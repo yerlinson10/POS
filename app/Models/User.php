@@ -45,4 +45,13 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'pos_user_id');
+    }
+
+    public function posSessions()
+    {
+        return $this->hasMany(PosSession::class);
+    }
 }
