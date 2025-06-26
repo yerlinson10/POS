@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->date('date');
             $table->decimal('total_amount', 12, 2);
-            $table->string('status', 20);
+            $table->string('status', 20)->default('paid')->comment('pending, paid, canceled');
             $table->timestamps();
         });
     }
