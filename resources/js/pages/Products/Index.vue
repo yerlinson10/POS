@@ -1,0 +1,138 @@
+<template>
+
+    <Head title="Products" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <div
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border  p-4">
+                <div class="flex justify-between mb-4">
+                    <Button as="a" href="/products/create">Nuevo</Button>
+                    <div class="flex space-x-2">
+                        <Input v-model="filters.search" placeholder="Buscar..." @keyup.enter="getList" />
+                    </div>
+                </div>
+                <Table>
+                    <TableCaption>List of Products.</TableCaption>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Sku</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead>Unit</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Stock</TableHead>
+                            <TableHead class="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="p in products.data" :key="p.id">
+                            <TableCell>{{ p.sku }}</TableCell>
+                            <TableCell>{{ p.name }}</TableCell>
+                            <TableCell>{{ p.category }}</TableCell>
+                            <TableCell>{{ p.unit_measure }}</TableCell>
+                            <TableCell>{{ p.price }}</TableCell>
+                            <TableCell>{{ p.stock }}</TableCell>
+                            <TableCell class="text-right space-x-1">
+                                <Button size="sm" variant="outline" as="a" :href="`/products/${p.id}/edit`">Editar</Button>
+                                <Button size="sm" variant="destructive" @click="destroy(p.id)">Borrar</Button>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+
+                <Pagination v-slot="{ page: internalPage }" :items-per-page="filters.per_page"
+                    :total="products.last_page" :default-page="filters.page" @page-change="onPageChange">
+                    <PaginationContent v-slot="{ items: pages }">
+                        <PaginationPrevious />
+                        <template v-for="(item, idx) in pages" :key="idx">
+                            <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                                :is-active="item.value === internalPage" @click="onPageChange(item.value)">
+                                {{ item.value }}
+                            </PaginationItem>
+                        </template>
+                        <PaginationEllipsis :index="4" v-if="products.last_page >= 4" />
+                        <PaginationNext />
+                    </PaginationContent>
+                </Pagination>
+            </div>
+        </div>
+    </AppLayout>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { router } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
+import {   Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow, } from '@/components/ui/table'
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination'
+import { type BreadcrumbItem } from '@/types'
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Products', href: '/products' },
+]
+
+interface Product {
+    id: number; sku: string; name: string;
+    category: string; unit_measure: string;
+    price: number; stock: number;
+}
+
+interface Paginated<T> {
+    data: T[]
+    current_page: number,
+    per_page: number,
+    total: number,
+    last_page: number,
+}
+
+const props = defineProps<{
+    products: Paginated<Product>
+    filters: { per_page: number; search?: string; page?: number, }
+}>()
+
+// Inicializa filtros, incluyendo page
+const filters = ref({
+    ...props.filters,
+    page: props.filters.page ?? props.products.current_page,
+})
+
+// Llama a Inertia para recargar la lista
+function getList() {
+    router.get('/products', filters.value, { preserveState: true, replace: true })
+}
+
+// Manejadores de cambio
+function onPageChange(newPage: number) {
+    console.log('Changing page to:', newPage);
+
+    filters.value.page = newPage
+    getList()
+}
+
+// function onPerPageChange() {
+//     filters.value.page = 1
+//     getList()
+// }
+
+function destroy(id: number) {
+    if (!confirm('¿Confirmar eliminación?')) return
+    router.delete(`/products/${id}`)
+}
+</script>

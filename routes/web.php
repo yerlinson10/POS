@@ -1,7 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\UnitMeasureController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -13,16 +17,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Products routes
-    Route::resource('products', 'ProductController');
+    Route::resource('products', ProductController::class);
 
     // Unit Measures routes
-    Route::resource('unit-measures', 'UnitMeasureController');
+    Route::resource('unit-measures', UnitMeasureController::class);
 
     // Categories routes
-    Route::resource('categories', 'CategoryController');
+    Route::resource('categories', CategoryController::class);
 
     // Sales routes
-    Route::resource('customers', 'CustomerController');
+    Route::resource('customers', CustomerController::class);
 
 });
 
