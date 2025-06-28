@@ -14,7 +14,7 @@
                     </div>
                 </div>
                 <Table>
-                    <TableCaption>List of Products.</TableCaption>
+                    <TableCaption>{{ products.total ? 'List of Products.' : 'There are no products available'}}</TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Sku</TableHead>
@@ -36,11 +36,32 @@
                             <TableCell>{{ p.stock }}</TableCell>
                             <TableCell class="text-right space-x-1">
                                 <Button size="sm" variant="outline" as="a" :href="`/products/${p.id}/edit`">
-                                    Editar
+                                    Edit
+                                    <SquarePen class="w-4 h-4" />
                                 </Button>
-                                <Button size="sm" variant="destructive" @click="destroy(p.id)">
-                                    Borrar
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger as-child>
+                                        <Button size="sm" variant="destructive" class="cursor-pointer">
+                                            Delete
+                                            <Trash2 class="w-4 h-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. It will permanently delete this record and
+                                                remove your data from our servers.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel class="cursor-pointer">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction variant="destructive"
+                                                class="text-red11  bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]"
+                                                @click="destroy(p.id)">Continue</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </TableCell>
                         </TableRow>
                     </TableBody>
@@ -88,6 +109,20 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination'
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Trash2, SquarePen } from 'lucide-vue-next';
+
 import { type BreadcrumbItem } from '@/types'
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -146,7 +181,6 @@ function onPageChange(newPage: number) {
 }
 
 function destroy(id: number) {
-    if (!confirm('¿Confirmar eliminación?')) return
     router.delete(`/products/${id}`)
 }
 </script>
