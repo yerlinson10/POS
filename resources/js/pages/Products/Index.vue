@@ -57,7 +57,7 @@
                                         <AlertDialogFooter>
                                             <AlertDialogCancel class="cursor-pointer">Cancel</AlertDialogCancel>
                                             <AlertDialogAction variant="destructive"
-                                                class="text-red11  bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]"
+                                                class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]"
                                                 @click="destroy(p.id)">Continue</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
