@@ -18,7 +18,7 @@ class ProductService
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return Product::with(['category', 'unitMeasure'])
-                    ->orderBy('name')
+                    ->orderBy('created_at', 'desc')
                     ->paginate($perPage);
     }
 
@@ -30,7 +30,7 @@ class ProductService
     public function all(): Collection
     {
         return Product::with(['category', 'unitMeasure'])
-                    ->orderBy('name')
+                    ->orderBy('created_at', 'desc')
                     ->get();
     }
 

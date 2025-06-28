@@ -32,6 +32,7 @@ class ProductController extends Controller
             });
 
         $products = $productsQuery
+            ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->appends($filters);
 
