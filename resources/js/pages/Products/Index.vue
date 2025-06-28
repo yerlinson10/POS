@@ -9,7 +9,8 @@
                 <div class="flex justify-between mb-4">
                     <Button as="a" href="/products/create">Nuevo</Button>
                     <div class="flex space-x-2">
-                        <Input v-model="filters.search" placeholder="Buscar..." @keyup.enter="getList" />
+                        <!-- Ahora usamos @keyup.enter="search" -->
+                        <Input v-model="filters.search" placeholder="Buscar..." @keyup.enter="search" />
                     </div>
                 </div>
                 <Table>
@@ -34,8 +35,12 @@
                             <TableCell>{{ p.price }}</TableCell>
                             <TableCell>{{ p.stock }}</TableCell>
                             <TableCell class="text-right space-x-1">
-                                <Button size="sm" variant="outline" as="a" :href="`/products/${p.id}/edit`">Editar</Button>
-                                <Button size="sm" variant="destructive" @click="destroy(p.id)">Borrar</Button>
+                                <Button size="sm" variant="outline" as="a" :href="`/products/${p.id}/edit`">
+                                    Editar
+                                </Button>
+                                <Button size="sm" variant="destructive" @click="destroy(p.id)">
+                                    Borrar
+                                </Button>
                             </TableCell>
                         </TableRow>
                     </TableBody>
@@ -66,14 +71,15 @@ import { router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
-import {   Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow, } from '@/components/ui/table'
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
 import {
     Pagination,
     PaginationContent,
@@ -89,22 +95,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 interface Product {
-    id: number; sku: string; name: string;
-    category: string; unit_measure: string;
-    price: number; stock: number;
+    id: number
+    sku: string
+    name: string
+    category: string
+    unit_measure: string
+    price: number
+    stock: number
 }
 
 interface Paginated<T> {
     data: T[]
-    current_page: number,
-    per_page: number,
-    total: number,
-    last_page: number,
+    current_page: number
+    per_page: number
+    total: number
+    last_page: number
 }
 
 const props = defineProps<{
     products: Paginated<Product>
-    filters: { per_page: number; search?: string; page?: number, }
+    filters: { per_page: number; search?: string; page?: number }
 }>()
 
 // Inicializa filtros, incluyendo page
@@ -113,23 +123,27 @@ const filters = ref({
     page: props.filters.page ?? props.products.current_page,
 })
 
-// Llama a Inertia para recargar la lista
+// Función general para recargar lista
 function getList() {
-    router.get('/products', filters.value, { preserveState: true, replace: true })
+    router.get(
+        '/products',
+        // Preparamos query sin page si queremos resetearla
+        filters.value,
+        { preserveState: true, replace: true }
+    )
 }
 
-// Manejadores de cambio
-function onPageChange(newPage: number) {
-    console.log('Changing page to:', newPage);
-
-    filters.value.page = newPage
+// Al hacer búsqueda, forzamos page = 1
+function search() {
+    filters.value.page = 1
     getList()
 }
 
-// function onPerPageChange() {
-//     filters.value.page = 1
-//     getList()
-// }
+// Cambio de página manteniendo búsqueda
+function onPageChange(newPage: number) {
+    filters.value.page = newPage
+    getList()
+}
 
 function destroy(id: number) {
     if (!confirm('¿Confirmar eliminación?')) return

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
 use App\Http\Requests\Products\StoreProductRequest;
@@ -21,20 +22,30 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->query('per_page', 10);
-        $products = $this->service->paginate((int)$perPage);
+        $filters = $request->only(['per_page', 'search']);
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        $productsQuery = Product::with(['category', 'unitMeasure'])
+            ->when($filters['search'] ?? null, function($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku',  'like', "%{$search}%");
+            });
+
+        $products = $productsQuery
+            ->paginate($perPage)
+            ->appends($filters);
 
         return Inertia::render('Products/Index', [
             'products' => $products->through(fn($p) => [
-                'id'               => $p->id,
-                'sku'              => $p->sku,
-                'name'             => $p->name,
-                'category'         => $p->category->name,
-                'unit_measure'     => $p->unitMeasure->code,
-                'price'            => $p->price,
-                'stock'            => $p->stock,
+                'id'           => $p->id,
+                'sku'          => $p->sku,
+                'name'         => $p->name,
+                'category'     => $p->category->name,
+                'unit_measure' => $p->unitMeasure->code,
+                'price'        => $p->price,
+                'stock'        => $p->stock,
             ]),
-            'filters' => $request->only(['per_page', 'search']),
+            'filters' => $filters,
         ]);
     }
 
