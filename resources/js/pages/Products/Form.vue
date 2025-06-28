@@ -113,13 +113,13 @@ interface UnitMeasure extends DataItem {
     code: string
 }
 
-interface Category extends DataItem {
-    // Additional properties can be added here if needed
-}
+// interface Category extends DataItem {
+//     // Additional properties can be added here if needed
+// }
 
 const props = defineProps<{
     product: ProductForm | null
-    categories: Category[]
+    categories: DataItem[]
     unit_measures: UnitMeasure[]
     errors: Record<string, string>
 }>();
