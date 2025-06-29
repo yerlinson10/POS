@@ -70,7 +70,7 @@
                 <Pagination v-slot="{ page: internalPage }" :items-per-page="filters.per_page"
                     :total="products.last_page" :default-page="filters.page" @page-change="onPageChange">
                     <PaginationContent v-slot="{ items: pages }">
-                        <PaginationPrevious />
+                        <PaginationPrevious  @click="onPageChange(internalPage - 1)"/>
                         <template v-for="(item, idx) in pages" :key="idx">
                             <PaginationItem v-if="item.type === 'page'" :value="item.value"
                                 :is-active="item.value === internalPage" @click="onPageChange(item.value)">
@@ -78,7 +78,7 @@
                             </PaginationItem>
                         </template>
                         <PaginationEllipsis :index="4" v-if="products.last_page >= 4" />
-                        <PaginationNext />
+                        <PaginationNext @click="onPageChange(internalPage + 1)"/>
                     </PaginationContent>
                 </Pagination>
             </div>
