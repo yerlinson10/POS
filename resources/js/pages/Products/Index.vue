@@ -6,11 +6,27 @@
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border  p-4">
-                <div class="flex justify-between mb-4">
-                    <Button as="a" href="/products/create">Nuevo</Button>
-                    <div class="flex space-x-2">
-                        <!-- Ahora usamos @keyup.enter="search" -->
-                        <Input v-model="filters.search" placeholder="Buscar..." @keyup.enter="search" />
+                <div class="flex flex-col gap-2 md:flex-row md:justify-between mb-4">
+                    <Button as="a" href="/products/create" class="w-full md:w-auto">New</Button>
+                    <div class="relative flex-1 max-w-sm md:max-w-xs items-center">
+                        <Input
+                            id="search"
+                            type="text"
+                            placeholder="Search..."
+                            v-model="filters.search"
+                            class="pl-10 w-full"
+                            @keyup.enter="search"
+                        />
+                        <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
+                            <Search class="size-6 text-muted-foreground" />
+                        </span>
+                        <Button
+                            type="submit"
+                            class="absolute end-0 inset-y-0 flex items-center justify-center px-2 cursor-pointer rounded-l-none"
+                            @click="search"
+                        >
+                            Search
+                        </Button>
                     </div>
                 </div>
                 <Table>
@@ -121,7 +137,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Trash2, SquarePen } from 'lucide-vue-next';
+import { Trash2, SquarePen, Search } from 'lucide-vue-next';
 
 import { type BreadcrumbItem } from '@/types'
 
