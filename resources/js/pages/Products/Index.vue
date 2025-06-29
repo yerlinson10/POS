@@ -51,10 +51,12 @@
                             <TableCell>{{ p.price }}</TableCell>
                             <TableCell>{{ p.stock }}</TableCell>
                             <TableCell class="text-right space-x-1">
-                                <Button size="sm" variant="outline" as="a" :href="`/products/${p.id}/edit`">
-                                    Edit
-                                    <SquarePen class="w-4 h-4" />
-                                </Button>
+                                <Link :href="`/products/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']"  >
+                                    <Button size="sm" variant="outline" class="cursor-pointer">
+                                        Edit
+                                        <SquarePen class="w-4 h-4" />
+                                    </Button>
+                                </Link>
                                 <AlertDialog>
                                     <AlertDialogTrigger as-child>
                                         <Button size="sm" variant="destructive" class="cursor-pointer">
@@ -104,7 +106,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
