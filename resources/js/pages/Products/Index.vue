@@ -6,9 +6,63 @@
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div
                 class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border  p-4">
-                <div class="flex flex-col gap-2 md:flex-row md:justify-between mb-4">
-                    <Button as="a" href="/products/create" class="w-full md:w-auto">New</Button>
-                    <div class="relative flex-1 max-w-sm md:max-w-xs items-center">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-4">
+                    <!-- Botón Nuevo -->
+                    <div class="md:w-1/3 flex items-center">
+                        <Button as="a" href="/products/create" class="md:w-auto">New</Button>
+                    </div>
+                    <!-- Selects de ordenamiento -->
+                    <div class="md:w-full flex gap-2">
+                        <Select v-model="filters.sort_by" @update:modelValue="search" class="px-2 py-1 w-1/2">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a field" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                    <SelectItem value="created_at">
+                                        Date
+                                    </SelectItem>
+                                    <SelectItem value="sku">
+                                        SKU
+                                    </SelectItem>
+                                    <SelectItem value="name">
+                                        Name
+                                    </SelectItem>
+                                    <SelectItem value="price">
+                                        Price
+                                    </SelectItem>
+                                    <SelectItem value="stock">
+                                        Stock
+                                    </SelectItem>
+                                    <SelectItem value="category.name">
+                                        Category
+                                    </SelectItem>
+                                    <SelectItem value="unitMeasure.code">
+                                        Unit
+                                    </SelectItem>
+                                </SelectContent>
+                        </Select>
+                        <Select v-model="filters.sort_dir" @update:modelValue="search" class="px-2 py-1 w-1/2">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a sort" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="asc">
+                                    Ascending
+                                </SelectItem>
+                                <SelectItem value="desc">
+                                    Descending
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button v-if="hasActiveFilters" variant="destructive" class="p-1 cursor-pointer"
+                            @click="resetFilters">
+                            <RotateCcw />
+                        </Button>
+                    </div>
+
+                    <!-- Buscador alineado a la derecha -->
+                    <div
+                        class="md:max-w-xs max-w-sm relative flex items-center justify-end lg:justify-end w-full lg:col-start-3 justify-self-end">
                         <Input id="search" type="text" placeholder="Search..." v-model="filters.search"
                             class="pl-10 w-full" @keyup.enter="search" />
                         <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
@@ -98,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { router, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
@@ -132,7 +186,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Trash2, SquarePen, Search } from 'lucide-vue-next';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Trash2, SquarePen, Search, RotateCcw } from 'lucide-vue-next';
 
 import { type BreadcrumbItem } from '@/types'
 import useFlashMessage from '@/composables/useFlashMessages'
@@ -161,7 +222,13 @@ interface Paginated<T> {
 
 const props = defineProps<{
     products: Paginated<Product>
-    filters: { per_page: number; search?: string; page?: number }
+    filters: {
+        per_page: number;
+        search?: string;
+        page?: number;
+        sort_by?: string;
+        sort_dir?: string;
+    }
 }>()
 useFlashMessage();
 
@@ -169,8 +236,29 @@ useFlashMessage();
 const filters = ref({
     ...props.filters,
     page: props.filters.page ?? props.products.current_page,
+    sort_by: props.filters.sort_by ?? 'created_at',
+    sort_dir: props.filters.sort_dir ?? 'desc',
 })
 
+const hasActiveFilters = computed(() => {
+    return (
+        (filters.value.search && filters.value.search.length > 0) ||
+        filters.value.sort_by !== 'created_at' ||
+        filters.value.sort_dir !== 'desc' ||
+        filters.value.page !== 1
+    )
+})
+
+function resetFilters() {
+    filters.value = {
+        per_page: props.filters.per_page,
+        search: '',
+        page: 1,
+        sort_by: 'created_at',
+        sort_dir: 'desc',
+    }
+    getList()
+}
 // Función general para recargar lista
 function getList() {
     router.get(

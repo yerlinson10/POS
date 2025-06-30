@@ -22,17 +22,20 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['per_page', 'search']);
+        $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
         $perPage = (int) ($filters['per_page'] ?? 10);
 
         $productsQuery = Product::with(['category', 'unitMeasure'])
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('sku', 'like', "%{$search}%");
-            });
+            })
+            ->withAdvancedFilters($filters, [
+                'id', 'sku', 'name', 'price', 'stock', 'created_at',
+                'category.name', 'unitMeasure.code'
+            ]);
 
         $products = $productsQuery
-            ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->appends($filters);
 
