@@ -9,28 +9,21 @@
                 <div class="flex flex-col gap-2 md:flex-row md:justify-between mb-4">
                     <Button as="a" href="/products/create" class="w-full md:w-auto">New</Button>
                     <div class="relative flex-1 max-w-sm md:max-w-xs items-center">
-                        <Input
-                            id="search"
-                            type="text"
-                            placeholder="Search..."
-                            v-model="filters.search"
-                            class="pl-10 w-full"
-                            @keyup.enter="search"
-                        />
+                        <Input id="search" type="text" placeholder="Search..." v-model="filters.search"
+                            class="pl-10 w-full" @keyup.enter="search" />
                         <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
                             <Search class="size-6 text-muted-foreground" />
                         </span>
-                        <Button
-                            type="submit"
+                        <Button type="submit"
                             class="absolute end-0 inset-y-0 flex items-center justify-center px-2 cursor-pointer rounded-l-none"
-                            @click="search"
-                        >
+                            @click="search">
                             Search
                         </Button>
                     </div>
                 </div>
                 <Table>
-                    <TableCaption>{{ products.total ? 'List of Products.' : 'There are no products available'}}</TableCaption>
+                    <TableCaption>{{ products.total ? 'List of Products.' : 'There are no products available' }}
+                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Sku</TableHead>
@@ -51,11 +44,11 @@
                             <TableCell>{{ p.price }}</TableCell>
                             <TableCell>{{ p.stock }}</TableCell>
                             <TableCell class="text-right space-x-1">
-                                <Link :href="`/products/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']"  >
-                                    <Button size="sm" variant="outline" class="cursor-pointer">
-                                        Edit
-                                        <SquarePen class="w-4 h-4" />
-                                    </Button>
+                                <Link :href="`/products/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']">
+                                <Button size="sm" variant="outline" class="cursor-pointer">
+                                    Edit
+                                    <SquarePen class="w-4 h-4" />
+                                </Button>
                                 </Link>
                                 <AlertDialog>
                                     <AlertDialogTrigger as-child>
@@ -88,7 +81,7 @@
                 <Pagination v-slot="{ page: internalPage }" :items-per-page="filters.per_page"
                     :total="products.last_page" :default-page="filters.page" @page-change="onPageChange">
                     <PaginationContent v-slot="{ items: pages }">
-                        <PaginationPrevious  @click="onPageChange(internalPage - 1)"/>
+                        <PaginationPrevious @click="onPageChange(internalPage - 1)" />
                         <template v-for="(item, idx) in pages" :key="idx">
                             <PaginationItem v-if="item.type === 'page'" :value="item.value"
                                 :is-active="item.value === internalPage" @click="onPageChange(item.value)">
@@ -96,17 +89,17 @@
                             </PaginationItem>
                         </template>
                         <PaginationEllipsis :index="4" v-if="products.last_page >= 4" />
-                        <PaginationNext @click="onPageChange(internalPage + 1)"/>
+                        <PaginationNext @click="onPageChange(internalPage + 1)" />
                     </PaginationContent>
                 </Pagination>
             </div>
         </div>
-        <Toaster richColors  position="top-right" theme="system" />
+        <Toaster richColors position="top-right" theme="system" closeButton />
     </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
@@ -190,9 +183,19 @@ const flash = computed(() => (page.props.flash as { message?: FlashMessage })?.m
 
 onMounted(() => {
     if (flash.value?.text) {
-        toast.success(flash.value.text)
+        toast[flash.value.type === 'success' ? 'success' : 'error'](flash.value.text);
     }
-})
+});
+
+watch(
+    () => flash.value,
+    (newFlash, oldFlash) => {
+        // Solo mostrar si cambia y no es igual al anterior
+        if (newFlash?.text && newFlash?.text !== oldFlash?.text) {
+            toast[newFlash.type === 'success' ? 'success' : 'error'](newFlash.text);
+        }
+    }
+);
 
 // Función general para recargar lista
 function getList() {
