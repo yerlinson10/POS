@@ -26,9 +26,9 @@ class ProductController extends Controller
         $perPage = (int) ($filters['per_page'] ?? 10);
 
         $productsQuery = Product::with(['category', 'unitMeasure'])
-            ->when($filters['search'] ?? null, function($query, $search) {
+            ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku',  'like', "%{$search}%");
+                    ->orWhere('sku', 'like', "%{$search}%");
             });
 
         $products = $productsQuery
@@ -38,13 +38,13 @@ class ProductController extends Controller
 
         return Inertia::render('Products/Index', [
             'products' => $products->through(fn($p) => [
-                'id'           => $p->id,
-                'sku'          => $p->sku,
-                'name'         => $p->name,
-                'category'     => $p->category->name,
+                'id' => $p->id,
+                'sku' => $p->sku,
+                'name' => $p->name,
+                'category' => $p->category->name,
                 'unit_measure' => $p->unitMeasure->code,
-                'price'        => $p->price,
-                'stock'        => $p->stock,
+                'price' => $p->price,
+                'stock' => $p->stock,
             ]),
             'filters' => $filters,
         ]);
@@ -67,9 +67,9 @@ class ProductController extends Controller
     public function create()
     {
         return Inertia::render('Products/Form', [
-            'categories'    => \App\Models\Category::all(),
+            'categories' => \App\Models\Category::all(),
             'unit_measures' => \App\Models\UnitMeasure::all(),
-            'product'       => null,
+            'product' => null,
         ]);
     }
 
@@ -78,9 +78,24 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $this->service->create($request->validated());
-        return redirect()->route('products.index')
-            ->with('success', 'Producto creado correctamente.');
+        try {
+
+            $this->service->create($request->validated());
+
+            return redirect()->route('products.index')
+                ->with('message', [
+                    'type' => 'success',
+                    'text' => 'Product created successfully.'
+                ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Error creating product: ' . $th->getMessage()
+                ])
+                ->withInput();
+        }
+
     }
 
 
@@ -90,19 +105,26 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         $p = $this->service->find($id);
+        if (!$p) {
+            return redirect()->route('products.index')
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Product not found.'
+                ]);
+        }
 
         return Inertia::render('Products/Form', [
-            'product'       => [
-                'id'               => $p->id,
-                'sku'              => $p->sku,
-                'name'             => $p->name,
-                'description'      => $p->description,
-                'category_id'      => $p->category_id,
-                'unit_measure_id'  => $p->unit_measure_id,
-                'price'            => $p->price,
-                'stock'            => $p->stock,
+            'product' => [
+                'id' => $p->id,
+                'sku' => $p->sku,
+                'name' => $p->name,
+                'description' => $p->description,
+                'category_id' => $p->category_id,
+                'unit_measure_id' => $p->unit_measure_id,
+                'price' => $p->price,
+                'stock' => $p->stock,
             ],
-            'categories'    => \App\Models\Category::all(),
+            'categories' => \App\Models\Category::all(),
             'unit_measures' => \App\Models\UnitMeasure::all(),
         ]);
     }
@@ -112,9 +134,24 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, string $id)
     {
-        $this->service->update($id, $request->validated());
-        return redirect()->route('products.index')
-            ->with('success', 'Producto actualizado correctamente.');
+        try {
+
+            $this->service->update($id, $request->validated());
+
+            return redirect()->route('products.index')
+                ->with('message', [
+                    'type' => 'success',
+                    'text' => 'Product updated successfully.'
+                ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Error updating product: ' . $th->getMessage()
+                ])
+                ->withInput();
+        }
+
     }
 
     /**
@@ -122,8 +159,20 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->service->delete($id);
-        return redirect()->route('products.index')
-            ->with('success', 'Producto eliminado.');
+        try {
+            $this->service->delete($id);
+            return redirect()->route('products.index')
+                ->with('message', [
+                    'type' => 'success',
+                    'text' => 'Product deleted successfully.'
+                ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Error deleting product: ' . $th->getMessage()
+                ]);
+        }
+
     }
 }

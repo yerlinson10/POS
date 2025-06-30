@@ -101,12 +101,13 @@
                 </Pagination>
             </div>
         </div>
+        <Toaster richColors  position="top-right" theme="system" />
     </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { router, Link } from '@inertiajs/vue3'
+import { ref, computed, onMounted } from 'vue'
+import { router, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -142,6 +143,8 @@ import {
 import { Trash2, SquarePen, Search } from 'lucide-vue-next';
 
 import { type BreadcrumbItem } from '@/types'
+import { Toaster, toast } from 'vue-sonner'
+import 'vue-sonner/style.css'
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Products', href: '/products' },
@@ -174,6 +177,21 @@ const props = defineProps<{
 const filters = ref({
     ...props.filters,
     page: props.filters.page ?? props.products.current_page,
+})
+
+interface FlashMessage {
+    type?: string;
+    text?: string;
+}
+
+
+const page = usePage();
+const flash = computed(() => (page.props.flash as { message?: FlashMessage })?.message);
+
+onMounted(() => {
+    if (flash.value?.text) {
+        toast.success(flash.value.text)
+    }
 })
 
 // Función general para recargar lista
