@@ -85,7 +85,7 @@ class ProductController extends Controller
             return redirect()->route('products.index')
                 ->with('message', [
                     'type' => 'success',
-                    'text' => 'Product created successfully.'
+                    'text' => 'Product created.'
                 ]);
         } catch (\Throwable $th) {
             return redirect()->back()
@@ -141,7 +141,7 @@ class ProductController extends Controller
             return redirect()->route('products.index')
                 ->with('message', [
                     'type' => 'success',
-                    'text' => 'Product updated successfully.'
+                    'text' => 'Product updated.'
                 ]);
         } catch (\Throwable $th) {
             return redirect()->back()
@@ -164,7 +164,7 @@ class ProductController extends Controller
             return redirect()->route('products.index')
                 ->with('message', [
                     'type' => 'success',
-                    'text' => 'Product deleted successfully.'
+                    'text' => 'Product deleted.'
                 ]);
         } catch (\Throwable $th) {
             return redirect()->back()
