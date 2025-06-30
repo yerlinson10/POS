@@ -94,13 +94,12 @@
                 </Pagination>
             </div>
         </div>
-        <Toaster richColors position="top-right" theme="system" closeButton />
     </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import { router, Link, usePage } from '@inertiajs/vue3'
+import { ref } from 'vue'
+import { router, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -136,8 +135,7 @@ import {
 import { Trash2, SquarePen, Search } from 'lucide-vue-next';
 
 import { type BreadcrumbItem } from '@/types'
-import { Toaster, toast } from 'vue-sonner'
-import 'vue-sonner/style.css'
+import useFlashMessage from '@/composables/useFlashMessages'
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Products', href: '/products' },
@@ -165,37 +163,13 @@ const props = defineProps<{
     products: Paginated<Product>
     filters: { per_page: number; search?: string; page?: number }
 }>()
+useFlashMessage();
 
 // Inicializa filtros, incluyendo page
 const filters = ref({
     ...props.filters,
     page: props.filters.page ?? props.products.current_page,
 })
-
-interface FlashMessage {
-    type?: string;
-    text?: string;
-}
-
-
-const page = usePage();
-const flash = computed(() => (page.props.flash as { message?: FlashMessage })?.message);
-
-onMounted(() => {
-    if (flash.value?.text) {
-        toast[flash.value.type === 'success' ? 'success' : 'error'](flash.value.text);
-    }
-});
-
-watch(
-    () => flash.value,
-    (newFlash, oldFlash) => {
-        // Solo mostrar si cambia y no es igual al anterior
-        if (newFlash?.text && newFlash?.text !== oldFlash?.text) {
-            toast[newFlash.type === 'success' ? 'success' : 'error'](newFlash.text);
-        }
-    }
-);
 
 // Función general para recargar lista
 function getList() {
