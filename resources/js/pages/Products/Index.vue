@@ -18,28 +18,28 @@
                                 <SelectValue placeholder="Select a field" />
                             </SelectTrigger>
                             <SelectContent>
-                                    <SelectItem value="created_at">
-                                        Date
-                                    </SelectItem>
-                                    <SelectItem value="sku">
-                                        SKU
-                                    </SelectItem>
-                                    <SelectItem value="name">
-                                        Name
-                                    </SelectItem>
-                                    <SelectItem value="price">
-                                        Price
-                                    </SelectItem>
-                                    <SelectItem value="stock">
-                                        Stock
-                                    </SelectItem>
-                                    <SelectItem value="category.name">
-                                        Category
-                                    </SelectItem>
-                                    <SelectItem value="unitMeasure.code">
-                                        Unit
-                                    </SelectItem>
-                                </SelectContent>
+                                <SelectItem value="created_at">
+                                    Date
+                                </SelectItem>
+                                <SelectItem value="sku">
+                                    SKU
+                                </SelectItem>
+                                <SelectItem value="name">
+                                    Name
+                                </SelectItem>
+                                <SelectItem value="price">
+                                    Price
+                                </SelectItem>
+                                <SelectItem value="stock">
+                                    Stock
+                                </SelectItem>
+                                <SelectItem value="category.name">
+                                    Category
+                                </SelectItem>
+                                <SelectItem value="unitMeasure.code">
+                                    Unit
+                                </SelectItem>
+                            </SelectContent>
                         </Select>
                         <Select v-model="filters.sort_dir" @update:modelValue="search" class="px-2 py-1 w-1/2">
                             <SelectTrigger>
@@ -133,7 +133,7 @@
                 </Table>
 
                 <Pagination v-slot="{ page: internalPage }" :items-per-page="filters.per_page"
-                    :total="products.last_page" :default-page="filters.page" @page-change="onPageChange">
+                    :total="products.last_page" :page="filters.page" @page-change="onPageChange">
                     <PaginationContent v-slot="{ items: pages }">
                         <PaginationPrevious @click="onPageChange(internalPage - 1)" />
                         <template v-for="(item, idx) in pages" :key="idx">
