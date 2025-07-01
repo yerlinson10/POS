@@ -2,32 +2,54 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
+use App\Models\UnitMeasure;
 use Illuminate\Http\Request;
+use App\Services\UnitMeasureService;
+use App\Http\Requests\UnitMeasure\StoreUnitMeasureRequest;
+use App\Http\Requests\UnitMeasure\UpdateUnitMeasureRequest;
 
 class UnitMeasureController extends Controller
 {
+
+    protected UnitMeasureService $service;
+
+    public function __construct(UnitMeasureService $service)
+    {
+        $this->service = $service;
+    }
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-    }
+        $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
+        $perPage = (int) ($filters['per_page'] ?? 10);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        $unitsQuery = UnitMeasure::when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('unit_measures.name', 'like', "%{$search}%")
+                        ->orWhere('unit_measures.code', 'like', "%{$search}%");
+                });
+            })
+            ->withAdvancedFilters($filters, [
+                'id',
+                'name',
+                'code',
+            ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+        $units = $unitsQuery
+            ->paginate($perPage)
+            ->appends($filters);
+
+        return Inertia::render('Units/Index', [
+            'units' => $units->through(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'code' => $p->code,
+            ]),
+            'filters' => $filters,
+        ]);
     }
 
     /**
@@ -35,23 +57,94 @@ class UnitMeasureController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $unit = $this->service->find($id);
+        return $unit
+            ? response()->json($unit)
+            : response()->json(['message' => 'No encontrado'], 404);
     }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return Inertia::render('Units/Form', [
+            'unit' => null,
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreUnitMeasureRequest $request)
+    {
+        try {
+
+            $this->service->create($request->validated());
+
+            return redirect()->route('unit-measures.index')
+                ->with('message', [
+                    'type' => 'success',
+                    'text' => 'Unit of measure created.'
+                ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Error creating unit of measure: ' . $th->getMessage()
+                ])
+                ->withInput();
+        }
+
+    }
+
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        //
+        $p = $this->service->find($id);
+        if (!$p) {
+            return redirect()->route('unit-measures.index')
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Unit of measure not found.'
+                ]);
+        }
+
+        return Inertia::render('Units/Form', [
+            'unit' => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'code' => $p->code,
+            ]
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUnitMeasureRequest $request, string $id)
     {
-        //
+        try {
+
+            $this->service->update($id, $request->validated());
+
+            return redirect()->route('unit-measures.index')
+                ->with('message', [
+                    'type' => 'success',
+                    'text' => 'Unit of measure updated.'
+                ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Error updating unit of measure: ' . $th->getMessage()
+                ])
+                ->withInput();
+        }
+
     }
 
     /**
@@ -59,6 +152,20 @@ class UnitMeasureController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $this->service->delete($id);
+            return redirect()->route('unit-measures.index')
+                ->with('message', [
+                    'type' => 'success',
+                    'text' => 'Unit of measure deleted.'
+                ]);
+        } catch (\Throwable $th) {
+            return redirect()->back()
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Error deleting unit of measure: ' . $th->getMessage()
+                ]);
+        }
+
     }
 }

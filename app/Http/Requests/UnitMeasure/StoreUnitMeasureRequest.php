@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\UnitMeasure;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -23,7 +23,7 @@ class StoreUnitMeasureRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:10',
-            'code' => 'required|string|max:50',
+            'code' => 'required|string|max:50|unique:unit_measures,code',
         ];
     }
 }

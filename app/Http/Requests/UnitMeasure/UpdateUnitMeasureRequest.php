@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\UnitMeasure;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,8 +22,8 @@ class UpdateUnitMeasureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:10',
-            'code' => 'required|string|max:50',
+            'name' => 'nullable|string|max:100',
+            'code' => 'nullable|string|max:50|unique:unit_measures,code',
         ];
     }
 }
