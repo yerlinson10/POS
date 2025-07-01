@@ -8,14 +8,14 @@ export const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Products',
-        href: '/products',
-        icon: ShoppingBasket,
-    },
-    {
         title: 'Categories',
         href: '/categories',
         icon: Box ,
+    },
+    {
+        title: 'Products',
+        href: '/products',
+        icon: ShoppingBasket,
     },
 ];
 
