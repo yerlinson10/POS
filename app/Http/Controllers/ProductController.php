@@ -27,12 +27,26 @@ class ProductController extends Controller
 
         $productsQuery = Product::with(['category', 'unitMeasure'])
             ->when($filters['search'] ?? null, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('products.name', 'like', "%{$search}%")
+                        ->orWhere('products.sku', 'like', "%{$search}%");
+                })
+                ->orWhereHas('category', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })
+                ->orWhereHas('unitMeasure', function ($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%");
+                });
             })
             ->withAdvancedFilters($filters, [
-                'id', 'sku', 'name', 'price', 'stock', 'created_at',
-                'category.name', 'unitMeasure.code'
+                'id',
+                'sku',
+                'name',
+                'price',
+                'stock',
+                'created_at',
+                'category.name',
+                'unitMeasure.code'
             ]);
 
         $products = $productsQuery
