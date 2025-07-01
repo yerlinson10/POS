@@ -152,8 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { router, Link } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -197,91 +196,26 @@ import { Trash2, SquarePen, Search, RotateCcw } from 'lucide-vue-next';
 
 import { type BreadcrumbItem } from '@/types'
 import useFlashMessage from '@/composables/useFlashMessages'
+import { useProductFilters } from '@/composables/useProductFilters'
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Products', href: '/products' },
 ]
 
-interface Product {
-    id: number
-    sku: string
-    name: string
-    category: string
-    unit_measure: string
-    price: number
-    stock: number
-}
-
-interface Paginated<T> {
-    data: T[]
-    current_page: number
-    per_page: number
-    total: number
-    last_page: number
-}
-
 const props = defineProps<{
-    products: Paginated<Product>
-    filters: {
-        per_page: number;
-        search?: string;
-        page?: number;
-        sort_by?: string;
-        sort_dir?: string;
-    }
+    products: import('@/composables/useProductFilters').Paginated<import('@/composables/useProductFilters').Product>
+    filters: import('@/composables/useProductFilters').ProductFilters
 }>()
+
+const {
+    filters,
+    hasActiveFilters,
+    resetFilters,
+    // getList,
+    search,
+    onPageChange,
+    destroy,
+} = useProductFilters(props)
+
 useFlashMessage();
-
-// Inicializa filtros, incluyendo page
-const filters = ref({
-    ...props.filters,
-    page: props.filters.page ?? props.products.current_page,
-    sort_by: props.filters.sort_by ?? 'created_at',
-    sort_dir: props.filters.sort_dir ?? 'desc',
-})
-
-const hasActiveFilters = computed(() => {
-    return (
-        (filters.value.search && filters.value.search.length > 0) ||
-        filters.value.sort_by !== 'created_at' ||
-        filters.value.sort_dir !== 'desc' ||
-        filters.value.page !== 1
-    )
-})
-
-function resetFilters() {
-    filters.value = {
-        per_page: props.filters.per_page,
-        search: '',
-        page: 1,
-        sort_by: 'created_at',
-        sort_dir: 'desc',
-    }
-    getList()
-}
-// Función general para recargar lista
-function getList() {
-    router.get(
-        '/products',
-        // Preparamos query sin page si queremos resetearla
-        filters.value,
-        { preserveState: true, replace: true }
-    )
-}
-
-// Al hacer búsqueda, forzamos page = 1
-function search() {
-    filters.value.page = 1
-    getList()
-}
-
-// Cambio de página manteniendo búsqueda
-function onPageChange(newPage: number) {
-    filters.value.page = newPage
-    getList()
-}
-
-function destroy(id: number) {
-    router.delete(`/products/${id}`)
-}
 </script>
