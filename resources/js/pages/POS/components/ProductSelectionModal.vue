@@ -1,72 +1,80 @@
 <template>
     <Dialog v-model:open="isOpen">
-        <DialogContent class="!max-w-none !w-[88vw] !h-[90vh] !max-h-none flex flex-col p-0">
-            <!-- Header with Search -->
-            <div class="flex flex-col gap-4 p-6 border-b bg-muted/30">
-                <div class="flex items-center justify-between">
+        <DialogContent class="!max-w-none !w-[98vw] md:!w-[90vw] lg:!w-[88vw] !h-[95vh] md:!h-[85vh] lg:!h-[90vh] !max-h-none flex flex-col p-0">
+            <!-- Compact Header with Search -->
+            <div class="flex flex-col gap-2 md:gap-4 p-2 md:p-6 border-b bg-muted/30">
+                <div class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-0">
                     <div>
-                        <DialogTitle class="text-xl font-semibold">Product Catalog</DialogTitle>
-                        <DialogDescription class="text-sm text-muted-foreground">
+                        <DialogTitle class="text-base md:text-xl font-semibold">Product Catalog</DialogTitle>
+                        <DialogDescription class="text-xs md:text-sm text-muted-foreground hidden xs:block">
                             Browse and add products to your cart
                         </DialogDescription>
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Icon name="Package" class="w-4 h-4" />
-                        <span v-if="pagination.total">{{ pagination.total }} products available</span>
+                    <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                        <Icon name="Package" class="w-3 h-3 md:w-4 md:h-4" />
+                        <span v-if="pagination.total">{{ pagination.total }} items</span>
                     </div>
                 </div>
 
                 <!-- Search Bar -->
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <div class="relative flex-1">
                         <Icon name="Search"
-                            class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input v-model="filters.search" placeholder="Search by product name, SKU, or category..."
-                            class="pl-10 h-11" @keyup.enter="search" />
+                            class="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
+                        <Input v-model="filters.search" placeholder="Search products..."
+                            class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                     </div>
-                    <Button @click="search" :disabled="isLoading" class="h-11 px-6">
-                        <Icon name="Search" class="w-4 h-4 mr-2" />
-                        Search
+                    <Button @click="search" :disabled="isLoading" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                        <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
+                    </Button>
+                    <!-- Collapsible Filters Button for Mobile -->
+                    <Button @click="showFilters = !showFilters" variant="outline" size="sm"
+                        class="h-8 md:hidden px-2 text-xs">
+                        <Icon name="Filter" class="w-3 h-3 mr-1" />
+                        <span>{{ showFilters ? 'Hide' : 'Show' }}</span>
                     </Button>
                     <Button v-if="filters.search || filters.sort_by !== 'name' || filters.sort_dir !== 'asc'"
-                        @click="clearSearch" variant="outline" class="h-11">
-                        <Icon name="RotateCcw" class="w-4 h-4 mr-2" />
-                        Reset
+                        @click="clearSearch" variant="outline" size="sm" class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
+                        <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                 </div>
             </div>
 
-            <!-- Filters Toolbar -->
-            <div class="flex items-center justify-between gap-4 p-4 bg-background border-b">
-                <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-muted-foreground">Sort:</span>
-                    <Select v-model="filters.sort_by" @update:modelValue="search">
-                        <SelectTrigger class="w-48 h-9">
-                            <SelectValue placeholder="Sort by..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="name">Name</SelectItem>
-                            <SelectItem value="price">Price</SelectItem>
-                            <SelectItem value="stock">Stock</SelectItem>
-                            <SelectItem value="category.name">Category</SelectItem>
-                        </SelectContent>
-                    </Select>
+            <!-- Collapsible Filters Toolbar -->
+            <div v-show="showFilters || !isMobile"
+                class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:gap-4 p-2 md:p-4 bg-background border-b"
+                :class="{ 'border-b-0': !showFilters && isMobile }">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3">
+                    <span class="text-xs md:text-sm font-medium text-muted-foreground hidden sm:inline">Sort:</span>
+                    <div class="flex gap-2">
+                        <Select v-model="filters.sort_by" @update:modelValue="search">
+                            <SelectTrigger class="w-full sm:w-36 md:w-48 h-7 md:h-9 text-xs md:text-sm">
+                                <SelectValue placeholder="Sort by..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="name">Name</SelectItem>
+                                <SelectItem value="price">Price</SelectItem>
+                                <SelectItem value="stock">Stock</SelectItem>
+                                <SelectItem value="category.name">Category</SelectItem>
+                            </SelectContent>
+                        </Select>
 
-                    <Select v-model="filters.sort_dir" @update:modelValue="search">
-                        <SelectTrigger class="w-32 h-9">
-                            <SelectValue placeholder="Order..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="asc">A-Z / Low-High</SelectItem>
-                            <SelectItem value="desc">Z-A / High-Low</SelectItem>
-                        </SelectContent>
-                    </Select>
+                        <Select v-model="filters.sort_dir" @update:modelValue="search">
+                            <SelectTrigger class="w-full sm:w-24 md:w-32 h-7 md:h-9 text-xs md:text-sm">
+                                <SelectValue placeholder="Order..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="asc">A-Z / Low-High</SelectItem>
+                                <SelectItem value="desc">Z-A / High-Low</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-muted-foreground">Show:</span>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3">
+                    <span class="text-xs md:text-sm font-medium text-muted-foreground hidden sm:inline">Show:</span>
                     <Select v-model="filters.per_page" @update:modelValue="changePageSize">
-                        <SelectTrigger class="w-32 h-9">
+                        <SelectTrigger class="w-full sm:w-24 md:w-32 h-7 md:h-9 text-xs md:text-sm">
                             <SelectValue placeholder="Per page..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -81,38 +89,38 @@
             <!-- Products Table -->
             <div class="flex-1 min-h-0 flex flex-col">
                 <!-- Loading State -->
-                <div v-if="isLoading" class="flex items-center justify-center h-64">
-                    <div class="flex flex-col items-center gap-3">
-                        <Icon name="Loader2" class="w-8 h-8 animate-spin text-primary" />
-                        <p class="text-sm text-muted-foreground">Loading products...</p>
+                <div v-if="isLoading" class="flex items-center justify-center h-48 md:h-64">
+                    <div class="flex flex-col items-center gap-2 md:gap-3">
+                        <Icon name="Loader2" class="w-6 h-6 md:w-8 md:h-8 animate-spin text-primary" />
+                        <p class="text-xs md:text-sm text-muted-foreground">Loading products...</p>
                     </div>
                 </div>
 
                 <!-- Error State -->
-                <div v-else-if="error" class="flex items-center justify-center h-64">
-                    <div class="flex flex-col items-center gap-3 text-center">
-                        <Icon name="AlertCircle" class="w-8 h-8 text-destructive" />
+                <div v-else-if="error" class="flex items-center justify-center h-48 md:h-64">
+                    <div class="flex flex-col items-center gap-2 md:gap-3 text-center">
+                        <Icon name="AlertCircle" class="w-6 h-6 md:w-8 md:h-8 text-destructive" />
                         <div>
-                            <p class="font-medium text-destructive">Error loading products</p>
-                            <p class="text-sm text-muted-foreground">{{ error }}</p>
+                            <p class="font-medium text-destructive text-sm md:text-base">Error loading products</p>
+                            <p class="text-xs md:text-sm text-muted-foreground">{{ error }}</p>
                         </div>
-                        <Button @click="search" variant="outline" size="sm">
-                            <Icon name="RefreshCw" class="w-4 h-4 mr-2" />
+                        <Button @click="search" variant="outline" size="sm" class="text-xs md:text-sm">
+                            <Icon name="RefreshCw" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                             Try Again
                         </Button>
                     </div>
                 </div>
 
                 <!-- Empty State -->
-                <div v-else-if="products.length === 0" class="flex items-center justify-center h-64">
-                    <div class="flex flex-col items-center gap-3 text-center">
-                        <Icon name="Package" class="w-12 h-12 text-muted-foreground/50" />
+                <div v-else-if="products.length === 0" class="flex items-center justify-center h-48 md:h-64">
+                    <div class="flex flex-col items-center gap-2 md:gap-3 text-center">
+                        <Icon name="Package" class="w-8 h-8 md:w-12 md:h-12 text-muted-foreground/50" />
                         <div>
-                            <p class="font-medium text-muted-foreground">No products found</p>
-                            <p class="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+                            <p class="font-medium text-muted-foreground text-sm md:text-base">No products found</p>
+                            <p class="text-xs md:text-sm text-muted-foreground">Try adjusting your search or filters</p>
                         </div>
-                        <Button @click="clearSearch" variant="outline" size="sm">
-                            <Icon name="RotateCcw" class="w-4 h-4 mr-2" />
+                        <Button @click="clearSearch" variant="outline" size="sm" class="text-xs md:text-sm">
+                            <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                             Clear Filters
                         </Button>
                     </div>
@@ -120,7 +128,61 @@
 
                 <!-- Products Grid/Table -->
                 <div v-else class="flex-1 overflow-hidden">
-                    <div class="h-full overflow-y-auto">
+                    <!-- Mobile Cards View -->
+                    <div class="block md:hidden h-full overflow-y-auto px-2 py-1">
+                        <div class="space-y-2">
+                            <div v-for="product in products" :key="product.id"
+                                class="border rounded-lg p-3 bg-card hover:bg-accent/50 transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-medium text-sm mb-1 line-clamp-2">{{ product.name }}</h4>
+                                        <div class="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                                            <span class="font-mono bg-muted px-1 py-0.5 rounded text-xs">{{ product.sku }}</span>
+                                            <span class="text-xs">{{ product.unit_measure }}</span>
+                                        </div>
+                                        <div class="text-xs text-muted-foreground">{{ product.category }}</div>
+                                    </div>
+                                    <div class="flex flex-col items-end gap-1 ml-2">
+                                        <div class="text-base font-bold text-primary">${{ Number(product.price).toFixed(2) }}</div>
+                                        <div class="text-xs text-muted-foreground">
+                                            <span :class="[
+                                                product.stock <= 10 ? 'text-destructive font-medium' :
+                                                product.stock <= 50 ? 'text-orange-600 font-medium' :
+                                                'text-green-600 font-medium'
+                                            ]">{{ product.stock }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-1 bg-muted rounded p-1">
+                                        <Button size="sm" variant="ghost"
+                                            @click="decreaseQuantity(product.id)"
+                                            :disabled="(productQuantities[product.id] || 1) <= 1"
+                                            class="h-5 w-5 p-0">
+                                            <Icon name="Minus" class="w-3 h-3" />
+                                        </Button>
+                                        <span class="w-6 text-center text-xs font-medium">{{ productQuantities[product.id] || 1 }}</span>
+                                        <Button size="sm" variant="ghost"
+                                            @click="increaseQuantity(product.id, product.stock)"
+                                            :disabled="(productQuantities[product.id] || 1) >= product.stock"
+                                            class="h-5 w-5 p-0">
+                                            <Icon name="Plus" class="w-3 h-3" />
+                                        </Button>
+                                    </div>
+
+                                    <Button @click="addProduct(product)" :disabled="product.stock === 0 || (productQuantities[product.id] || 1) > product.stock"
+                                        size="sm" class="flex-1 text-xs h-7">
+                                        <Icon name="ShoppingCart" class="w-3 h-3 mr-1" />
+                                        Add
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Table View -->
+                    <div class="hidden md:block h-full overflow-y-auto">
                         <table class="w-full">
                             <thead
                                 class="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
@@ -201,50 +263,73 @@
                     </div>
                 </div>
             </div>
-            <!-- Enhanced Pagination -->
-            <div v-if="products.length > 0" class="flex items-center justify-between p-4 border-t bg-muted/20">
-                <div class="flex items-center gap-4">
-                    <div class="text-sm text-muted-foreground">
-                        Showing <span class="font-medium">{{ pagination.from || 0 }}</span> to
-                        <span class="font-medium">{{ pagination.to || 0 }}</span> of
-                        <span class="font-medium">{{ pagination.total }}</span> products
+
+            <!-- Compact Pagination -->
+            <div v-if="products.length > 0" class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-4 p-2 md:p-4 border-t bg-muted/20">
+                <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4">
+                    <div class="text-xs text-muted-foreground">
+                        <span class="font-medium">{{ pagination.from || 0 }}-{{ pagination.to || 0 }}</span>
+                        <span class="hidden xs:inline"> of </span>
+                        <span class="xs:hidden">/</span>
+                        <span class="font-medium">{{ pagination.total }}</span>
                     </div>
                     <div class="text-xs text-muted-foreground">
-                        Page {{ pagination.current_page }} of {{ pagination.last_page }}
+                        Page {{ pagination.current_page }}/{{ pagination.last_page }}
                     </div>
                 </div>
 
+                <!-- Simplified Mobile Pagination -->
+                <div class="flex md:hidden items-center justify-center gap-2">
+                    <Button @click="onPageChange(pagination.current_page - 1)"
+                        :disabled="pagination.current_page <= 1"
+                        size="sm" variant="outline" class="h-7 w-7 p-0">
+                        <Icon name="ChevronLeft" class="w-3 h-3" />
+                    </Button>
+                    <span class="text-xs font-medium px-2">
+                        {{ pagination.current_page }}
+                    </span>
+                    <Button @click="onPageChange(pagination.current_page + 1)"
+                        :disabled="pagination.current_page >= pagination.last_page"
+                        size="sm" variant="outline" class="h-7 w-7 p-0">
+                        <Icon name="ChevronRight" class="w-3 h-3" />
+                    </Button>
+                </div>
+
+                <!-- Full Desktop Pagination -->
                 <Pagination v-slot="{ page: internalPage }" :items-per-page="pagination.per_page"
-                    :total="pagination.last_page" :page="pagination.current_page" @page-change="onPageChange">
-                    <PaginationContent v-slot="{ items: pages }">
+                    :total="pagination.last_page" :page="pagination.current_page" @page-change="onPageChange"
+                    class="hidden md:flex">
+                    <PaginationContent v-slot="{ items: pages }" class="justify-center sm:justify-end">
                         <PaginationPrevious @click="onPageChange(internalPage - 1)"
-                            :disabled="pagination.current_page <= 1" />
+                            :disabled="pagination.current_page <= 1" class="h-8 md:h-9" />
                         <template v-for="(item, idx) in pages" :key="idx">
                             <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                                :is-active="item.value === internalPage" @click="onPageChange(item.value)">
+                                :is-active="item.value === internalPage" @click="onPageChange(item.value)"
+                                class="h-8 md:h-9 w-8 md:w-9 text-xs md:text-sm">
                                 {{ item.value }}
                             </PaginationItem>
                         </template>
-                        <PaginationEllipsis :index="4" v-if="pagination.last_page >= 4" />
+                        <PaginationEllipsis :index="4" v-if="pagination.last_page >= 4" class="h-8 md:h-9" />
                         <PaginationNext @click="onPageChange(internalPage + 1)"
-                            :disabled="pagination.current_page >= pagination.last_page" />
+                            :disabled="pagination.current_page >= pagination.last_page" class="h-8 md:h-9" />
                     </PaginationContent>
                 </Pagination>
             </div>
 
-            <!-- Footer -->
-            <div class="flex items-center justify-between p-6 border-t bg-background">
-                <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Icon name="Info" class="w-4 h-4" />
-                    <span>Use Enter key in quantity field to quickly add products</span>
+            <!-- Compact Footer -->
+            <div class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-0 p-2 md:p-6 border-t bg-background">
+                <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                    <Icon name="Info" class="w-3 h-3 md:w-4 md:h-4" />
+                    <span class="hidden sm:inline">Use Enter key in quantity field to quickly add products</span>
+                    <span class="sm:hidden">Press Enter to add</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <Button @click="clearSearch" variant="ghost" size="sm">
-                        <Icon name="RotateCcw" class="w-4 h-4 mr-2" />
-                        Reset All
+                <div class="flex items-center gap-2">
+                    <Button @click="clearSearch" variant="ghost" size="sm" class="text-xs md:text-sm h-7 ">
+                        <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                        <span class="hidden xs:inline">Reset</span>
                     </Button>
-                    <Button @click="closeModal" variant="outline">
-                        <Icon name="X" class="w-4 h-4 mr-2" />
+                    <Button @click="closeModal" variant="outline" size="sm" class="text-xs md:text-sm h-7">
+                        <Icon name="X" class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         Close
                     </Button>
                 </div>
@@ -254,7 +339,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, reactive } from 'vue'
+import { ref, watch, onMounted, onUnmounted, reactive } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProductStore } from '../../../stores/products'
 import type { Product } from '../../../types/pos'
@@ -303,6 +388,16 @@ const { products, isLoading, error, pagination, filters } = storeToRefs(productS
 // Local state
 const isOpen = ref(props.open)
 const productQuantities = reactive<Record<number, number>>({})
+const showFilters = ref(false)
+const isMobile = ref(window.innerWidth < 768)
+
+// Handle window resize for mobile detection
+const handleResize = () => {
+    isMobile.value = window.innerWidth < 768
+    if (!isMobile.value) {
+        showFilters.value = true // Always show filters on desktop
+    }
+}
 
 // Initialize quantities for all products
 const initializeQuantities = () => {
@@ -375,6 +470,19 @@ const addProduct = (product: Product) => {
     productQuantities[product.id] = 1
 }
 
+const decreaseQuantity = (productId: number) => {
+    if ((productQuantities[productId] || 1) > 1) {
+        productQuantities[productId] = (productQuantities[productId] || 1) - 1
+    }
+}
+
+const increaseQuantity = (productId: number, maxStock: number) => {
+    const current = productQuantities[productId] || 1
+    if (current < maxStock) {
+        productQuantities[productId] = current + 1
+    }
+}
+
 const closeModal = () => {
     isOpen.value = false
     emit('update:open', false)
@@ -400,6 +508,15 @@ onMounted(() => {
     if (props.open && products.value.length === 0) {
         productStore.fetchProducts()
     }
+
+    // Setup resize listener
+    window.addEventListener('resize', handleResize)
+    handleResize() // Initial check
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize)
 })
 
 // Watch for products changes to initialize quantities
@@ -415,5 +532,42 @@ watch(products, () => {
     width: 98vw !important;
     height: 95vh !important;
     max-height: 95vh !important;
+}
+
+/* Custom breakpoint para pantallas extra pequeñas */
+@media (min-width: 480px) {
+    .xs\:flex-row {
+        flex-direction: row;
+    }
+    .xs\:items-center {
+        align-items: center;
+    }
+    .xs\:gap-0 {
+        gap: 0;
+    }
+    .xs\:gap-4 {
+        gap: 1rem;
+    }
+    .xs\:block {
+        display: block;
+    }
+    .xs\:inline {
+        display: inline;
+    }
+    .xs\:hidden {
+        display: none;
+    }
+}
+
+/* Mejorar scroll en móvil */
+@media (max-width: 767px) {
+    .overflow-y-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Estados de filtros colapsables */
+.filter-transition {
+    transition: all 0.3s ease-in-out;
 }
 </style>

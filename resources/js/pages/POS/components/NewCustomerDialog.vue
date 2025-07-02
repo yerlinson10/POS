@@ -1,70 +1,72 @@
 <template>
     <Dialog v-model:open="isOpen">
-        <DialogContent class="sm:max-w-md">
+        <DialogContent class="w-[95vw] max-w-md sm:max-w-md">
             <DialogHeader>
-                <DialogTitle>New Customer</DialogTitle>
-                <DialogDescription>
+                <DialogTitle class="text-lg md:text-xl">New Customer</DialogTitle>
+                <DialogDescription class="text-sm">
                     Create a new customer account
                 </DialogDescription>
             </DialogHeader>
 
-            <form @submit.prevent="handleSubmit" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
+            <form @submit.prevent="handleSubmit" class="space-y-3 md:space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div class="space-y-2">
-                        <Label for="first_name">First Name *</Label>
+                        <Label for="first_name" class="text-sm">First Name *</Label>
                         <Input id="first_name" v-model="form.first_name" placeholder="Enter first name" required
-                            :disabled="isCreating" />
-                        <div v-if="errors.first_name" class="text-sm text-red-500">
+                            :disabled="isCreating" class="h-9 md:h-10 text-sm" />
+                        <div v-if="errors.first_name" class="text-xs text-red-500">
                             {{ errors.first_name }}
                         </div>
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="last_name">Last Name *</Label>
+                        <Label for="last_name" class="text-sm">Last Name *</Label>
                         <Input id="last_name" v-model="form.last_name" placeholder="Enter last name" required
-                            :disabled="isCreating" />
-                        <div v-if="errors.last_name" class="text-sm text-red-500">
+                            :disabled="isCreating" class="h-9 md:h-10 text-sm" />
+                        <div v-if="errors.last_name" class="text-xs text-red-500">
                             {{ errors.last_name }}
                         </div>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="email">Email</Label>
+                    <Label for="email" class="text-sm">Email</Label>
                     <Input id="email" v-model="form.email" type="email" placeholder="Enter email address"
-                        :disabled="isCreating" />
-                    <div v-if="errors.email" class="text-sm text-red-500">
+                        :disabled="isCreating" class="h-9 md:h-10 text-sm" />
+                    <div v-if="errors.email" class="text-xs text-red-500">
                         {{ errors.email }}
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="phone">Phone</Label>
-                    <Input id="phone" v-model="form.phone" placeholder="Enter phone number" :disabled="isCreating" />
-                    <div v-if="errors.phone" class="text-sm text-red-500">
+                    <Label for="phone" class="text-sm">Phone</Label>
+                    <Input id="phone" v-model="form.phone" placeholder="Enter phone number" :disabled="isCreating" class="h-9 md:h-10 text-sm" />
+                    <div v-if="errors.phone" class="text-xs text-red-500">
                         {{ errors.phone }}
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="address">Address</Label>
+                    <Label for="address" class="text-sm">Address</Label>
                     <Textarea id="address" v-model="form.address" placeholder="Enter address" rows="3"
-                        :disabled="isCreating" />
-                    <div v-if="errors.address" class="text-sm text-red-500">
+                        :disabled="isCreating" class="text-sm resize-none" />
+                    <div v-if="errors.address" class="text-xs text-red-500">
                         {{ errors.address }}
                     </div>
                 </div>
 
-                <div v-if="error" class="text-sm text-red-500">
+                <div v-if="error" class="text-xs text-red-500">
                     {{ error }}
                 </div>
 
-                <DialogFooter>
-                    <Button type="button" @click="closeDialog" variant="outline" :disabled="isCreating">
+                <DialogFooter class="flex flex-col sm:flex-row gap-2 sm:gap-0">
+                    <Button type="button" @click="closeDialog" variant="outline" :disabled="isCreating"
+                        class="w-full sm:w-auto h-9 md:h-10 text-sm">
                         Cancel
                     </Button>
-                    <Button type="submit" :loading="isCreating" :disabled="!canSubmit">
-                        <Icon name="UserPlus" class="w-4 h-4 mr-2" />
+                    <Button type="submit" :loading="isCreating" :disabled="!canSubmit"
+                        class="w-full sm:w-auto h-9 md:h-10 text-sm">
+                        <Icon name="UserPlus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                         {{ isCreating ? 'Creating...' : 'Create Customer' }}
                     </Button>
                 </DialogFooter>
