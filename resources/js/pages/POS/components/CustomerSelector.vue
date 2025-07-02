@@ -17,7 +17,7 @@
                     {{ selectedCustomer.email || 'No email' }} • {{ selectedCustomer.phone || 'No phone' }}
                 </div>
             </div>
-            <Button @click="clearSelection" variant="ghost" size="sm">
+            <Button @click="clearSelection" variant="ghost" size="sm" class="cursor-pointer">
                 <Icon name="X" class="h-4 w-4" />
             </Button>
         </div>

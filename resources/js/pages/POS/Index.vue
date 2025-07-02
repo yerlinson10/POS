@@ -1,8 +1,162 @@
 <template>
     <AppLayout title="Point of Sale">
         <div class="flex h-[calc(100vh-4rem)] gap-4 p-4">
-            <!-- Left Panel - Products and Customer Selection -->
+            <!-- Left Panel - Cart and Products -->
             <div class="w-2/3 flex flex-col gap-4">
+                <!-- Cart Section -->
+                <Card class="flex-1 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-semibold">Shopping Cart</h3>
+                            <p class="text-sm text-muted-foreground">
+                                {{ itemCount }} {{ itemCount === 1 ? 'item' : 'items' }} selected
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <Button @click="showProductModal = true" class="h-10 cursor-pointer">
+                                <Icon name="Plus" class="w-4 h-4 mr-2" />
+                                Add Products
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger as-child>
+                                    <Button variant="destructive" size="sm" :disabled="!cart.length"
+                                        class="h-10 cursor-pointer">
+                                        <Icon name="Trash2" class="w-4 h-4 mr-2" />
+                                        Clear Cart
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Clear Shopping Cart?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action will remove all {{ itemCount }} item{{ itemCount !== 1 ? 's' :
+                                            '' }} from your cart.
+                                            This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel class="cursor-pointer">Cancel</AlertDialogCancel>
+                                        <AlertDialogAction variant="destructive"
+                                            class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]"
+                                            @click="clearCart">
+                                            Clear Cart
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    </div>
+
+                    <!-- Cart Items -->
+                    <div class="space-y-3 mb-6 flex-1 overflow-y-auto" style="max-height: calc(100vh - 20rem);">
+                        <!-- Empty Cart State -->
+                        <div v-if="!cart.length" class="text-center py-16">
+                            <div class="flex flex-col items-center gap-4">
+                                <Icon name="ShoppingCart" class="w-16 h-16 text-muted-foreground/50" />
+                                <div>
+                                    <h4 class="font-medium text-lg mb-2">Your cart is empty</h4>
+                                    <p class="text-muted-foreground mb-4">Add products to get started</p>
+                                    <Button @click="showProductModal = true" class="cursor-pointer">
+                                        <Icon name="Plus" class="w-4 h-4 mr-2" />
+                                        Browse Products
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cart Items List -->
+                        <div v-for="item in cart" :key="item.product_id"
+                            class="flex items-center gap-4 p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors">
+                            <div class="flex-1 min-w-0">
+                                {{ console.log(item) }}
+                                <div class="font-medium text-base mb-1">{{ item.product_name }}</div>
+                                <div class="text-sm text-muted-foreground mb-2">{{ item.product_sku }}</div>
+                                <div class="text-sm font-medium text-primary">
+                                    ${{ Number(item.unit_price).toFixed(2) }} per unit
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2 bg-muted rounded-lg p-1">
+                                    <Button size="sm" variant="ghost"
+                                        @click="updateQuantity(item.product_id, item.quantity - 1)"
+                                        :disabled="item.quantity <= 1" class="h-8 w-8 p-0 cursor-pointer">
+                                        <Icon name="Minus" class="w-3 h-3" />
+                                    </Button>
+                                    <span class="w-12 text-center text-sm font-medium">{{ item.quantity }}</span>
+                                    <Button size="sm" variant="ghost"
+                                        @click="updateQuantity(item.product_id, item.quantity + 1)"
+                                        :disabled="item.quantity >= item.available_stock"
+                                        class="h-8 w-8 p-0 cursor-pointer">
+                                        <Icon name="Plus" class="w-3 h-3" />
+                                    </Button>
+                                </div>
+
+                                <div class="text-right min-w-[80px]">
+                                    <div class="text-lg font-semibold">${{ Number(item.line_total).toFixed(2) }}</div>
+                                </div>
+
+                                <AlertDialog>
+                                    <AlertDialogTrigger as-child>
+                                        <Button size="sm" variant="ghost"
+                                            class="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer">
+                                            <Icon name="X" class="w-4 h-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Remove Product?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Are you sure you want to remove "{{ item.product_name }}" from your
+                                                cart?
+                                                This action cannot be undone.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel class="cursor-pointer">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction variant="destructive"
+                                                class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]"
+                                                @click="removeFromCart(item.product_id)">
+                                                Remove Product
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Search Section (Optional) -->
+                    <div v-if="cart.length > 0" class="border-t pt-4">
+                        <div class="flex gap-2">
+                            <Input v-model="quickSearchTerm" placeholder="Quick add products..." class="flex-1"
+                                @keyup.enter="performQuickSearch" />
+                            <Button @click="performQuickSearch" variant="outline" size="sm">
+                                <Icon name="Search" class="w-4 h-4" />
+                            </Button>
+                        </div>
+
+                        <!-- Quick Search Results -->
+                        <div v-if="quickSearchResults.length" class="mt-3 space-y-2 max-h-32 overflow-y-auto">
+                            <div v-for="product in quickSearchResults" :key="product.id"
+                                class="flex items-center justify-between p-2 border rounded hover:bg-accent/50 cursor-pointer text-sm"
+                                @click="addToCart(product)">
+                                <div class="flex-1">
+                                    <div class="font-medium">{{ product.name }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ product.sku }} • ${{
+                                        Number(product.price).toFixed(2) }}</div>
+                                </div>
+                                <Button size="sm" variant="ghost" class="h-6 w-6 p-0">
+                                    <Icon name="Plus" class="w-3 h-3" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            <!-- Right Panel - Customer and Checkout -->
+            <div class="w-1/3 flex flex-col gap-4">
                 <!-- Customer Selection -->
                 <Card class="p-4">
                     <div class="flex items-center justify-between mb-4">
@@ -15,152 +169,75 @@
                     <CustomerSelector v-model="selectedCustomer" @customer-selected="handleCustomerSelected" />
                 </Card>
 
-                <!-- Products Section -->
+                <!-- Checkout Section -->
                 <Card class="flex-1 p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium">Products</h3>
-                        <Button @click="showProductModal = true">
-                            <Icon name="Plus" class="w-4 h-4 mr-2" />
-                            Add Product
-                        </Button>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="flex gap-2 mb-4">
-                        <Input v-model="quickSearchTerm" placeholder="Quick search products..." class="flex-1"
-                            @keyup.enter="performQuickSearch" />
-                        <Button @click="performQuickSearch" variant="outline">
-                            <Icon name="Search" class="w-4 h-4" />
-                        </Button>
-                    </div>
-
-                    <!-- Recent/Quick Access Products -->
-                    <div v-if="!quickSearchResults.length" class="text-sm text-muted-foreground">
-                        Click "Add Product" to browse and add products to cart
-                    </div>
-
-                    <!-- Quick Search Results -->
-                    <div v-if="quickSearchResults.length" class="space-y-2 max-h-60 overflow-y-auto">
-                        <div v-for="product in quickSearchResults" :key="product.id"
-                            class="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 cursor-pointer"
-                            @click="addToCart(product)">
-                            <div class="flex-1">
-                                <div class="font-medium">{{ product.name }}</div>
-                                <div class="text-sm text-muted-foreground">
-                                    {{ product.sku }} | {{ product.category }} | Stock: {{ product.stock }}
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-medium">${{ Number(product.price).toFixed(2) }}</div>
-                                <div class="text-xs text-muted-foreground">{{ product.unit_measure }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-
-            <!-- Right Panel - Cart and Checkout -->
-            <div class="w-1/3 flex flex-col gap-4">
-                <!-- Cart -->
-                <Card class="flex-1 p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium">
-                            Cart ({{ itemCount }} {{ itemCount === 1 ? 'item' : 'items' }})
-                        </h3>
-                        <Button @click="clearCart" variant="outline" size="sm" :disabled="!cart.length">
-                            <Icon name="Trash2" class="w-4 h-4" />
-                        </Button>
-                    </div>
-
-                    <!-- Cart Items -->
-                    <div class="space-y-2 mb-4 flex-1 overflow-y-auto max-h-80">
-                        <div v-for="item in cart" :key="item.product_id"
-                            class="flex items-center gap-2 p-2 border rounded-lg">
-                            <div class="flex-1 min-w-0">
-                                <div class="font-medium text-sm truncate">{{ item.product_name }}</div>
-                                <div class="text-xs text-muted-foreground">{{ item.product_sku }}</div>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <Button size="sm" variant="outline"
-                                    @click="updateQuantity(item.product_id, item.quantity - 1)"
-                                    :disabled="item.quantity <= 1">
-                                    <Icon name="Minus" class="w-3 h-3" />
-                                </Button>
-                                <span class="w-8 text-center text-sm">{{ item.quantity }}</span>
-                                <Button size="sm" variant="outline"
-                                    @click="updateQuantity(item.product_id, item.quantity + 1)"
-                                    :disabled="item.quantity >= item.available_stock">
-                                    <Icon name="Plus" class="w-3 h-3" />
-                                </Button>
-                            </div>
-                            <div class="text-right min-w-0">
-                                <div class="text-sm font-medium">${{ Number(item.line_total).toFixed(2) }}</div>
-                                <div class="text-xs text-muted-foreground">${{ Number(item.unit_price).toFixed(2) }} ea
-                                </div>
-                            </div>
-                            <Button size="sm" variant="ghost" @click="removeFromCart(item.product_id)">
-                                <Icon name="X" class="w-4 h-4" />
-                            </Button>
-                        </div>
-
-                        <div v-if="!cart.length" class="text-center text-muted-foreground py-8">
-                            No items in cart
-                        </div>
-                    </div>
+                    <h3 class="text-lg font-medium mb-4">Order Summary</h3>
 
                     <!-- Discount Section -->
-                    <div class="border-t pt-4 mb-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium">Discount</span>
-                            <Button v-if="discountType" @click="clearDiscount" variant="ghost" size="sm">
+                    <div class="border rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-medium">Apply Discount</span>
+                            <Button v-if="discountType" @click="clearDiscount" variant="ghost" size="sm"
+                                class="cursor-pointer">
                                 <Icon name="X" class="w-4 h-4" />
                             </Button>
                         </div>
 
                         <div v-if="!discountType" class="flex gap-2">
                             <Button @click="showDiscountDialog('percentage')" variant="outline" size="sm"
-                                class="flex-1">
+                                class="flex-1 cursor-pointer">
+                                <Icon name="Percent" class="w-4 h-4 mr-2" />
                                 % Discount
                             </Button>
-                            <Button @click="showDiscountDialog('fixed')" variant="outline" size="sm" class="flex-1">
+                            <Button @click="showDiscountDialog('fixed')" variant="outline" size="sm"
+                                class="flex-1 cursor-pointer">
+                                <Icon name="DollarSign" class="w-4 h-4 mr-2" />
                                 $ Discount
                             </Button>
                         </div>
 
-                        <div v-else class="text-sm">
-                            <div class="flex justify-between">
-                                <span>
+                        <div v-else class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium text-green-800 dark:text-green-400">
                                     {{ discountType === 'percentage' ? `${Number(discountValue)}%` :
-                                        `$${Number(discountValue).toFixed(2)}` }}
-                                    Discount
+                                        `$${Number(discountValue).toFixed(2)}` }} Discount Applied
                                 </span>
-                                <span>-${{ Number(discountAmount).toFixed(2) }}</span>
+                                <span class="text-sm font-semibold text-green-800 dark:text-green-400">
+                                    -${{ Number(discountAmount).toFixed(2) }}
+                                </span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Totals -->
-                    <div class="space-y-2 border-t pt-4">
+                    <div class="space-y-3 border rounded-lg p-4 mb-6">
                         <div class="flex justify-between text-sm">
                             <span>Subtotal:</span>
-                            <span>${{ Number(subtotal).toFixed(2) }}</span>
+                            <span class="font-medium">${{ Number(subtotal).toFixed(2) }}</span>
                         </div>
-                        <div v-if="discountAmount > 0" class="flex justify-between text-sm text-green-600">
+                        <div v-if="discountAmount > 0"
+                            class="flex justify-between text-sm text-green-600 dark:text-green-400">
                             <span>Discount:</span>
-                            <span>-${{ Number(discountAmount).toFixed(2) }}</span>
+                            <span class="font-medium">-${{ Number(discountAmount).toFixed(2) }}</span>
                         </div>
-                        <div class="flex justify-between text-lg font-bold border-t pt-2">
+                        <div class="flex justify-between text-xl font-bold border-t pt-3">
                             <span>Total:</span>
-                            <span>${{ Number(total).toFixed(2) }}</span>
+                            <span class="text-primary">${{ Number(total).toFixed(2) }}</span>
                         </div>
                     </div>
 
                     <!-- Checkout Button -->
-                    <Button @click="processCheckout" class="w-full mt-4" size="lg" :disabled="!canProcessSale"
-                        :loading="isProcessingSale">
+                    <Button @click="processCheckout" class="w-full h-12 cursor-pointer" size="lg"
+                        :disabled="!canProcessSale" :loading="isProcessingSale">
                         <Icon name="CreditCard" class="w-5 h-5 mr-2" />
-                        {{ isProcessingSale ? 'Processing...' : 'Process Sale' }}
+                        {{ isProcessingSale ? 'Processing Sale...' : 'Process Sale' }}
                     </Button>
+
+                    <!-- Additional Info -->
+                    <div v-if="cart.length > 0" class="mt-4 text-xs text-muted-foreground text-center">
+                        <p>{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }} • Last updated: {{ new
+                            Date().toLocaleTimeString() }}</p>
+                    </div>
                 </Card>
             </div>
         </div>
@@ -190,6 +267,17 @@ import AppLayout from '../../layouts/AppLayout.vue'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '../../components/ui/alert-dialog'
 import Icon from '../../components/Icon.vue'
 // Make sure the file exists at this path, or update the path if needed
 import CustomerSelector from './components/CustomerSelector.vue'

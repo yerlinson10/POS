@@ -151,9 +151,8 @@ export const usePOSStore = defineStore('pos', () => {
             const update = updates[item.product_id];
             if (update) {
                 item.available_stock = update.stock;
-                // Optionally update price if needed
-                // item.unit_price = update.price
-                // item.line_total = item.quantity * update.price
+                item.unit_price = update.price
+                item.line_total = item.quantity * update.price
             }
         });
     };

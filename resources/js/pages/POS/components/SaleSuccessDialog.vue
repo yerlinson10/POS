@@ -72,11 +72,11 @@
 
                 <!-- Actions -->
                 <div class="flex gap-2">
-                    <Button @click="startNewSale" class="flex-1">
+                    <Button @click="startNewSale" class="flex-1 cursor-pointer">
                         <Icon name="Plus" class="w-4 h-4 mr-2" />
                         New Sale
                     </Button>
-                    <Button @click="printReceipt" variant="outline" class="flex-1">
+                    <Button @click="printReceipt" variant="outline" class="flex-1 cursor-pointer">
                         <Icon name="Printer" class="w-4 h-4 mr-2" />
                         Print Receipt
                     </Button>
@@ -84,7 +84,7 @@
             </div>
 
             <DialogFooter>
-                <Button @click="closeDialog" variant="outline">
+                <Button @click="closeDialog" variant="outline" class="cursor-pointer">
                     Close
                 </Button>
             </DialogFooter>
