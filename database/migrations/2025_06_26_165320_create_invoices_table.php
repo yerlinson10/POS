@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->date('date');
-            $table->decimal('subtotal', 10, 2)->default(0)->after('total_amount');
-            $table->string('discount_type')->nullable()->after('subtotal'); // 'percentage' or 'fixed'
-            $table->decimal('discount_value', 10, 2)->nullable()->after('discount_type');
+            $table->decimal('subtotal', 10, 2)->default(0);
+            $table->string('discount_type')->nullable(); // 'percentage' or 'fixed'
+            $table->decimal('discount_value', 10, 2)->nullable();
             $table->decimal('total_amount', 12, 2);
             $table->string('status', 20)->default('paid')->comment('pending, paid, canceled');
             $table->timestamps();

@@ -11,14 +11,13 @@ class Invoice extends Model
     use HasFactory;
     protected $fillable = [
         'customer_id',
-        'pos_user_id',
+        'user_id',
         'date',
         'total_amount',
         'status',
         'subtotal',
         'discount_type',
         'discount_value',
-        'discount_amount'
     ];
 
     protected $casts = [

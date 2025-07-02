@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Customer;
-use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Services\ProductService;
 use App\Services\CustomerService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class POSController extends Controller
 {
@@ -192,14 +193,13 @@ class POSController extends Controller
             // Create invoice
             $invoice = Invoice::create([
                 'customer_id' => $validated['customer_id'],
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'date' => now(),
                 'total_amount' => $validated['total_amount'],
                 'status' => 'completed',
                 'subtotal' => $validated['subtotal'],
                 'discount_type' => $validated['discount_type'],
-                'discount_value' => $validated['discount_value'],
-                'discount_amount' => $validated['discount_amount'] ?? 0,
+                'discount_value' => $validated['discount_value']
             ]);
 
             // Create invoice items and update stock
