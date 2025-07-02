@@ -1,5 +1,5 @@
 import { type NavItem } from '@/types';
-import { BookOpen, Box, Folder, LayoutGrid, PencilRuler, ShoppingBasket } from 'lucide-vue-next';
+import { BookOpen, Box, Folder, LayoutGrid, PencilRuler, ShoppingBasket, BookUser  } from 'lucide-vue-next';
 
 export const mainNavItems: NavItem[] = [
     {
@@ -21,6 +21,11 @@ export const mainNavItems: NavItem[] = [
         title: 'Products',
         href: '/products',
         icon: ShoppingBasket,
+    },
+    {
+        title: 'Customers',
+        href: '/customers',
+        icon: BookUser,
     },
 ];
 
