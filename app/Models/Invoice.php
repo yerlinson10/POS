@@ -9,23 +9,16 @@ class Invoice extends Model
 {
     /** @use HasFactory<\Database\Factories\InvoiceFactory> */
     use HasFactory;
-    protected $fillable = ['customer_id', 'user_id', 'date', 'total_amount', 'status'];
-
-    protected $casts = [
-        'total_amount' => 'decimal:2',
-        'date' => 'date',
-        'customer_id' => 'integer',
-        'user_id' => 'integer',
-    ];
+    protected $fillable = ['customer_id', 'pos_user_id', 'date', 'total_amount', 'status'];
 
     public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function user()
+    public function posUser()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'pos_user_id');
     }
 
     public function items()

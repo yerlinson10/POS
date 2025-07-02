@@ -1,21 +1,11 @@
 import { type NavItem } from '@/types';
-import { BookOpen, Box, Folder, LayoutGrid, PencilRuler, ShoppingBasket, BookUser, Receipt, ShoppingCart } from 'lucide-vue-next';
+import { BookOpen, Box, Folder, LayoutGrid, PencilRuler, ShoppingBasket, BookUser  } from 'lucide-vue-next';
 
 export const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
-    },
-    {
-        title: 'POS',
-        href: '/pos',
-        icon: ShoppingCart,
-    },
-    {
-        title: 'Invoices',
-        href: '/invoices',
-        icon: Receipt,
     },
     {
         title: 'Categories',
