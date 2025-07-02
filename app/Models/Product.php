@@ -15,6 +15,10 @@ class Product extends Model
         'sku', 'name', 'description', 'category_id',
         'unit_measure_id', 'price', 'stock'
     ];
+    protected $casts = [
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+    ];
 
     public function category()
     {

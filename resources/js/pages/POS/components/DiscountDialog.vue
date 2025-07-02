@@ -1,0 +1,178 @@
+<template>
+    <Dialog v-model:open="isOpen">
+        <DialogContent class="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>
+                    Apply {{ type === 'percentage' ? 'Percentage' : 'Fixed Amount' }} Discount
+                </DialogTitle>
+                <DialogDescription>
+                    {{ type === 'percentage'
+                        ? 'Enter the discount percentage (0-100)'
+                        : 'Enter the fixed discount amount'
+                    }}
+                </DialogDescription>
+            </DialogHeader>
+
+            <form @submit.prevent="handleSubmit" class="space-y-4">
+                <div class="space-y-2">
+                    <Label for="discount_value">
+                        {{ type === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)' }}
+                    </Label>
+                    <div class="relative">
+                        <Input id="discount_value" v-model.number="discountValue" type="number" :min="0"
+                            :max="type === 'percentage' ? 100 : undefined" step="any" placeholder="0" class="pr-8"
+                            required @input="calculatePreview" />
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            {{ type === 'percentage' ? '%' : '$' }}
+                        </div>
+                    </div>
+                    <div v-if="error" class="text-sm text-red-500">
+                        {{ error }}
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div v-if="previewAmount > 0" class="p-3 bg-accent/50 rounded-lg space-y-1">
+                    <div class="text-sm font-medium">Discount Preview</div>
+                    <div class="text-sm text-muted-foreground">
+                        Subtotal: ${{ Number(subtotal).toFixed(2) }}
+                    </div>
+                    <div class="text-sm text-green-600">
+                        Discount: -${{ Number(previewAmount).toFixed(2) }}
+                    </div>
+                    <div class="text-sm font-medium border-t pt-1">
+                        New Total: ${{ Math.max(0, Number(subtotal) - Number(previewAmount)).toFixed(2) }}
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button type="button" @click="closeDialog" variant="outline">
+                        Cancel
+                    </Button>
+                    <Button type="submit" :disabled="!canApply">
+                        <Icon name="Percent" class="w-4 h-4 mr-2" />
+                        Apply Discount
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+    </Dialog>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { usePOSStore } from '../../../stores/pos'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '../../../components/ui/dialog'
+import { Input } from '../../../components/ui/input'
+import { Button } from '../../../components/ui/button'
+import { Label } from '../../../components/ui/label'
+import Icon from '../../../components/Icon.vue'
+
+interface Props {
+    open: boolean
+    type: 'percentage' | 'fixed'
+}
+
+interface Emits {
+    (e: 'update:open', value: boolean): void
+    (e: 'update:type', value: 'percentage' | 'fixed'): void
+    (e: 'discount-applied', type: 'percentage' | 'fixed', value: number): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+// Store
+const posStore = usePOSStore()
+const { subtotal } = storeToRefs(posStore)
+
+// Local state
+const isOpen = ref(props.open)
+const discountValue = ref<number>(0)
+const previewAmount = ref<number>(0)
+const error = ref<string>('')
+
+// Computed
+const canApply = computed(() => {
+    return discountValue.value > 0 && !error.value && subtotal.value > 0
+})
+
+// Methods
+const calculatePreview = () => {
+    error.value = ''
+
+    if (discountValue.value <= 0) {
+        previewAmount.value = 0
+        return
+    }
+
+    if (props.type === 'percentage') {
+        if (discountValue.value > 100) {
+            error.value = 'Percentage cannot exceed 100%'
+            previewAmount.value = 0
+            return
+        }
+        previewAmount.value = (subtotal.value * discountValue.value) / 100
+    } else {
+        if (discountValue.value > subtotal.value) {
+            error.value = 'Discount cannot exceed subtotal'
+            previewAmount.value = 0
+            return
+        }
+        previewAmount.value = discountValue.value
+    }
+}
+
+const handleSubmit = () => {
+    if (!canApply.value) return
+
+    emit('discount-applied', props.type, discountValue.value)
+    closeDialog()
+}
+
+const resetForm = () => {
+    discountValue.value = 0
+    previewAmount.value = 0
+    error.value = ''
+}
+
+const closeDialog = () => {
+    isOpen.value = false
+    emit('update:open', false)
+    resetForm()
+}
+
+// Watch for prop changes
+watch(() => props.open, (newValue) => {
+    isOpen.value = newValue
+    if (newValue) {
+        resetForm()
+    }
+})
+
+watch(isOpen, (newValue) => {
+    if (!newValue) {
+        emit('update:open', false)
+    }
+})
+
+watch(() => props.type, () => {
+    calculatePreview()
+})
+
+watch(discountValue, () => {
+    calculatePreview()
+})
+
+watch(subtotal, () => {
+    calculatePreview()
+})
+</script>
