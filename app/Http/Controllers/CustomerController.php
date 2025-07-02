@@ -40,8 +40,7 @@ class CustomerController extends Controller
                 'email',
                 'phone',
                 'address',
-                'created_at',
-                'updated_at',
+                'created_at'
             ]);
 
         $customers = $customersQuery

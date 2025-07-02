@@ -21,8 +21,20 @@
                                 <SelectItem value="created_at">
                                     Date
                                 </SelectItem>
-                                <SelectItem value="name">
-                                    Name
+                                <SelectItem value="first_name">
+                                    First Name
+                                </SelectItem>
+                                <SelectItem value="last_name">
+                                    Last Name
+                                </SelectItem>
+                                <SelectItem value="email">
+                                    Email
+                                </SelectItem>
+                                <SelectItem value="phone">
+                                    Phone
+                                </SelectItem>
+                                <SelectItem value="address">
+                                    Address
                                 </SelectItem>
                             </SelectContent>
                         </Select>
