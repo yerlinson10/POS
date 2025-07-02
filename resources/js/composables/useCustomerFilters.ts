@@ -12,6 +12,6 @@ export interface Customer {
 export function useCustomerFilters(props: { customers: Paginated<Customer>, filters: BaseFilters }) {
     return useFilters(
         { data: props.customers, filters: props.filters },
-        { endpoint: '/Customers' }
+        { endpoint: '/customers' }
     )
 }
