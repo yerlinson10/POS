@@ -297,7 +297,7 @@
 
                 <!-- Full Desktop Pagination -->
                 <Pagination v-slot="{ page: internalPage }" :items-per-page="pagination.per_page"
-                    :total="pagination.last_page" :page="pagination.current_page" @page-change="onPageChange"
+                    :total="pagination.total" :page="pagination.current_page" @page-change="onPageChange"
                     class="hidden md:flex">
                     <PaginationContent v-slot="{ items: pages }" class="justify-center sm:justify-end">
                         <PaginationPrevious @click="onPageChange(internalPage - 1)"
@@ -464,7 +464,6 @@ const addProduct = (product: Product) => {
     }
 
     emit('product-selected', product, quantity)
-    toast.success(`${product.name} added to cart`)
 
     // Reset quantity to 1
     productQuantities[product.id] = 1
