@@ -1,5 +1,5 @@
 import { type NavItem } from '@/types';
-import { BookOpen, Box, Folder, LayoutGrid, PencilRuler, ShoppingBasket, Users, CreditCard  } from 'lucide-vue-next';
+import { BookOpen, FolderOpenIcon, Folder, LayoutGrid, RulerIcon, PackageIcon, Users, ShoppingCartIcon  } from 'lucide-vue-next';
 
 export const mainNavItems: NavItem[] = [
     {
@@ -10,22 +10,22 @@ export const mainNavItems: NavItem[] = [
     {
         title: 'Point of Sale',
         href: '/pos',
-        icon: CreditCard,
+        icon: ShoppingCartIcon,
     },
     {
         title: 'Categories',
         href: '/categories',
-        icon: Box,
+        icon: FolderOpenIcon,
     },
     {
         title: 'Units Measure',
         href: '/unit-measures',
-        icon: PencilRuler,
+        icon: RulerIcon,
     },
     {
         title: 'Products',
         href: '/products',
-        icon: ShoppingBasket,
+        icon: PackageIcon,
     },
     {
         title: 'Customers',
