@@ -5,144 +5,204 @@
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div
-                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border  p-4">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-4">
-                    <!-- Botón Nuevo -->
-                    <div class="md:w-1/3 flex items-center">
-                        <Button as="a" href="/customers/create" class="md:w-auto">New</Button>
-                    </div>
-                    <!-- Selects de ordenamiento -->
-                    <div class="md:w-full flex gap-2">
-                        <Select v-model="filters.sort_by" @update:modelValue="search" class="px-2 py-1 w-1/2">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a field" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="created_at">
-                                    Date
-                                </SelectItem>
-                                <SelectItem value="first_name">
-                                    First Name
-                                </SelectItem>
-                                <SelectItem value="last_name">
-                                    Last Name
-                                </SelectItem>
-                                <SelectItem value="email">
-                                    Email
-                                </SelectItem>
-                                <SelectItem value="phone">
-                                    Phone
-                                </SelectItem>
-                                <SelectItem value="address">
-                                    Address
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Select v-model="filters.sort_dir" @update:modelValue="search" class="px-2 py-1 w-1/2">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a sort" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="asc">
-                                    Ascending
-                                </SelectItem>
-                                <SelectItem value="desc">
-                                    Descending
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button v-if="hasActiveFilters" variant="destructive" class="p-1 cursor-pointer"
-                            @click="resetFilters">
-                            <RotateCcw />
-                        </Button>
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
+
+                <!-- Header con Search -->
+                <div class="flex flex-col gap-2 md:gap-4 p-2 md:p-6 border-b bg-muted/30">
+                    <div class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-0">
+                        <div>
+                            <h2 class="text-base md:text-xl font-semibold">Customers Management</h2>
+                            <p class="text-xs md:text-sm text-muted-foreground hidden xs:block">
+                                Manage your customer database and information
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <Button as="a" href="/customers/create" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                                <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                New Customer
+                            </Button>
+                            <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                                <Icon name="Users" class="w-3 h-3 md:w-4 md:h-4" />
+                                <span v-if="customers.total">{{ customers.total }} customers</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Buscador alineado a la derecha -->
-                    <div
-                        class="md:max-w-xs max-w-sm relative flex items-center justify-end lg:justify-end w-full lg:col-start-3 justify-self-end">
-                        <Input id="search" type="text" placeholder="Search..." v-model="filters.search"
-                            class="pl-10 w-full" @keyup.enter="search" />
-                        <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
-                            <Search class="size-6 text-muted-foreground" />
-                        </span>
-                        <Button type="submit"
-                            class="absolute end-0 inset-y-0 flex items-center justify-center px-2 cursor-pointer rounded-l-none"
-                            @click="search">
-                            Search
+                    <!-- Search Bar -->
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <Icon name="Search"
+                                class="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
+                            <Input v-model="filters.search" placeholder="Search customers..."
+                                class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
+                        </div>
+                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                            <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
+                        </Button>
+                        <Button v-if="hasActiveFilters" @click="resetFilters" variant="outline" size="sm"
+                            class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
+                            <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                     </div>
                 </div>
-                <Table>
-                    <TableCaption>{{ customers.total ? 'List of Customers.' : 'There are no customers available' }}
-                    </TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>ID</TableHead>
-                            <TableHead>First Name</TableHead>
-                            <TableHead>Last Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Address</TableHead>
-                            <TableHead class="text-right">Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="p in customers.data" :key="p.id">
-                            <TableCell>{{ p.id }}</TableCell>
-                            <TableCell>{{ p.first_name }}</TableCell>
-                            <TableCell>{{ p.last_name }}</TableCell>
-                            <TableCell>{{ p.email }}</TableCell>
-                            <TableCell>{{ p.phone }}</TableCell>
-                            <TableCell>{{ p.address }}</TableCell>
-                            <TableCell class="text-right space-x-1">
-                                <Link :href="`/customers/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']">
-                                <Button size="sm" variant="outline" class="cursor-pointer">
-                                    Edit
-                                    <SquarePen class="w-4 h-4" />
-                                </Button>
-                                </Link>
-                                <AlertDialog>
-                                    <AlertDialogTrigger as-child>
-                                        <Button size="sm" variant="destructive" class="cursor-pointer">
-                                            Delete
-                                            <Trash2 class="w-4 h-4" />
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone. It will permanently delete this record and
-                                                remove your data from our servers.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel class="cursor-pointer">Cancel</AlertDialogCancel>
-                                            <AlertDialogAction variant="destructive"
-                                                class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]"
-                                                @click="destroy(p.id)">Continue</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
 
-                <Pagination v-slot="{ page: internalPage }" :items-per-page="filters.per_page"
-                    :total="customers.last_page" :page="filters.page" @page-change="onPageChange">
-                    <PaginationContent v-slot="{ items: pages }">
-                        <PaginationPrevious @click="onPageChange(internalPage - 1)" />
-                        <template v-for="(item, idx) in pages" :key="idx">
-                            <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                                :is-active="item.value === internalPage" @click="onPageChange(item.value)">
-                                {{ item.value }}
-                            </PaginationItem>
-                        </template>
-                        <PaginationEllipsis :index="4" v-if="customers.last_page >= 4" />
-                        <PaginationNext @click="onPageChange(internalPage + 1)" />
-                    </PaginationContent>
-                </Pagination>
+                <!-- Filters Toolbar -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:gap-4 p-2 md:p-4 bg-background border-b">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3">
+                        <span class="text-xs md:text-sm font-medium text-muted-foreground hidden sm:inline">Sort:</span>
+                        <div class="flex gap-2">
+                            <Select v-model="filters.sort_by" @update:modelValue="search">
+                                <SelectTrigger class="w-full sm:w-36 md:w-48 h-7 md:h-9 text-xs md:text-sm">
+                                    <SelectValue placeholder="Sort by..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="created_at">Date</SelectItem>
+                                    <SelectItem value="first_name">First Name</SelectItem>
+                                    <SelectItem value="last_name">Last Name</SelectItem>
+                                    <SelectItem value="email">Email</SelectItem>
+                                    <SelectItem value="phone">Phone</SelectItem>
+                                    <SelectItem value="address">Address</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select v-model="filters.sort_dir" @update:modelValue="search">
+                                <SelectTrigger class="w-full sm:w-24 md:w-32 h-7 md:h-9 text-xs md:text-sm">
+                                    <SelectValue placeholder="Order..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="asc">A-Z / Low-High</SelectItem>
+                                    <SelectItem value="desc">Z-A / High-Low</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+                <!-- Customers Table -->
+                <div class="flex-1 overflow-hidden">
+                    <div class="h-full overflow-y-auto">
+                        <table class="w-full">
+                            <thead
+                                class="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
+                                <tr class="h-12">
+                                    <th class="text-left px-4 py-3 font-semibold text-sm">Customer Info</th>
+                                    <th class="text-left px-4 py-3 font-semibold text-sm">Contact</th>
+                                    <th class="text-left px-4 py-3 font-semibold text-sm">Address</th>
+                                    <th class="text-center px-4 py-3 font-semibold text-sm w-28">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="p in customers.data" :key="p.id"
+                                    class="border-b hover:bg-muted/50 transition-colors group">
+                                    <!-- Customer Info -->
+                                    <td class="px-4 py-4">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2">
+                                                <Icon name="User" class="w-4 h-4 text-primary" />
+                                                <div class="font-medium text-sm group-hover:text-primary transition-colors">
+                                                    {{ p.first_name }} {{ p.last_name }}
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span class="font-mono bg-muted px-1.5 py-0.5 rounded">#{{ p.id }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Contact -->
+                                    <td class="px-4 py-4">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2 text-sm">
+                                                <Icon name="Mail" class="w-4 h-4 text-muted-foreground" />
+                                                <span class="text-sm">{{ p.email }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-sm">
+                                                <Icon name="Phone" class="w-4 h-4 text-muted-foreground" />
+                                                <span class="text-sm">{{ p.phone }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Address -->
+                                    <td class="px-4 py-4">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <Icon name="MapPin" class="w-4 h-4 text-muted-foreground" />
+                                            <span class="text-sm text-muted-foreground truncate max-w-xs">
+                                                {{ p.address }}
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="px-4 py-4 text-center">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <Link :href="`/customers/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']">
+                                                <Button size="sm" variant="outline" class="h-8 w-8 p-0">
+                                                    <Icon name="SquarePen" class="w-4 h-4" />
+                                                </Button>
+                                            </Link>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger as-child>
+                                                    <Button size="sm" variant="destructive" class="h-8 w-8 p-0">
+                                                        <Icon name="Trash2" class="w-4 h-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. It will permanently delete this record and
+                                                            remove your data from our servers.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel class="cursor-pointer">Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction variant="destructive"
+                                                            class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]"
+                                                            @click="destroy(p.id)">Continue</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Compact Pagination -->
+                <div v-if="customers.data.length > 0" class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-4 p-2 md:p-4 border-t bg-muted/20">
+                    <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4">
+                        <div class="text-xs text-muted-foreground">
+                            <span class="font-medium">{{ customers.from || 0 }}-{{ customers.to || 0 }}</span>
+                            <span class="hidden xs:inline"> of </span>
+                            <span class="xs:hidden">/</span>
+                            <span class="font-medium">{{ customers.total }}</span>
+                        </div>
+                        <div class="text-xs text-muted-foreground">
+                            Page {{ customers.current_page }}/{{ customers.last_page }}
+                        </div>
+                    </div>
+
+                    <Pagination v-slot="{ page: internalPage }" :items-per-page="filters.per_page"
+                        :total="customers.last_page" :page="filters.page" @page-change="onPageChange"
+                        class="flex">
+                        <PaginationContent v-slot="{ items: pages }" class="justify-center sm:justify-end">
+                            <PaginationPrevious @click="onPageChange(internalPage - 1)"
+                                :disabled="customers.current_page <= 1" class="h-8 md:h-9" />
+                            <template v-for="(item, idx) in pages" :key="idx">
+                                <PaginationItem v-if="item.type === 'page'" :value="item.value"
+                                    :is-active="item.value === internalPage" @click="onPageChange(item.value)"
+                                    class="h-8 md:h-9 w-8 md:w-9 text-xs md:text-sm">
+                                    {{ item.value }}
+                                </PaginationItem>
+                            </template>
+                            <PaginationEllipsis :index="4" v-if="customers.last_page >= 4" class="h-8 md:h-9" />
+                            <PaginationNext @click="onPageChange(internalPage + 1)"
+                                :disabled="customers.current_page >= customers.last_page" class="h-8 md:h-9" />
+                        </PaginationContent>
+                    </Pagination>
+                </div>
             </div>
         </div>
     </AppLayout>
@@ -153,15 +213,6 @@ import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
 import {
     Pagination,
     PaginationContent,
@@ -189,7 +240,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Trash2, SquarePen, Search, RotateCcw } from 'lucide-vue-next';
+import Icon from '@/components/Icon.vue'
 
 import { type BreadcrumbItem } from '@/types'
 import useFlashMessage from '@/composables/useFlashMessages'
@@ -216,3 +267,37 @@ const {
 
 useFlashMessage();
 </script>
+
+<style scoped>
+/* Custom breakpoint para pantallas extra pequeñas */
+@media (min-width: 480px) {
+    .xs\:flex-row {
+        flex-direction: row;
+    }
+    .xs\:items-center {
+        align-items: center;
+    }
+    .xs\:gap-0 {
+        gap: 0;
+    }
+    .xs\:gap-4 {
+        gap: 1rem;
+    }
+    .xs\:block {
+        display: block;
+    }
+    .xs\:inline {
+        display: inline;
+    }
+    .xs\:hidden {
+        display: none;
+    }
+}
+
+/* Mejorar scroll en móvil */
+@media (max-width: 767px) {
+    .overflow-y-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+</style>
