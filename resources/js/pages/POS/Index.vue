@@ -99,10 +99,14 @@
 
                                 <AlertDialog>
                                     <AlertDialogTrigger as-child>
-                                        <Button size="sm" variant="ghost"
-                                            class="h-6 w-6 md:h-8 md:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer">
+                                        <Button variant="ghost" size="sm"
+                                                    class="h-6 w-6 md:h-8 md:w-8 p-0 text-red-600 hover:text-red-700 cursor-pointer">
+                                                    <Icon name="Trash2" class="w-4 h-4" />
+                                                </Button>
+                                        <!-- <Button size="sm" variant="ghost"
+                                            class="h-6 w-6 md:h-8 md:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 ">
                                             <Icon name="X" class="w-3 h-3 md:w-4 md:h-4" />
-                                        </Button>
+                                        </Button> -->
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
