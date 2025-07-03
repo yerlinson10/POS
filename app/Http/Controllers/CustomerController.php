@@ -87,8 +87,20 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         try {
+            $customer = $this->service->create($request->validated());
 
-            $this->service->create($request->validated());
+            // If request expects JSON (for modal), return the customer data
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'customer' => [
+                        'id' => $customer->id,
+                        'name' => $customer->first_name . ' ' . $customer->last_name,
+                        'email' => $customer->email,
+                        'phone' => $customer->phone,
+                        'address' => $customer->address,
+                    ]
+                ], 201);
+            }
 
             return redirect()->route('customers.index')
                 ->with('message', [
@@ -96,6 +108,13 @@ class CustomerController extends Controller
                     'text' => 'Customer created.'
                 ]);
         } catch (\Throwable $th) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Error creating customer',
+                    'error' => $th->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()
                 ->with('message', [
                     'type' => 'error',
@@ -103,7 +122,6 @@ class CustomerController extends Controller
                 ])
                 ->withInput();
         }
-
     }
 
 

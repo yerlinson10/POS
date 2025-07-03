@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UnitMeasureController;
 use App\Http\Controllers\POSController;
+use App\Http\Controllers\InvoiceController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -36,8 +37,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Categories routes
     Route::resource('categories', CategoryController::class);
 
-    // Sales routes
+    // Customers routes
     Route::resource('customers', CustomerController::class);
+    Route::get('api/customers', [CustomerController::class, 'index'])->name('api.customers.index');
+
+    // Products routes
+    Route::resource('products', ProductController::class);
+    Route::get('api/products', [ProductController::class, 'index'])->name('api.products.index');
+
+    // Invoices routes (only index and show - no edit/delete for legal compliance)
+    Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::patch('invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.update-status');
 
 });
 
