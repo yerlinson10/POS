@@ -151,9 +151,11 @@
                                     <!-- Actions -->
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center gap-1">
-                                            <Button @click="viewInvoice(invoice)" variant="ghost" class="h-8 w-8 p-0">
-                                                <Icon name="Eye" class="w-4 h-4" />
-                                            </Button>
+                                            <Link :href="route('invoices.show', invoice.id)" prefetch :cacheFor="['30s', '1m']">
+                                                    <Button variant="ghost" class="h-8 w-8 p-0">
+                                                        <Icon name="Eye" class="w-4 h-4" />
+                                                    </Button>
+                                            </Link>
                                         </div>
                                     </td>
                                 </tr>
@@ -177,20 +179,20 @@
                         </div>
                     </div>
 
-                    <Pagination v-slot="{ page: internalPage }" :items-per-page="parseInt(filters.per_page)"
-                        :total="invoices.last_page" :page="filters.page" @page-change="onPageChange" class="flex">
+                    <Pagination :items-per-page="parseInt(filters.per_page)"
+                        :total="invoices.total" :page="invoices.current_page" @page-change="onPageChange" class="flex">
                         <PaginationContent v-slot="{ items: pages }" class="justify-center sm:justify-end">
-                            <PaginationPrevious @click="onPageChange(internalPage - 1)"
+                            <PaginationPrevious @click="onPageChange(invoices.current_page - 1)"
                                 :disabled="invoices.current_page <= 1" class="h-8 md:h-9" />
                             <template v-for="(item, idx) in pages" :key="idx">
                                 <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                                    :is-active="item.value === internalPage" @click="onPageChange(item.value)"
+                                    :is-active="item.value === invoices.current_page" @click="onPageChange(item.value)"
                                     class="h-8 md:h-9 w-8 md:w-9 text-xs md:text-sm">
                                     {{ item.value }}
                                 </PaginationItem>
                             </template>
                             <PaginationEllipsis :index="4" v-if="invoices.last_page >= 4" class="h-8 md:h-9" />
-                            <PaginationNext @click="onPageChange(internalPage + 1)"
+                            <PaginationNext @click="onPageChange(invoices.current_page + 1)"
                                 :disabled="invoices.current_page >= invoices.last_page" class="h-8 md:h-9" />
                         </PaginationContent>
                     </Pagination>
@@ -202,8 +204,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { router } from '@inertiajs/vue3'
-import { Head } from '@inertiajs/vue3'
+import { Head, router, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -345,11 +346,6 @@ const getStatusVariant = (status: string) => {
             return 'default'
     }
 }
-
-const viewInvoice = (invoice: Invoice) => {
-    router.get(route('invoices.show', invoice.id))
-}
-
 
 
 useFlashMessage()
