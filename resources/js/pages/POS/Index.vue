@@ -13,7 +13,8 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <Button @click="showProductModal = true" class="h-9 md:h-10 cursor-pointer text-xs md:text-sm">
+                            <Button @click="showProductModal = true"
+                                class="h-9 md:h-10 cursor-pointer text-xs md:text-sm">
                                 <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                                 <span class="hidden sm:inline">Add Products</span>
                                 <span class="sm:hidden">Add</span>
@@ -32,7 +33,7 @@
                                         <AlertDialogTitle>Clear Shopping Cart?</AlertDialogTitle>
                                         <AlertDialogDescription>
                                             This action will remove all {{ itemCount }} item{{ itemCount !== 1 ? 's' :
-                                            '' }} from your cart.
+                                                '' }} from your cart.
                                             This action cannot be undone.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
@@ -50,14 +51,16 @@
                     </div>
 
                     <!-- Cart Items -->
-                    <div class="space-y-2 md:space-y-3 mb-4 md:mb-6 flex-1 overflow-y-auto" style="max-height: calc(100vh - 16rem); min-height: 200px;">
+                    <div class="space-y-2 md:space-y-3 mb-4 md:mb-6 flex-1 overflow-y-auto"
+                        style="max-height: calc(100vh - 16rem); min-height: 200px;">
                         <!-- Empty Cart State -->
                         <div v-if="!cart.length" class="text-center py-8 md:py-16">
                             <div class="flex flex-col items-center gap-3 md:gap-4">
                                 <Icon name="ShoppingCart" class="w-12 h-12 md:w-16 md:h-16 text-muted-foreground/50" />
                                 <div>
                                     <h4 class="font-medium text-base md:text-lg mb-2">Your cart is empty</h4>
-                                    <p class="text-muted-foreground mb-3 md:mb-4 text-sm">Add products to get started</p>
+                                    <p class="text-muted-foreground mb-3 md:mb-4 text-sm">Add products to get started
+                                    </p>
                                     <Button @click="showProductModal = true" class="cursor-pointer">
                                         <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                                         Browse Products
@@ -71,7 +74,8 @@
                             class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 md:p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors">
                             <div class="flex-1 min-w-0">
                                 <div class="font-medium text-sm md:text-base mb-1">{{ item.product_name }}</div>
-                                <div class="text-xs md:text-sm text-muted-foreground mb-1 md:mb-2">{{ item.product_sku }}</div>
+                                <div class="text-xs md:text-sm text-muted-foreground mb-1 md:mb-2">{{ item.product_sku
+                                    }}</div>
                                 <div class="text-xs md:text-sm font-medium text-primary">
                                     ${{ Number(item.unit_price).toFixed(2) }} per unit
                                 </div>
@@ -84,7 +88,8 @@
                                         :disabled="item.quantity <= 1" class="h-6 w-6 md:h-8 md:w-8 p-0 cursor-pointer">
                                         <Icon name="Minus" class="w-2 h-2 md:w-3 md:h-3" />
                                     </Button>
-                                    <span class="w-8 md:w-12 text-center text-xs md:text-sm font-medium">{{ item.quantity }}</span>
+                                    <span class="w-8 md:w-12 text-center text-xs md:text-sm font-medium">{{
+                                        item.quantity }}</span>
                                     <Button size="sm" variant="ghost"
                                         @click="updateQuantity(item.product_id, item.quantity + 1)"
                                         :disabled="item.quantity >= item.available_stock"
@@ -94,15 +99,16 @@
                                 </div>
 
                                 <div class="text-right min-w-[60px] md:min-w-[80px]">
-                                    <div class="text-base md:text-lg font-semibold">${{ Number(item.line_total).toFixed(2) }}</div>
+                                    <div class="text-base md:text-lg font-semibold">${{
+                                        Number(item.line_total).toFixed(2) }}</div>
                                 </div>
 
                                 <AlertDialog>
                                     <AlertDialogTrigger as-child>
                                         <Button variant="ghost" size="sm"
-                                                    class="h-6 w-6 md:h-8 md:w-8 p-0 text-red-600 hover:text-red-700 cursor-pointer">
-                                                    <Icon name="Trash2" class="w-4 h-4" />
-                                                </Button>
+                                            class="h-6 w-6 md:h-8 md:w-8 p-0 text-red-600 hover:text-red-700 cursor-pointer">
+                                            <Icon name="Trash2" class="w-4 h-4" />
+                                        </Button>
                                         <!-- <Button size="sm" variant="ghost"
                                             class="h-6 w-6 md:h-8 md:w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 ">
                                             <Icon name="X" class="w-3 h-3 md:w-4 md:h-4" />
@@ -142,7 +148,8 @@
                         </div>
 
                         <!-- Quick Search Results -->
-                        <div v-if="quickSearchResults.length" class="mt-2 md:mt-3 space-y-1 md:space-y-2 max-h-24 md:max-h-32 overflow-y-auto">
+                        <div v-if="quickSearchResults.length"
+                            class="mt-2 md:mt-3 space-y-1 md:space-y-2 max-h-24 md:max-h-32 overflow-y-auto">
                             <div v-for="product in quickSearchResults" :key="product.id"
                                 class="flex items-center justify-between p-2 border rounded hover:bg-accent/50 cursor-pointer text-xs md:text-sm"
                                 @click="addToCart(product)">
@@ -166,7 +173,8 @@
                 <Card class="p-3 md:p-4">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 md:mb-4 gap-2 sm:gap-0">
                         <h3 class="text-base md:text-lg font-medium">Customer</h3>
-                        <Button @click="showNewCustomerDialog = true" variant="outline" size="sm" class="text-xs md:text-sm">
+                        <Button @click="showNewCustomerDialog = true" variant="outline" size="sm"
+                            class="text-xs md:text-sm">
                             <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                             <span class="hidden sm:inline">New Customer</span>
                             <span class="sm:hidden">New</span>
@@ -178,6 +186,11 @@
                 <!-- Checkout Section -->
                 <Card class="flex-1 p-3 md:p-4">
                     <h3 class="text-base md:text-lg font-medium mb-3 md:mb-4">Order Summary</h3>
+
+                    <!-- Invoice Status Selection -->
+                    <div class="border rounded-lg p-3 md:p-4 mb-3 md:mb-4">
+                        <InvoiceStatusSelector v-model="invoiceStatus" />
+                    </div>
 
                     <!-- Discount Section -->
                     <div class="border rounded-lg p-3 md:p-4 mb-3 md:mb-4">
@@ -233,17 +246,19 @@
                     </div>
 
                     <!-- Checkout Button -->
-                    <Button @click="processCheckout" class="w-full h-10 md:h-12 cursor-pointer text-sm md:text-base" size="lg"
-                        :disabled="!canProcessSale" :loading="isProcessingSale">
-                        <Icon name="CreditCard" class="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />
-                        <span class="hidden sm:inline">{{ isProcessingSale ? 'Processing Sale...' : 'Process Sale' }}</span>
-                        <span class="sm:hidden">{{ isProcessingSale ? 'Processing...' : 'Pay' }}</span>
+                    <Button @click="processCheckout" class="w-full h-10 md:h-12 cursor-pointer text-sm md:text-base"
+                        size="lg" :disabled="!canProcessSale" :loading="isProcessingSale">
+                        <Icon :name="getCheckoutIcon" class="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />
+                        <span class="hidden sm:inline">{{ isProcessingSale ? getProcessingText : getCheckoutText
+                            }}</span>
+                        <span class="sm:hidden">{{ isProcessingSale ? 'Processing...' : getCheckoutButtonShort }}</span>
                     </Button>
 
                     <!-- Additional Info -->
                     <div v-if="cart.length > 0" class="mt-3 md:mt-4 text-xs text-muted-foreground text-center">
-                        <p class="hidden md:block">{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }} • Last updated: {{ new
-                            Date().toLocaleTimeString() }}</p>
+                        <p class="hidden md:block">{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }} • Last updated:
+                            {{ new
+                                Date().toLocaleTimeString() }}</p>
                         <p class="md:hidden">{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }}</p>
                     </div>
                 </Card>
@@ -266,7 +281,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePOSStore } from '../../stores/pos'
 import { useProductStore } from '../../stores/products'
@@ -293,6 +308,7 @@ import ProductSelectionModal from './components/ProductSelectionModal.vue'
 import NewCustomerDialog from './components/NewCustomerDialog.vue'
 import DiscountDialog from './components/DiscountDialog.vue'
 import SaleSuccessDialog from './components/SaleSuccessDialog.vue'
+import InvoiceStatusSelector from './components/InvoiceStatusSelector.vue'
 import { toast } from 'vue-sonner'
 
 // Stores
@@ -306,6 +322,7 @@ const {
     discountType,
     discountValue,
     discountAmount,
+    invoiceStatus,
     subtotal,
     total,
     itemCount,
@@ -325,6 +342,51 @@ const quickSearchResults = ref<Product[]>([])
 
 // Auto-refresh interval for stock updates
 let stockUpdateInterval: number | null = null
+
+// Computed properties for checkout button
+const getCheckoutIcon = computed(() => {
+    switch (invoiceStatus.value) {
+        case 'paid':
+            return 'CreditCard'
+        case 'pending':
+            return 'Clock'
+        default:
+            return 'CreditCard'
+    }
+})
+
+const getCheckoutText = computed(() => {
+    switch (invoiceStatus.value) {
+        case 'paid':
+            return 'Process Payment'
+        case 'pending':
+            return 'Create Pending Invoice'
+        default:
+            return 'Process Sale'
+    }
+})
+
+const getProcessingText = computed(() => {
+    switch (invoiceStatus.value) {
+        case 'paid':
+            return 'Processing Payment...'
+        case 'pending':
+            return 'Creating Invoice...'
+        default:
+            return 'Processing Sale...'
+    }
+})
+
+const getCheckoutButtonShort = computed(() => {
+    switch (invoiceStatus.value) {
+        case 'paid':
+            return 'Pay'
+        case 'pending':
+            return 'Pending'
+        default:
+            return 'Pay'
+    }
+})
 
 // Methods
 const handleCustomerSelected = (customer: Customer | null) => {

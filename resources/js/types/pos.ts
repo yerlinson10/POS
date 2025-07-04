@@ -27,13 +27,15 @@ export interface CartItem {
     available_stock: number;
 }
 
+export type InvoiceStatus = 'pending' | 'paid';
+
 export interface Sale {
     id: number;
     customer_id?: number;
     pos_user_id: number;
     date: string;
     total_amount: number;
-    status: string;
+    status: InvoiceStatus;
     subtotal: number;
     discount_type?: 'percentage' | 'fixed';
     discount_value?: number;

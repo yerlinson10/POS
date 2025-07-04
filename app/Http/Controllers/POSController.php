@@ -177,16 +177,19 @@ class POSController extends Controller
             'discount_value' => 'nullable|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
+            'status' => 'required|in:pending,paid',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Verify stock availability
-            foreach ($validated['items'] as $item) {
-                $product = Product::find($item['product_id']);
-                if ($product->stock < $item['quantity']) {
-                    throw new \Exception("Insufficient stock for product: {$product->name}");
+            // Verify stock availability only for paid invoices
+            if ($validated['status'] === 'paid') {
+                foreach ($validated['items'] as $item) {
+                    $product = Product::find($item['product_id']);
+                    if ($product->stock < $item['quantity']) {
+                        throw new \Exception("Insufficient stock for product: {$product->name}");
+                    }
                 }
             }
 
@@ -196,13 +199,13 @@ class POSController extends Controller
                 'user_id' => Auth::id(),
                 'date' => now(),
                 'total_amount' => $validated['total_amount'],
-                'status' => 'completed',
+                'status' => $validated['status'],
                 'subtotal' => $validated['subtotal'],
                 'discount_type' => $validated['discount_type'],
                 'discount_value' => $validated['discount_value']
             ]);
 
-            // Create invoice items and update stock
+            // Create invoice items and update stock based on status
             foreach ($validated['items'] as $item) {
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
@@ -212,16 +215,23 @@ class POSController extends Controller
                     'line_total' => $item['line_total'],
                 ]);
 
-                // Update product stock
-                $product = Product::find($item['product_id']);
-                $product->decrement('stock', $item['quantity']);
+                // Update product stock only if invoice is paid
+                if ($validated['status'] === 'paid') {
+                    $product = Product::find($item['product_id']);
+                    $product->decrement('stock', $item['quantity']);
+                }
             }
 
             DB::commit();
 
+            $statusMessages = [
+                'paid' => 'Sale processed and payment completed successfully',
+                'pending' => 'Sale registered successfully, payment is pending'
+            ];
+
             return response()->json([
                 'invoice' => $invoice->load(['customer', 'items.product']),
-                'message' => 'Sale processed successfully'
+                'message' => $statusMessages[$validated['status']]
             ], 201);
 
         } catch (\Exception $e) {

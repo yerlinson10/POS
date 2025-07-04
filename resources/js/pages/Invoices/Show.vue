@@ -1,9 +1,11 @@
 <template>
+
     <Head title="Invoice Details" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
+            <div
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
 
                 <!-- Header -->
                 <div class="flex flex-col gap-2 md:gap-4 p-2 md:p-6 border-b bg-muted/30">
@@ -15,12 +17,8 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                :as="Link"
-                                :href="route('invoices.index')"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm flex items-center gap-2"
-                            >
+                            <Button variant="outline" :as="Link" :href="route('invoices.index')"
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm flex items-center gap-2">
                                 <Icon name="ArrowLeft" class="w-3 h-3 md:w-4 md:h-4" />
                                 <span>Back</span>
                             </Button>
@@ -49,11 +47,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="item in invoice.items" :key="item.id" class="border-b hover:bg-muted/20">
+                                            <tr v-for="item in invoice.items" :key="item.id"
+                                                class="border-b hover:bg-muted/20">
                                                 <td class="px-4 py-4">
                                                     <div>
                                                         <div class="font-medium text-sm">{{ item.product.name }}</div>
-                                                        <div class="text-xs text-muted-foreground">SKU: {{ item.product.sku }}</div>
+                                                        <div class="text-xs text-muted-foreground">SKU: {{
+                                                            item.product.sku }}</div>
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-4 text-sm">{{ item.quantity }}</td>
@@ -144,28 +144,19 @@
                                     <h3 class="text-lg font-semibold">Status Actions</h3>
                                 </div>
                                 <div class="p-4 space-y-2">
-                                    <Button
-                                        v-if="invoice.status === 'pending'"
-                                        @click="updateStatus('paid')"
+                                    <Button v-if="invoice.status === 'pending'" @click="updateStatus('paid')"
                                         variant="outline"
-                                        class="w-full text-green-600 border-green-600 hover:bg-green-50 cursor-pointer"
-                                    >
+                                        class="w-full text-green-600 border-green-600 hover:bg-green-50 cursor-pointer">
                                         Mark as Paid
                                     </Button>
-                                    <Button
-                                        v-if="invoice.status === 'pending'"
-                                        @click="updateStatus('canceled')"
+                                    <Button v-if="invoice.status === 'pending'" @click="updateStatus('canceled')"
                                         variant="outline"
-                                        class="w-full text-red-600 border-red-600 hover:bg-red-50 cursor-pointer"
-                                    >
+                                        class="w-full text-red-600 border-red-600 hover:bg-red-50 cursor-pointer">
                                         Cancel Invoice
                                     </Button>
-                                    <Button
-                                        v-if="invoice.status === 'canceled'"
-                                        @click="updateStatus('pending')"
+                                    <Button v-if="invoice.status === 'canceled'" @click="updateStatus('pending')"
                                         variant="outline"
-                                        class="w-full text-yellow-600 border-yellow-600 hover:bg-yellow-50 cursor-pointer"
-                                    >
+                                        class="w-full text-yellow-600 border-yellow-600 hover:bg-yellow-50 cursor-pointer">
                                         Reactivate Invoice
                                     </Button>
                                     <div v-if="invoice.status === 'paid'" class="text-center py-4">
@@ -180,16 +171,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- Stock Error Dialog -->
+        <StockErrorDialog v-model:open="showStockError" :error-data="stockErrorData" />
     </AppLayout>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import Icon from '@/components/Icon.vue'
+import StockErrorDialog from '@/components/StockErrorDialog.vue'
 import { toast } from 'vue-sonner'
 import { type BreadcrumbItem } from '@/types'
 
@@ -224,16 +220,40 @@ interface Invoice {
     discount_type?: 'percentage' | 'fixed'
     discount_value: number
     total_amount: number
-    status: 'pending' | 'paid' | 'canceled' | 'completed'
+    status: 'pending' | 'paid' | 'canceled'
     items: InvoiceItem[]
     created_at: string
 }
 
 interface Props {
     invoice: Invoice
+    stock_error?: any
+    message?: any
 }
 
 const props = defineProps<Props>()
+
+// State for stock error dialog
+const showStockError = ref(false)
+const stockErrorData = ref<any>(null)
+
+// Watch for stock errors in the errors prop
+onMounted(() => {
+
+    // Check if we have the structured stock_error prop
+    if (props.stock_error) {
+
+        stockErrorData.value = props.stock_error
+        showStockError.value = true
+
+    }
+    // If not, show a simple notification for now (fallback)
+    else if (props.message && props.message.type === 'error' && props.message.text &&
+        (props.message.text.includes('insufficient stock') || props.message.text.includes('stock insuficiente'))) {
+
+        toast.error('Insufficient stock detected. Please check the logs for more details.')
+    }
+})
 
 const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString()
@@ -270,6 +290,7 @@ const calculateDiscountAmount = () => {
 }
 
 const updateStatus = (status: string) => {
+
     router.patch(route('invoices.update-status', props.invoice.id), {
         status,
     }, {
@@ -277,8 +298,28 @@ const updateStatus = (status: string) => {
         onSuccess: () => {
             toast.success('Invoice status updated successfully')
         },
-        onError: () => {
-            toast.error('Error updating invoice status')
+        onError: (errors) => {
+
+            // Handle other types of errors first
+            let errorMessage = 'Error updating invoice status'
+
+            if (errors.stock && Array.isArray(errors.stock)) {
+
+                // This indicates a stock error - wait for page reload to show dialog
+                toast.error('Insufficient stock detected')
+                return;
+
+            } else if (errors.status && Array.isArray(errors.status)) {
+
+                errorMessage = errors.status[0]
+
+            } else if (errors.message) {
+
+                errorMessage = errors.message
+
+            }
+
+            toast.error(errorMessage)
         },
     })
 }

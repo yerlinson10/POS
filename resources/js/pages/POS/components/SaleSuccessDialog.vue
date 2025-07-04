@@ -2,12 +2,12 @@
     <Dialog v-model:open="isOpen">
         <DialogContent class="w-[95vw] max-w-md sm:max-w-md">
             <DialogHeader>
-                <DialogTitle class="flex items-center gap-2 text-green-600 text-lg md:text-xl">
-                    <Icon name="CheckCircle" class="w-4 h-4 md:w-5 md:h-5" />
-                    Sale Completed Successfully!
+                <DialogTitle class="flex items-center gap-2 text-lg md:text-xl" :class="getTitleClass">
+                    <Icon :name="getTitleIcon" class="w-4 h-4 md:w-5 md:h-5" />
+                    {{ getTitleText }}
                 </DialogTitle>
                 <DialogDescription class="text-sm">
-                    Your sale has been processed and recorded.
+                    {{ getDescriptionText }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -22,6 +22,13 @@
                     <div class="flex justify-between items-center">
                         <span class="text-xs md:text-sm font-medium">Date:</span>
                         <span class="text-xs md:text-sm">{{ formatDate(sale.date) }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs md:text-sm font-medium">Status:</span>
+                        <span class="text-xs md:text-sm px-2 py-1 rounded-full" :class="getStatusBadgeClass">
+                            {{ getStatusText }}
+                        </span>
                     </div>
 
                     <div v-if="sale.customer" class="flex justify-between items-center">
@@ -84,7 +91,8 @@
             </div>
 
             <DialogFooter>
-                <Button @click="closeDialog" variant="outline" class="cursor-pointer w-full sm:w-auto h-9 md:h-10 text-sm">
+                <Button @click="closeDialog" variant="outline"
+                    class="cursor-pointer w-full sm:w-auto h-9 md:h-10 text-sm">
                     Close
                 </Button>
             </DialogFooter>
@@ -93,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import type { Sale } from '../../../types/pos'
 import {
     Dialog,
@@ -121,6 +129,85 @@ const emit = defineEmits<Emits>()
 
 // Local state
 const isOpen = ref(props.open)
+
+// Computed properties for status-specific content
+const getTitleClass = computed(() => {
+    if (!props.sale) return 'text-green-600'
+
+    switch (props.sale.status) {
+        case 'paid':
+            return 'text-green-600'
+        case 'pending':
+            return 'text-yellow-600'
+        default:
+            return 'text-green-600'
+    }
+})
+
+const getTitleIcon = computed(() => {
+    if (!props.sale) return 'CheckCircle'
+
+    switch (props.sale.status) {
+        case 'paid':
+            return 'CheckCircle'
+        case 'pending':
+            return 'Clock'
+        default:
+            return 'CheckCircle'
+    }
+})
+
+const getTitleText = computed(() => {
+    if (!props.sale) return 'Sale Completed Successfully!'
+
+    switch (props.sale.status) {
+        case 'paid':
+            return 'Payment Completed Successfully!'
+        case 'pending':
+            return 'Invoice Created - Payment Pending'
+        default:
+            return 'Sale Completed Successfully!'
+    }
+})
+
+const getDescriptionText = computed(() => {
+    if (!props.sale) return 'Your sale has been processed and recorded.'
+
+    switch (props.sale.status) {
+        case 'paid':
+            return 'Payment has been processed and inventory has been updated.'
+        case 'pending':
+            return 'Invoice has been created and is waiting for payment. Inventory will be updated upon payment.'
+        default:
+            return 'Your sale has been processed and recorded.'
+    }
+})
+
+const getStatusText = computed(() => {
+    if (!props.sale) return 'Completed'
+
+    switch (props.sale.status) {
+        case 'paid':
+            return 'Paid'
+        case 'pending':
+            return 'Pending Payment'
+        default:
+            return 'Completed'
+    }
+})
+
+const getStatusBadgeClass = computed(() => {
+    if (!props.sale) return 'bg-green-100 text-green-800'
+
+    switch (props.sale.status) {
+        case 'paid':
+            return 'bg-green-100 text-green-800'
+        case 'pending':
+            return 'bg-yellow-100 text-yellow-800'
+        default:
+            return 'bg-green-100 text-green-800'
+    }
+})
 
 // Methods
 const formatDate = (dateString: string): string => {

@@ -116,7 +116,10 @@ class InvoiceController extends Controller
                     'total_amount' => $item->line_total,
                 ]),
                 'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
-            ]
+            ],
+            // Pass any flash data that might contain stock errors
+            'stock_error' => session('stock_error'),
+            'message' => session('message'),
         ]);
     }
 
@@ -151,19 +154,66 @@ class InvoiceController extends Controller
                     'text' => 'Invoice status updated successfully.'
                 ]);
         } catch (\Throwable $th) {
+
+            // Try to decode the exception message as JSON to check for structured error
+            $errorData = json_decode($th->getMessage(), true);
+
+            if ($errorData && is_array($errorData) && isset($errorData['error']) && $errorData['error'] === 'insufficient_stock') {
+                // Handle structured stock validation error
+                $message = $this->formatStockErrorMessage($errorData);
+
+                if ($request->expectsJson()) {
+                    \Log::info("Returning JSON response for stock error");
+                    return response()->json([
+                        'message' => 'Insufficient stock',
+                        'error' => $errorData,
+                        'formatted_message' => $message
+                    ], 422);
+                }
+
+                // For Inertia requests, use redirect with session data
+                return redirect()->back()
+                    ->with('stock_error', $errorData)
+                    ->with('message', [
+                        'type' => 'error',
+                        'text' => $message
+                    ])
+                    ->withErrors([
+                        'stock' => 'Insufficient stock for some products'
+                    ]);
+            }
+
+            // Handle other errors normally - simplified
+            $errorMessage = $th->getMessage();
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Error updating invoice status',
-                    'error' => $th->getMessage()
-                ], 422);
+                    'error' => $errorMessage
+                ], 500);
             }
 
             return redirect()->back()
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Error updating invoice status: ' . $th->getMessage()
+                    'text' => 'Error: ' . $errorMessage
                 ]);
         }
+    }    /**
+         * Format stock error message for display
+         */
+    private function formatStockErrorMessage(array $errorData): string
+    {
+        $message = "Cannot change invoice #{$errorData['invoice_id']} status for customer {$errorData['customer']} due to insufficient stock:\n\n";
+
+        foreach ($errorData['unavailable_products'] as $product) {
+            $message .= "• {$product['product_name']}: ";
+            $message .= "Required {$product['required_quantity']}, ";
+            $message .= "available {$product['available_stock']}, ";
+            $message .= "missing {$product['missing_stock']}\n";
+        }
+
+        return $message;
     }
 
     /**

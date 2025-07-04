@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import type { CartItem, Customer, Product, Sale } from '../types/pos';
+import type { CartItem, Customer, InvoiceStatus, Product, Sale } from '../types/pos';
 
 export const usePOSStore = defineStore('pos', () => {
     // State
@@ -9,6 +9,7 @@ export const usePOSStore = defineStore('pos', () => {
     const selectedCustomer = ref<Customer | null>(null);
     const discountType = ref<'percentage' | 'fixed' | null>(null);
     const discountValue = ref<number>(0);
+    const invoiceStatus = ref<InvoiceStatus>('paid');
     const isProcessingSale = ref(false);
     const lastSale = ref<Sale | null>(null);
 
@@ -107,6 +108,10 @@ export const usePOSStore = defineStore('pos', () => {
         discountValue.value = 0;
     };
 
+    const setInvoiceStatus = (status: InvoiceStatus) => {
+        invoiceStatus.value = status;
+    };
+
     const processSale = async (): Promise<Sale> => {
         if (!canProcessSale.value) {
             throw new Error('Cannot process sale');
@@ -128,6 +133,7 @@ export const usePOSStore = defineStore('pos', () => {
                 discount_value: discountValue.value,
                 discount_amount: discountAmount.value,
                 total_amount: total.value,
+                status: invoiceStatus.value,
             };
 
             const response = await axios.post('/pos/sales', saleData);
@@ -139,6 +145,7 @@ export const usePOSStore = defineStore('pos', () => {
             clearCart();
             setCustomer(null);
             clearDiscount();
+            setInvoiceStatus('paid');
 
             return sale;
         } finally {
@@ -151,8 +158,8 @@ export const usePOSStore = defineStore('pos', () => {
             const update = updates[item.product_id];
             if (update) {
                 item.available_stock = update.stock;
-                item.unit_price = update.price
-                item.line_total = item.quantity * update.price
+                item.unit_price = update.price;
+                item.line_total = item.quantity * update.price;
             }
         });
     };
@@ -163,6 +170,7 @@ export const usePOSStore = defineStore('pos', () => {
         selectedCustomer,
         discountType,
         discountValue,
+        invoiceStatus,
         isProcessingSale,
         lastSale,
 
@@ -181,6 +189,7 @@ export const usePOSStore = defineStore('pos', () => {
         setCustomer,
         setDiscount,
         clearDiscount,
+        setInvoiceStatus,
         processSale,
         updateProductStock,
     };
