@@ -146,7 +146,7 @@
 
                                     <!-- Actions -->
                                     <div class="flex items-center justify-center gap-1 px-4 py-4">
-                                        <Link :href="`/products/${p.id}`" prefetch :cacheFor="['30s', '1m']">
+                                        <Link :href="`/products/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']">
                                             <Button variant="ghost" class="h-8 w-8 p-0">
                                                 <Icon name="Edit" class="w-4 h-4" />
                                             </Button>
