@@ -17,14 +17,14 @@ class InvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'customer_id'  => \App\Models\Customer::factory(),
-            'user_id'  => \App\Models\User::factory(), // o User::factory() si lo deseas
+            'customer_id'  => \App\Models\Customer::all()->random()->id,
+            'user_id'  => \App\Models\User::all()->random()->id, // o User::factory() si lo deseas
             'date'         => $this->faker->date(),
-            'subtotal'         => $this->faker->randomFloat(2, 10, 1000), // Genera un subtotal entre 10 y 1000
+            'subtotal'     => 0, // Genera un subtotal entre 10 y 1000
             'discount_type' => $this->faker->randomElement(['percentage', 'fixed', null]),
             'discount_value' => $this->faker->randomFloat(2, 0, 100), // Genera un valor de descuento entre 0 y 100
             'total_amount' => 0,    // se actualizará tras crear ítems
-            'status'       => $this->faker->randomElement(['pendiente','pagado','anulado']),
+            'status'       => $this->faker->randomElement(['paid','paid', 'pending' ,'canceled']),
         ];
     }
 }

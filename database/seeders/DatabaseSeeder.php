@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             CustomerSeeder::class,
             InvoiceSeeder::class,
+            InvoiceItemSeeder::class,
             PosSessionSeeder::class,
         ]);
     }
