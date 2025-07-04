@@ -61,7 +61,7 @@
 
                 <DialogFooter class="flex flex-col sm:flex-row gap-2 sm:gap-0">
                     <Button type="button" @click="closeDialog" variant="outline" :disabled="isCreating"
-                        class="w-full sm:w-auto h-9 md:h-10 text-sm">
+                        class="w-full sm:w-auto h-9 md:h-10 text-sm mr-2">
                         Cancel
                     </Button>
                     <Button type="submit" :loading="isCreating" :disabled="!canSubmit"
