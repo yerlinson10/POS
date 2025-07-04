@@ -1,6 +1,7 @@
 <template>
     <Dialog v-model:open="isOpen">
-        <DialogContent class="!max-w-none !w-[98vw] md:!w-[90vw] lg:!w-[88vw] !h-[95vh] md:!h-[85vh] lg:!h-[90vh] !max-h-none flex flex-col p-0">
+        <DialogContent
+            class="!max-w-none !w-[98vw] md:!w-[90vw] lg:!w-[88vw] !h-[95vh] md:!h-[85vh] lg:!h-[90vh] !max-h-none flex flex-col p-0">
             <!-- Compact Header with Search -->
             <div class="flex flex-col gap-2 md:gap-4 p-2 md:p-6 border-b bg-muted/30">
                 <div class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-0">
@@ -24,7 +25,8 @@
                         <Input v-model="filters.search" placeholder="Search products..."
                             class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                     </div>
-                    <Button @click="search" :disabled="isLoading" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                    <Button @click="search" :disabled="isLoading" size="sm"
+                        class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
                         <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                     <!-- Collapsible Filters Button for Mobile -->
@@ -34,7 +36,8 @@
                         <span>{{ showFilters ? 'Hide' : 'Show' }}</span>
                     </Button>
                     <Button v-if="filters.search || filters.sort_by !== 'name' || filters.sort_dir !== 'asc'"
-                        @click="clearSearch" variant="outline" size="sm" class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
+                        @click="clearSearch" variant="outline" size="sm"
+                        class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
                         <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                 </div>
@@ -137,18 +140,20 @@
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-medium text-sm mb-1 line-clamp-2">{{ product.name }}</h4>
                                         <div class="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                                            <span class="font-mono bg-muted px-1 py-0.5 rounded text-xs">{{ product.sku }}</span>
+                                            <span class="font-mono bg-muted px-1 py-0.5 rounded text-xs">{{ product.sku
+                                                }}</span>
                                             <span class="text-xs">{{ product.unit_measure }}</span>
                                         </div>
                                         <div class="text-xs text-muted-foreground">{{ product.category }}</div>
                                     </div>
                                     <div class="flex flex-col items-end gap-1 ml-2">
-                                        <div class="text-base font-bold text-primary">${{ Number(product.price).toFixed(2) }}</div>
+                                        <div class="text-base font-bold text-primary">${{
+                                            Number(product.price).toFixed(2) }}</div>
                                         <div class="text-xs text-muted-foreground">
                                             <span :class="[
                                                 product.stock <= 10 ? 'text-destructive font-medium' :
-                                                product.stock <= 50 ? 'text-orange-600 font-medium' :
-                                                'text-green-600 font-medium'
+                                                    product.stock <= 50 ? 'text-orange-600 font-medium' :
+                                                        'text-green-600 font-medium'
                                             ]">{{ product.stock }}</span>
                                         </div>
                                     </div>
@@ -156,13 +161,12 @@
 
                                 <div class="flex items-center justify-between gap-2">
                                     <div class="flex items-center gap-1 bg-muted rounded p-1">
-                                        <Button size="sm" variant="ghost"
-                                            @click="decreaseQuantity(product.id)"
-                                            :disabled="(productQuantities[product.id] || 1) <= 1"
-                                            class="h-5 w-5 p-0">
+                                        <Button size="sm" variant="ghost" @click="decreaseQuantity(product.id)"
+                                            :disabled="(productQuantities[product.id] || 1) <= 1" class="h-5 w-5 p-0">
                                             <Icon name="Minus" class="w-3 h-3" />
                                         </Button>
-                                        <span class="w-6 text-center text-xs font-medium">{{ productQuantities[product.id] || 1 }}</span>
+                                        <span class="w-6 text-center text-xs font-medium">{{
+                                            productQuantities[product.id] || 1 }}</span>
                                         <Button size="sm" variant="ghost"
                                             @click="increaseQuantity(product.id, product.stock)"
                                             :disabled="(productQuantities[product.id] || 1) >= product.stock"
@@ -171,7 +175,8 @@
                                         </Button>
                                     </div>
 
-                                    <Button @click="addProduct(product)" :disabled="product.stock === 0 || (productQuantities[product.id] || 1) > product.stock"
+                                    <Button @click="addProduct(product)"
+                                        :disabled="product.stock === 0 || (productQuantities[product.id] || 1) > product.stock"
                                         size="sm" class="flex-1 text-xs h-7">
                                         <Icon name="ShoppingCart" class="w-3 h-3 mr-1" />
                                         Add
@@ -183,7 +188,7 @@
 
                     <!-- Desktop Table View -->
                     <div class="hidden md:block h-full overflow-y-auto">
-                        <table class="w-full">
+                        <table class="w-full" ref="tableRef">
                             <thead
                                 class="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
                                 <tr class="h-12">
@@ -196,8 +201,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="product in products" :key="product.id"
-                                    class="border-b hover:bg-muted/50 transition-colors group">
+                                <tr v-for="(product, idx) in products" :key="product.id"
+                                    class="border-b hover:bg-muted/50 transition-colors group" :tabindex="0"
+                                    :class="{ 'ring-2 ring-primary ring-offset-2': selectedIndex === idx }"
+                                    @click="selectedIndex = idx" @focus="selectedIndex = idx">
                                     <!-- Product Info -->
                                     <td class="px-4 py-4">
                                         <div class="flex flex-col gap-1">
@@ -206,7 +213,7 @@
                                             </div>
                                             <div class="flex items-center gap-2 text-xs text-muted-foreground">
                                                 <span class="font-mono bg-muted px-1.5 py-0.5 rounded">{{ product.sku
-                                                    }}</span>
+                                                }}</span>
                                                 <span>•</span>
                                                 <span>{{ product.unit_measure }}</span>
                                             </div>
@@ -265,7 +272,8 @@
             </div>
 
             <!-- Compact Pagination -->
-            <div v-if="products.length > 0" class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-4 p-2 md:p-4 border-t bg-muted/20">
+            <div v-if="products.length > 0"
+                class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-4 p-2 md:p-4 border-t bg-muted/20">
                 <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4">
                     <div class="text-xs text-muted-foreground">
                         <span class="font-medium">{{ pagination.from || 0 }}-{{ pagination.to || 0 }}</span>
@@ -280,8 +288,7 @@
 
                 <!-- Simplified Mobile Pagination -->
                 <div class="flex md:hidden items-center justify-center gap-2">
-                    <Button @click="onPageChange(pagination.current_page - 1)"
-                        :disabled="pagination.current_page <= 1"
+                    <Button @click="onPageChange(pagination.current_page - 1)" :disabled="pagination.current_page <= 1"
                         size="sm" variant="outline" class="h-7 w-7 p-0">
                         <Icon name="ChevronLeft" class="w-3 h-3" />
                     </Button>
@@ -289,8 +296,8 @@
                         {{ pagination.current_page }}
                     </span>
                     <Button @click="onPageChange(pagination.current_page + 1)"
-                        :disabled="pagination.current_page >= pagination.last_page"
-                        size="sm" variant="outline" class="h-7 w-7 p-0">
+                        :disabled="pagination.current_page >= pagination.last_page" size="sm" variant="outline"
+                        class="h-7 w-7 p-0">
                         <Icon name="ChevronRight" class="w-3 h-3" />
                     </Button>
                 </div>
@@ -317,7 +324,8 @@
             </div>
 
             <!-- Compact Footer -->
-            <div class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-0 p-2 md:p-6 border-t bg-background">
+            <div
+                class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-0 p-2 md:p-6 border-t bg-background">
                 <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                     <Icon name="Info" class="w-3 h-3 md:w-4 md:h-4" />
                     <span class="hidden sm:inline">Use Enter key in quantity field to quickly add products</span>
@@ -339,7 +347,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, reactive } from 'vue'
+import { ref, watch, onMounted, onUnmounted, reactive, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProductStore } from '../../../stores/products'
 import type { Product } from '../../../types/pos'
@@ -390,6 +398,8 @@ const isOpen = ref(props.open)
 const productQuantities = reactive<Record<number, number>>({})
 const showFilters = ref(false)
 const isMobile = ref(window.innerWidth < 768)
+const selectedIndex = ref(0) // index of the selected product
+const tableRef = ref<HTMLElement | null>(null)
 
 // Handle window resize for mobile detection
 const handleResize = () => {
@@ -406,6 +416,14 @@ const initializeQuantities = () => {
             productQuantities[product.id] = 1
         }
     })
+}
+
+const focusRow = async (idx: number) => {
+    await nextTick()
+    const rows = tableRef.value?.querySelectorAll('tbody tr')
+    if (rows && rows[idx]) {
+        (rows[idx] as HTMLElement).focus()
+    }
 }
 
 // Methods
@@ -511,17 +529,58 @@ onMounted(() => {
     // Setup resize listener
     window.addEventListener('resize', handleResize)
     handleResize() // Initial check
+
+    window.addEventListener('keydown', handleKeydown)
 })
 
 // Cleanup on unmount
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
+    window.removeEventListener('keydown', handleKeydown)
 })
 
 // Watch for products changes to initialize quantities
 watch(products, () => {
     initializeQuantities()
+    selectedIndex.value = 0
 }, { immediate: true })
+
+const handleKeydown = async (e: KeyboardEvent) => {
+    if (!isOpen.value || products.value.length === 0) return
+    if (window.innerWidth < 768) return // Solo desktop
+    const max = products.value.length - 1
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
+        e.preventDefault()
+    }
+    if (e.key === "ArrowUp") {
+        if (selectedIndex.value > 0) {
+            selectedIndex.value--
+            await focusRow(selectedIndex.value)
+        } else if (pagination.value.current_page > 1) {
+            await onPageChange(pagination.value.current_page - 1)
+            selectedIndex.value = products.value.length - 1
+            await focusRow(selectedIndex.value)
+        }
+    } else if (e.key === "ArrowDown") {
+        if (selectedIndex.value < max) {
+            selectedIndex.value++
+            await focusRow(selectedIndex.value)
+        } else if (pagination.value.current_page < pagination.value.last_page) {
+            await onPageChange(pagination.value.current_page + 1)
+            selectedIndex.value = 0
+            await focusRow(selectedIndex.value)
+        }
+    } else if (e.key === "ArrowLeft") {
+        const prod = products.value[selectedIndex.value]
+        decreaseQuantity(prod.id)
+    } else if (e.key === "ArrowRight") {
+        const prod = products.value[selectedIndex.value]
+        increaseQuantity(prod.id, prod.stock)
+    } else if (e.key === "Enter") {
+        const prod = products.value[selectedIndex.value]
+        addProduct(prod)
+    }
+}
 </script>
 
 <style scoped>
@@ -538,21 +597,27 @@ watch(products, () => {
     .xs\:flex-row {
         flex-direction: row;
     }
+
     .xs\:items-center {
         align-items: center;
     }
+
     .xs\:gap-0 {
         gap: 0;
     }
+
     .xs\:gap-4 {
         gap: 1rem;
     }
+
     .xs\:block {
         display: block;
     }
+
     .xs\:inline {
         display: inline;
     }
+
     .xs\:hidden {
         display: none;
     }

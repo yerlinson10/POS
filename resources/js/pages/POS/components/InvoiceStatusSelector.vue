@@ -1,6 +1,6 @@
 <template>
     <div class="space-y-3">
-        <label class="text-sm font-medium">Invoice Status</label>
+        <label class="text-sm font-medium">Invoice Status (F8 to toggle)</label>
 
         <!-- Select dropdown -->
         <Select v-model="selectedStatus">
