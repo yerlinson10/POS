@@ -23,29 +23,7 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
-        $perPage = (int) ($filters['per_page'] ?? 10);
-
-        $customersQuery = Customer::when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('customers.first_name', 'like', "%{$search}%")
-                        ->orWhere('customers.last_name', 'like', "%{$search}%")
-                        ->orWhere('customers.email', 'like', "%{$search}%")
-                        ->orWhere('customers.phone', 'like', "%{$search}%");
-                });
-            })
-            ->withAdvancedFilters($filters, [
-                'id',
-                'first_name',
-                'last_name',
-                'email',
-                'phone',
-                'address',
-                'created_at'
-            ]);
-
-        $customers = $customersQuery
-            ->paginate($perPage)
-            ->appends($filters);
+        $customers = $this->service->filterAndPaginate($filters);
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers->through(fn($p) => [

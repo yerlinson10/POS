@@ -8,6 +8,32 @@ use App\Models\Customer;
 
 class CustomerService
 {
+    public function filterAndPaginate($filters)
+    {
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        $customersQuery = Customer::when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('customers.first_name', 'like', "%{$search}%")
+                        ->orWhere('customers.last_name', 'like', "%{$search}%")
+                        ->orWhere('customers.email', 'like', "%{$search}%")
+                        ->orWhere('customers.phone', 'like', "%{$search}%");
+                });
+            })
+            ->withAdvancedFilters($filters, [
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'phone',
+                'address',
+                'created_at'
+            ]);
+
+        return $customersQuery
+                ->paginate($perPage)
+                ->appends($filters);
+    }
     /**
      * Listar productos con paginación.
      *
@@ -17,8 +43,8 @@ class CustomerService
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return Customer::all()
-                    ->orderBy('created_at', 'desc')
-                    ->paginate($perPage);
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
     }
 
     /**
@@ -29,8 +55,8 @@ class CustomerService
     public function all(): Collection
     {
         return Customer::all()
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     /**

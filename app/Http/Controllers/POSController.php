@@ -86,28 +86,22 @@ class POSController extends Controller
      */
     public function getCustomers(Request $request)
     {
-        $search = $request->get('search');
-        $limit = $request->get('limit', 10);
+        $filters = [
+            'search' => $request->get('search'),
+            'per_page' => 1000 // Un valor alto para traer todos y luego limitar
+        ];
+        $limit = (int) $request->get('limit', 10);
 
-        $customersQuery = Customer::query()
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy('first_name')
-            ->limit($limit);
-
-        $customers = $customersQuery->get()->map(fn($c) => [
-            'id' => $c->id,
-            'full_name' => $c->full_name,
-            'email' => $c->email,
-            'phone' => $c->phone,
-            'address' => $c->address,
-        ]);
+        $customers = $this->customerService->filterAndPaginate($filters)
+            ->getCollection()
+            ->take($limit)
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'full_name' => $c->full_name,
+                'email' => $c->email,
+                'phone' => $c->phone,
+                'address' => $c->address,
+            ]);
 
         return response()->json(['customers' => $customers]);
     }
