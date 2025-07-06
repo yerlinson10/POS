@@ -236,8 +236,7 @@
                                         <span class="sm:hidden">Clear</span>
                                     </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent data-clear-cart-dialog @keydown.enter.prevent
-                                    @keydown.escape="() => { }">
+                                <AlertDialogContent data-clear-cart-dialog>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>Clear Shopping Cart?</AlertDialogTitle>
                                         <AlertDialogDescription>
@@ -328,8 +327,7 @@
                                             <Icon name="X" class="w-3 h-3 md:w-4 md:h-4" />
                                         </Button> -->
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent data-remove-product-dialog :data-product-id="item.product_id"
-                                        @keydown.enter.prevent @keydown.escape="() => { }">
+                                    <AlertDialogContent data-remove-product-dialog :data-product-id="item.product_id">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Remove Product?</AlertDialogTitle>
                                             <AlertDialogDescription>
@@ -493,16 +491,15 @@
             @discount-applied="handleDiscountApplied" />
 
         <!-- Sale Success Dialog -->
-        <SaleSuccessDialog v-model:open="showSaleSuccessDialog" :sale="lastSale" />
+        <SaleSuccessDialog v-model:open="showSaleSuccessDialog" :sale="lastSale" :is-printing="isPrintingInvoice" @print-invoice="printInvoice" />
 
         <!-- Payment Confirmation Dialog -->
         <AlertDialog v-model:open="showPaymentConfirmDialog">
-            <AlertDialogContent class="max-w-md md:max-w-lg" @keydown.enter="confirmPayment"
-                @keydown.escape="() => showPaymentConfirmDialog = false">
+            <AlertDialogContent class="max-w-md md:max-w-lg">
                 <AlertDialogHeader>
                     <AlertDialogTitle>Confirm Invoice</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Please review the order details before processing the invoice:
+                        Please review the order details before processing the invoice. Press F4 again to print after processing.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -555,7 +552,7 @@
                         @click="confirmPayment">
                         <Icon :name="getCheckoutIcon" class="w-4 h-4 mr-2" />
                         {{ getCheckoutText }}
-                        <span class="ml-2 text-xs opacity-75">(F4)</span>
+                        <span class="ml-2 text-xs opacity-75">(Enter/F4)</span>
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
@@ -563,7 +560,7 @@
 
         <!-- Remove Item Confirmation Dialog -->
         <AlertDialog v-model:open="showRemoveItemDialog">
-            <AlertDialogContent @keydown.enter.prevent @keydown.escape="cancelRemoveItem">
+            <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Remove Product?</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -592,6 +589,7 @@ import { usePOSStore } from '../../stores/pos'
 import { useProductStore } from '../../stores/products'
 import type { Product, Customer } from '../../types/pos'
 import AppLayout from '../../layouts/AppLayout.vue'
+import { route } from 'ziggy-js'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -647,6 +645,7 @@ const quickSearchResults = ref<Product[]>([])
 const showPaymentConfirmDialog = ref(false)
 const showRemoveItemDialog = ref(false)
 const itemToRemove = ref<{ id: number, name: string } | null>(null)
+const isPrintingInvoice = ref(false)
 
 // States for cart navigation
 const selectedCartItemIndex = ref(-1)
@@ -773,6 +772,156 @@ const toggleInvoiceStatus = () => {
 
     const statusText = newStatus === 'paid' ? 'Paid' : 'Pending Payment'
     toast.success(`Invoice status switched to: ${statusText}`)
+}
+
+// Print functionality
+const detectPrinters = async (): Promise<boolean> => {
+    try {
+        // Check if we're in a desktop environment where printing might be available
+        const isDesktop = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+
+        if (isDesktop && typeof window.print === 'function') {
+            return true
+        }
+        return false
+    } catch (error) {
+        console.error('Error detecting printers:', error)
+        return false
+    }
+}
+
+const printInvoice = async (invoiceId: number) => {
+    if (isPrintingInvoice.value) return
+
+    isPrintingInvoice.value = true
+
+    try {
+        // Use the more reliable method that opens PDF in new tab
+        await printInvoiceWithOptions(invoiceId)
+    } catch (error) {
+        console.error('Error printing invoice:', error)
+        toast.error('Error printing invoice, downloading PDF instead...')
+        await downloadInvoicePDF(invoiceId)
+    } finally {
+        isPrintingInvoice.value = false
+    }
+}
+
+const printInvoiceDirectly = async (invoiceId: number) => {
+    try {
+        // Strategy 1: Try to open PDF in new window and trigger print
+        const printWindow = window.open(route('invoice.pdf', invoiceId), '_blank', 'width=800,height=600')
+
+        if (printWindow) {
+            // Wait for the PDF to load in the new window
+            await new Promise((resolve, reject) => {
+                const checkLoad = () => {
+                    try {
+                        // Check if window is ready
+                        if (printWindow.document.readyState === 'complete') {
+                            // Give a moment for PDF to render
+                            setTimeout(() => {
+                                try {
+                                    printWindow.print()
+                                    toast.success('Print dialog opened')
+                                    resolve(true)
+                                } catch (printError) {
+                                    // If print fails, keep window open for manual printing
+                                    toast.info('PDF opened in new window - use Ctrl+P to print')
+                                    resolve(true)
+                                }
+                            }, 1500)
+                        } else {
+                            // Keep checking
+                            setTimeout(checkLoad, 100)
+                        }
+                    } catch (error) {
+                        // If we can't access the window (cross-origin), that's normal for PDFs
+                        // Just wait a bit and try to print
+                        setTimeout(() => {
+                            try {
+                                printWindow.print()
+                                toast.success('Print dialog opened')
+                                resolve(true)
+                            } catch (printError) {
+                                toast.info('PDF opened in new window - use Ctrl+P to print')
+                                resolve(true)
+                            }
+                        }, 2000)
+                    }
+                }
+
+                // Start checking
+                setTimeout(checkLoad, 500)
+
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    toast.info('PDF opened in new window - use Ctrl+P to print')
+                    resolve(true)
+                }, 10000)
+            })
+        } else {
+            // Popup blocked, fallback to download
+            throw new Error('Popup blocked')
+        }
+
+    } catch (error) {
+        console.error('Error printing directly:', error)
+        throw error
+    }
+}
+
+const downloadInvoicePDF = async (invoiceId: number) => {
+    try {
+        // Create a temporary link to download the PDF
+        const link = document.createElement('a')
+        link.href = route('invoice.pdf', invoiceId)
+        link.download = `invoice-${invoiceId}.pdf`
+        link.target = '_blank'
+
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
+        toast.success('Downloading invoice PDF...')
+    } catch (error) {
+        console.error('Error downloading PDF:', error)
+        toast.error('Error downloading invoice PDF')
+    }
+}
+
+// Alternative print method that gives user more control
+const printInvoiceWithOptions = async (invoiceId: number) => {
+    try {
+        // Open PDF in new tab and show instructions
+        const pdfUrl = route('invoice.pdf', invoiceId)
+        const printWindow = window.open(pdfUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+
+        if (printWindow) {
+            // Show success message with instructions
+            toast.success('PDF opened in new tab. Use Ctrl+P to print when ready.', {
+                duration: 5000,
+                action: {
+                    label: 'Download instead',
+                    onClick: () => downloadInvoicePDF(invoiceId)
+                }
+            })
+        } else {
+            // Popup was blocked, fallback to download
+            toast.warning('Popup blocked. Downloading PDF instead...')
+            await downloadInvoicePDF(invoiceId)
+        }
+    } catch (error) {
+        console.error('Error opening PDF:', error)
+        toast.error('Error opening PDF, downloading instead...')
+        await downloadInvoicePDF(invoiceId)
+    }
+}
+
+const handlePrintFromConfirmDialog = async () => {
+    if (lastSale.value?.id) {
+        await printInvoice(lastSale.value.id)
+    }
 }
 
 // Cart navigation
@@ -998,15 +1147,60 @@ onMounted(() => {
                 }, 100)
             }
         }
-        // F4: Process invoice or confirm payment if the modal is open
+        // Handle Enter key in modal dialogs
+        if (e.key === 'Enter') {
+            // If payment confirmation dialog is open
+            if (showPaymentConfirmDialog.value) {
+                e.preventDefault()
+                await confirmPayment()
+                return
+            }
+
+            // If remove item dialog is open
+            if (showRemoveItemDialog.value) {
+                e.preventDefault()
+                confirmRemoveItem()
+                return
+            }
+        }
+
+        // Handle Escape key in modal dialogs
+        if (e.key === 'Escape') {
+            // If payment confirmation dialog is open
+            if (showPaymentConfirmDialog.value) {
+                e.preventDefault()
+                showPaymentConfirmDialog.value = false
+                return
+            }
+
+            // If remove item dialog is open
+            if (showRemoveItemDialog.value) {
+                e.preventDefault()
+                cancelRemoveItem()
+                return
+            }
+        }
+
+        // F4: Process invoice, confirm payment, or print invoice
         if (e.key === 'F4') {
             e.preventDefault()
+
+            // If there's a sale success dialog open, print the invoice
+            if (showSaleSuccessDialog.value && lastSale.value?.id) {
+                await printInvoice(lastSale.value.id)
+                return
+            }
+
             // If the confirmation modal is open, confirm the payment
             if (showPaymentConfirmDialog.value) {
                 await confirmPayment()
-            } else if (canProcessSale.value && !isProcessingSale.value) {
-                // If no modal is open and it can be processed, process checkout
+                return
+            }
+
+            // If no modal is open and it can be processed, process checkout
+            if (canProcessSale.value && !isProcessingSale.value) {
                 await processCheckout()
+                return
             }
         }
         // F5: Focus customer search (CustomerSelector)

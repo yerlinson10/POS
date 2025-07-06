@@ -608,7 +608,8 @@
                                 <td class="label text-danger">Discount:</td>
                                 @if ($invoice->discount_type == 'percentage')
                                     <td class="value text-danger">
-                                        -${{ number_format($invoice->subtotal * ($invoice->discount_value / 100), 2) }} ({{ $invoice->discount_value }}%)
+                                        -${{ number_format($invoice->subtotal * ($invoice->discount_value / 100), 2) }}
+                                        ({{ $invoice->discount_value }}%)
                                     </td>
                                 @else
                                     <td class="value text-danger">
