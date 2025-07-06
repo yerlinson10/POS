@@ -9,6 +9,47 @@ use Illuminate\Validation\ValidationException;
 
 class ProductService
 {
+
+    private $fields = [
+        'id',
+        'sku',
+        'name',
+        'price',
+        'stock',
+        'created_at',
+        'category.name',
+        'unitMeasure.code'
+    ];
+
+    /**
+     * List products with advanced filters.
+     * @param mixed $filters
+     *
+     * @return [type]
+     */
+    public function filterAndPaginate($filters)
+    {
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        $productsQuery = Product::with(['category', 'unitMeasure'])
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('products.name', 'like', "%{$search}%")
+                        ->orWhere('products.sku', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('unitMeasure', function ($q) use ($search) {
+                        $q->where('code', 'like', "%{$search}%");
+                    });
+            })
+            ->withAdvancedFilters($filters, $this->fields);
+
+        return $productsQuery
+            ->paginate($perPage)
+            ->appends($filters);
+    }
     /**
      * Listar productos con paginación.
      *
@@ -18,8 +59,8 @@ class ProductService
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return Product::with(['category', 'unitMeasure'])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate($perPage);
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
     }
 
     /**
@@ -30,8 +71,8 @@ class ProductService
     public function all(): Collection
     {
         return Product::with(['category', 'unitMeasure'])
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     /**

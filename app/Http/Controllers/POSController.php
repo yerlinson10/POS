@@ -12,6 +12,7 @@ use App\Services\ProductService;
 use App\Services\CustomerService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Customer\StoreCustomerRequest;
 
 class POSController extends Controller
 {
@@ -38,51 +39,35 @@ class POSController extends Controller
     public function getProducts(Request $request)
     {
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir', 'current_page']);
-        $perPage = (int) ($filters['per_page'] ?? 20);
         $currentPage = (int) ($filters['current_page'] ?? 1);
 
-        $productsQuery = Product::with(['category', 'unitMeasure'])
-            ->where('stock', '>', 0) // Only show products with stock
-            ->when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('products.name', 'like', "%{$search}%")
-                        ->orWhere('products.sku', 'like', "%{$search}%");
-                })
-                    ->orWhereHas('category', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-            })
-            ->withAdvancedFilters($filters, [
-                'id',
-                'sku',
-                'name',
-                'price',
-                'stock',
-                'category.name',
-                'unitMeasure.code'
-            ]);
-
-        // Set the current page
+        // Resolver la página actual para la paginación
         \Illuminate\Pagination\Paginator::currentPageResolver(function () use ($currentPage) {
             return $currentPage;
         });
 
-        $products = $productsQuery
-            ->paginate($perPage)
-            ->appends($filters);
+        // Usar el servicio para obtener los productos filtrados y paginados
+        $products = $this->productService->filterAndPaginate($filters);
+
+        // Filtrar productos con stock > 0 (si no se hace en el servicio)
+        $products->getCollection()->transform(function ($p) {
+            return [
+                'id' => $p->id,
+                'sku' => $p->sku,
+                'name' => $p->name,
+                'category' => $p->category->name,
+                'unit_measure' => $p->unitMeasure->code,
+                'price' => (float) $p->price,
+                'stock' => (int) $p->stock,
+                'image' => $p->image ?? null,
+            ];
+        });
+
+        $filteredData = $products->getCollection()->filter(fn($p) => $p['stock'] > 0)->values();
 
         return response()->json([
             'products' => [
-                'data' => $products->through(fn($p) => [
-                    'id' => $p->id,
-                    'sku' => $p->sku,
-                    'name' => $p->name,
-                    'category' => $p->category->name,
-                    'unit_measure' => $p->unitMeasure->code,
-                    'price' => (float) $p->price,
-                    'stock' => (int) $p->stock,
-                    'image' => $p->image ?? null,
-                ])->items(),
+                'data' => $filteredData,
             ],
             'pagination' => [
                 'current_page' => $products->currentPage(),
@@ -118,7 +103,7 @@ class POSController extends Controller
 
         $customers = $customersQuery->get()->map(fn($c) => [
             'id' => $c->id,
-            'full_name' => $c->first_name . ' ' . $c->last_name,
+            'full_name' => $c->full_name,
             'email' => $c->email,
             'phone' => $c->phone,
             'address' => $c->address,
@@ -130,23 +115,16 @@ class POSController extends Controller
     /**
      * Create a new customer from POS.
      */
-    public function createCustomer(Request $request)
+    public function createCustomer(StoreCustomerRequest $data)
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:customers,email',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:500',
-        ]);
 
         try {
-            $customer = $this->customerService->create($validated);
+            $customer = $this->customerService->create($data->validated());
 
             return response()->json([
                 'customer' => [
                     'id' => $customer->id,
-                    'full_name' => $customer->first_name . ' ' . $customer->last_name,
+                    'full_name' => $customer->full_name,
                     'email' => $customer->email,
                     'phone' => $customer->phone,
                     'address' => $customer->address,
