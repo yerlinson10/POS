@@ -2,12 +2,13 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PdfController;
+use App\Http\Controllers\POSController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UnitMeasureController;
-use App\Http\Controllers\POSController;
-use App\Http\Controllers\InvoiceController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -17,6 +18,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::get('/invoice/{id}', [PdfController::class, 'Invoice'])->name('invoice.pdf');
 
     // POS routes
     Route::prefix('pos')->name('pos.')->group(function () {
