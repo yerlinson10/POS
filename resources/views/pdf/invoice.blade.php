@@ -619,10 +619,10 @@
 
                             </tr>
                         @endif
-                        @if (($invoice->tax_amount ?? 0) > 0)
+                        @if (!empty($invoice->tax_label) && !empty($invoice->tax_amount_formatted))
                             <tr>
-                                <td class="label">IVA ({{ number_format($invoice->tax_percentage ?? 19, 2) }}%):</td>
-                                <td class="value">${{ number_format($invoice->tax_amount, 2) }}</td>
+                                <td class="label">{{ $invoice->tax_label }}</td>
+                                <td class="value">{{ $invoice->tax_amount_formatted }}</td>
                             </tr>
                         @endif
                         <tr class="total-final">
