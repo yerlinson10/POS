@@ -12,6 +12,7 @@ use App\Services\ProductService;
 use App\Services\CustomerService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Sale\StoreSaleRequest;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 
 class POSController extends Controller
@@ -135,37 +136,31 @@ class POSController extends Controller
     /**
      * Process a sale/invoice.
      */
-    public function processSale(Request $request)
+    public function processSale(StoreSaleRequest $data)
     {
-        $validated = $request->validate([
-            'customer_id' => 'nullable|exists:customers,id',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
-            'items.*.line_total' => 'required|numeric|min:0',
-            'subtotal' => 'required|numeric|min:0',
-            'discount_type' => 'nullable|in:percentage,fixed',
-            'discount_value' => 'nullable|numeric|min:0',
-            'discount_amount' => 'nullable|numeric|min:0',
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,paid',
-        ]);
+        $validated = $data->validated();
 
         try {
             DB::beginTransaction();
 
-            // Verify stock availability only for paid invoices
+            // Only query products once and map by id for efficiency
+            $productIds = collect($validated['items'])->pluck('product_id')->unique();
+            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+            // Check stock only if the invoice is paid
             if ($validated['status'] === 'paid') {
                 foreach ($validated['items'] as $item) {
-                    $product = Product::find($item['product_id']);
+                    $product = $products->get($item['product_id']);
+                    if (!$product) {
+                        throw new \Exception("Product not found: ID {$item['product_id']}");
+                    }
                     if ($product->stock < $item['quantity']) {
                         throw new \Exception("Insufficient stock for product: {$product->name}");
                     }
                 }
             }
 
-            // Create invoice
+            // Create the invoice
             $invoice = Invoice::create([
                 'customer_id' => $validated['customer_id'],
                 'user_id' => Auth::id(),
@@ -177,7 +172,7 @@ class POSController extends Controller
                 'discount_value' => $validated['discount_value']
             ]);
 
-            // Create invoice items and update stock based on status
+            // Create the items and update stock if applicable
             foreach ($validated['items'] as $item) {
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
@@ -187,9 +182,8 @@ class POSController extends Controller
                     'line_total' => $item['line_total'],
                 ]);
 
-                // Update product stock only if invoice is paid
                 if ($validated['status'] === 'paid') {
-                    $product = Product::find($item['product_id']);
+                    $product = $products->get($item['product_id']);
                     $product->decrement('stock', $item['quantity']);
                 }
             }
