@@ -29,7 +29,8 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <Button @click="showProductModal = true"
-                                class="h-9 md:h-10 cursor-pointer text-xs md:text-sm">
+                                class="h-9 md:h-10 cursor-pointer text-xs md:text-sm shadow-sm hover:shadow-md transition-all"
+                                title="Add products to cart - Shortcut: F2">
                                 <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                                 <span class="hidden sm:inline">Add Products (F2)</span>
                                 <span class="sm:hidden">Add (F2)</span>
@@ -444,31 +445,49 @@
                         </div>
                     </div>
 
-                    <!-- Quick Search Section (Optional) -->
+                    <!-- Quick Search Section -->
                     <div v-if="cart.length > 0" class="border-t pt-3 md:pt-4">
-                        <div class="flex gap-2">
-                            <Input v-model="quickSearchTerm" placeholder="Quick add products..." class="flex-1 text-sm"
-                                @keyup.enter="performQuickSearch" />
-                            <Button @click="performQuickSearch" variant="outline" size="sm" class="px-2 md:px-3">
-                                <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
-                            </Button>
-                        </div>
-
-                        <!-- Quick Search Results -->
-                        <div v-if="quickSearchResults.length"
-                            class="mt-2 md:mt-3 space-y-1 md:space-y-2 max-h-24 md:max-h-32 overflow-y-auto">
-                            <div v-for="product in quickSearchResults" :key="product.id"
-                                class="flex items-center justify-between p-2 border rounded hover:bg-accent/50 cursor-pointer text-xs md:text-sm"
-                                @click="addToCart(product)">
-                                <div class="flex-1">
-                                    <div class="font-medium">{{ product.name }}</div>
-                                    <div class="text-xs text-muted-foreground">{{ product.sku }} • ${{
-                                        Number(product.price).toFixed(2) }}</div>
-                                </div>
-                                <Button size="sm" variant="ghost" class="h-5 w-5 md:h-6 md:w-6 p-0">
-                                    <Icon name="Plus" class="w-2 h-2 md:w-3 md:h-3" />
+                        <div class="space-y-2">
+                            <Label class="text-sm font-medium">Quick Add Products</Label>
+                            <div class="relative">
+                                <Input v-model="quickSearchTerm" placeholder="Type product name or SKU..."
+                                    class="flex-1 text-sm pr-10" @input="performQuickSearch"
+                                    @keyup.enter="addFirstSearchResult" @keyup.down="navigateQuickSearch('down')"
+                                    @keyup.up="navigateQuickSearch('up')" @keyup.escape="clearQuickSearch" />
+                                <Button v-if="quickSearchTerm" @click="clearQuickSearch" variant="ghost" size="sm"
+                                    class="absolute right-0 top-0 h-full px-2">
+                                    <Icon name="X" class="w-3 h-3" />
                                 </Button>
                             </div>
+                        </div>
+
+                        <!-- Quick Search Results with keyboard navigation -->
+                        <div v-if="quickSearchResults.length"
+                            class="mt-2 md:mt-3 space-y-1 max-h-32 overflow-y-auto border rounded-lg bg-background">
+                            <div v-for="(product, index) in quickSearchResults" :key="product.id"
+                                :ref="el => setQuickSearchItemRef(el, index)"
+                                class="flex items-center justify-between p-3 hover:bg-accent/50 cursor-pointer text-sm border-b last:border-b-0 transition-colors"
+                                :class="{ 'bg-accent': selectedQuickSearchIndex === index }" @click="addToCart(product)"
+                                @mouseenter="selectedQuickSearchIndex = index">
+                                <div class="flex-1">
+                                    <div class="font-medium">{{ product.name }}</div>
+                                    <div class="text-xs text-muted-foreground">
+                                        {{ product.sku }} • RD${{ formatCurrency(product.price) }}
+                                        <span v-if="product.stock !== undefined" class="ml-2">
+                                            ({{ product.stock }} in stock)
+                                        </span>
+                                    </div>
+                                </div>
+                                <Button size="sm" variant="ghost" class="h-6 w-6 p-0 ml-2">
+                                    <Icon name="Plus" class="w-3 h-3" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        <!-- No results message -->
+                        <div v-else-if="quickSearchTerm && quickSearchTerm.length >= 2"
+                            class="mt-2 p-3 text-center text-sm text-muted-foreground border rounded-lg bg-muted/30">
+                            No products found for "{{ quickSearchTerm }}"
                         </div>
                     </div>
                 </Card>
@@ -481,7 +500,8 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                         <h3 class="text-base md:text-lg font-medium">Customer</h3>
                         <Button @click="showNewCustomerDialog = true" variant="outline" size="sm"
-                            class="text-xs md:text-sm">
+                            class="text-xs md:text-sm shadow-sm hover:shadow-md transition-all"
+                            title="Create a new customer - Shortcut: F3">
                             <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                             <span class="hidden sm:inline">New Customer (F3)</span>
                             <span class="sm:hidden">New</span>
@@ -565,21 +585,48 @@
                     </div>
 
                     <!-- Checkout Button -->
-                    <Button @click="processCheckout" class="w-full h-10 md:h-12 cursor-pointer text-sm md:text-base"
-                        size="lg" :disabled="!canProcessSale" :loading="isProcessingSale">
-                        <Icon :name="getCheckoutIcon" class="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />
+                    <Button @click="processCheckout"
+                        class="w-full h-12 md:h-14 cursor-pointer text-base md:text-lg font-semibold transition-all duration-200 hover:scale-[1.02] shadow-lg"
+                        size="lg" :disabled="!canProcessSale" :loading="isProcessingSale"
+                        :title="`${getCheckoutText} - Shortcut: F4`">
+                        <Icon :name="getCheckoutIcon" class="w-5 h-5 md:w-6 md:h-6 mr-2" />
                         <span class="hidden sm:inline">{{ isProcessingSale ? getProcessingText : getCheckoutText
-                            }}</span>
+                        }}</span>
                         <span class="sm:hidden">{{ isProcessingSale ? 'Processing...' : getCheckoutButtonShort }}</span>
-                        <span v-if="!isProcessingSale" class="ml-2 text-xs opacity-75 hidden md:inline">(F4)</span>
+                        <span v-if="!isProcessingSale" class="ml-2 text-sm opacity-90 hidden md:inline">(F4)</span>
                     </Button>
 
-                    <!-- Additional Info -->
-                    <div v-if="cart.length > 0" class="mt-3 md:mt-4 text-xs text-muted-foreground text-center">
-                        <p class="hidden md:block">{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }} • Last updated:
-                            {{ new
-                                Date().toLocaleTimeString() }}</p>
-                        <p class="md:hidden">{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }}</p>
+                    <!-- Additional Info and Status -->
+                    <div v-if="cart.length > 0" class="mt-3 md:mt-4 space-y-2">
+                        <!-- Validation Messages -->
+                        <div v-if="!canProcessSale"
+                            class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
+                            <div class="flex items-center gap-1">
+                                <Icon name="AlertTriangle" class="w-3 h-3" />
+                                <span class="font-medium">Cannot process sale:</span>
+                            </div>
+                            <ul class="mt-1 ml-4 text-xs space-y-0.5">
+                                <li v-if="cart.length === 0">• Cart is empty</li>
+                                <li v-if="!selectedCustomer">• Customer is required</li>
+                                <li v-if="total <= 0">• Total amount must be greater than zero</li>
+                            </ul>
+                        </div>
+
+                        <!-- Success Indicators -->
+                        <div v-else
+                            class="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
+                            <div class="flex items-center gap-1">
+                                <Icon name="CheckCircle" class="w-3 h-3" />
+                                <span class="font-medium">Ready to process</span>
+                            </div>
+                        </div>
+
+                        <!-- Last updated time -->
+                        <div class="text-xs text-muted-foreground text-center">
+                            <p class="hidden md:block">{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }} • Last
+                                updated: {{ new Date().toLocaleTimeString() }}</p>
+                            <p class="md:hidden">{{ itemCount }} item{{ itemCount !== 1 ? 's' : '' }}</p>
+                        </div>
                     </div>
                 </Card>
             </div>
@@ -601,79 +648,122 @@
 
         <!-- Payment Confirmation Dialog -->
         <AlertDialog v-model:open="showPaymentConfirmDialog">
-            <AlertDialogContent class="max-w-md md:max-w-lg">
+            <AlertDialogContent class="max-w-4xl max-h-[90vh] overflow-hidden">
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Invoice</AlertDialogTitle>
+                    <AlertDialogTitle class="flex items-center gap-2">
+                        <Icon :name="getCheckoutIcon" class="w-5 h-5" />
+                        {{ getCheckoutText }}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                        Please review the order details before processing the invoice. Press F4 again to print after
-                        processing.
+                        Review the details below and {{ paymentMethod === 'cash' ? 'enter the cash amount received' :
+                            'confirm the payment' }}.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                <div class="py-4">
+                <div class="overflow-y-auto max-h-[60vh] space-y-4">
+                    <!-- Quick Summary Card -->
+                    <div class="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-muted-foreground">Total Amount</p>
+                                <p class="text-2xl font-bold text-primary">RD${{ formatCurrency(total) }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-muted-foreground">Items</p>
+                                <p class="text-lg font-semibold">{{ itemCount }} {{ itemCount === 1 ? 'item' : 'items'
+                                }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cash Payment Calculator (only for cash payments) -->
+                    <CashPaymentCalculator v-if="paymentMethod === 'cash'" :total-amount="total"
+                        @confirm="confirmPayment" @cash-received-change="handleCashReceivedChange"
+                        ref="cashCalculatorRef" />
+
                     <!-- Customer Info -->
-                    <div v-if="selectedCustomer" class="mb-4 p-3 bg-muted/50 rounded-lg">
-                        <h4 class="font-medium text-sm mb-1">Customer:</h4>
-                        <p class="text-sm">{{ selectedCustomer.full_name }}</p>
-                        <p class="text-xs text-muted-foreground">{{ selectedCustomer.email }}</p>
+                    <div v-if="selectedCustomer" class="p-3 bg-muted/30 rounded-lg border">
+                        <h4 class="font-medium text-sm mb-2 flex items-center gap-2">
+                            <Icon name="User" class="w-4 h-4" />
+                            Customer Information
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <p class="text-sm font-medium">{{ selectedCustomer.full_name }}</p>
+                                <p class="text-xs text-muted-foreground">{{ selectedCustomer.email }}</p>
+                            </div>
+                            <div v-if="selectedCustomer.phone">
+                                <p class="text-xs text-muted-foreground">Phone</p>
+                                <p class="text-sm">{{ selectedCustomer.phone }}</p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Payment Method & Invoice Status -->
-                    <div class="mb-4 p-3 bg-muted/50 rounded-lg">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <h4 class="font-medium text-sm mb-1">Payment Method:</h4>
-                                <div class="flex items-center gap-1">
-                                    <Icon :name="getPaymentMethodIcon(paymentMethod)" class="w-4 h-4" />
-                                    <span class="text-sm capitalize">{{ paymentMethod }}</span>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-sm mb-1">Invoice Status:</h4>
-                                <span class="text-sm capitalize">{{ invoiceStatus }}</span>
-                            </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="p-3 bg-muted/30 rounded-lg border">
+                            <h4 class="font-medium text-sm mb-2 flex items-center gap-2">
+                                <Icon :name="getPaymentMethodIcon(paymentMethod)" class="w-4 h-4" />
+                                Payment Method
+                            </h4>
+                            <span class="text-sm capitalize font-medium">{{ paymentMethod }}</span>
+                        </div>
+                        <div class="p-3 bg-muted/30 rounded-lg border">
+                            <h4 class="font-medium text-sm mb-2 flex items-center gap-2">
+                                <Icon name="FileText" class="w-4 h-4" />
+                                Invoice Type
+                            </h4>
+                            <span class="text-sm capitalize font-medium">{{ invoiceStatus }}</span>
                         </div>
                     </div>
 
-                    <!-- Cart Items -->
-                    <div class="space-y-2 mb-4 max-h-48 overflow-y-auto">
-                        <h4 class="font-medium text-sm mb-2">Items ({{ itemCount }}):</h4>
-                        <div v-for="item in cart" :key="item.product_id"
-                            class="flex justify-between items-center text-sm p-2 bg-background rounded border">
-                            <div class="flex-1 min-w-0">
-                                <div class="font-medium truncate">{{ item.product_name }}</div>
-                                <div class="text-xs text-muted-foreground">{{ item.product_sku }}</div>
-                            </div>
-                            <div class="text-right ml-2">
-                                <div class="font-medium">{{ item.quantity }}x ${{ Number(item.unit_price).toFixed(2) }}
+                    <!-- Collapsible Cart Items -->
+                    <details class="border rounded-lg" open>
+                        <summary class="p-3 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors">
+                            <span class="font-medium text-sm">Order Items ({{ itemCount }})</span>
+                        </summary>
+                        <div class="p-3 space-y-2 max-h-48 overflow-y-auto">
+                            <div v-for="item in cart" :key="item.product_id"
+                                class="flex justify-between items-center text-sm p-2 bg-background rounded border hover:bg-accent/30 transition-colors">
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-medium truncate">{{ item.product_name }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ item.product_sku }}</div>
                                 </div>
-                                <div class="text-xs text-muted-foreground">${{ Number(item.line_total).toFixed(2) }}
+                                <div class="text-right ml-2">
+                                    <div class="font-medium">{{ item.quantity }}x RD${{ formatCurrency(item.unit_price)
+                                    }}</div>
+                                    <div class="text-xs text-muted-foreground">RD${{ formatCurrency(item.line_total) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </details>
 
-                    <!-- Totals -->
-                    <div class="border-t pt-3">
-                        <div class="flex justify-between text-sm mb-1">
+                    <!-- Final Totals -->
+                    <div class="border-t pt-3 space-y-2">
+                        <div class="flex justify-between text-sm">
                             <span>Subtotal:</span>
-                            <span>${{ Number(subtotal).toFixed(2) }}</span>
+                            <span>RD${{ formatCurrency(subtotal) }}</span>
                         </div>
-                        <div v-if="discountAmount > 0" class="flex justify-between text-sm text-green-600 mb-1">
+                        <div v-if="discountAmount > 0" class="flex justify-between text-sm text-green-600">
                             <span>Discount:</span>
-                            <span>-${{ Number(discountAmount).toFixed(2) }}</span>
+                            <span>-RD${{ formatCurrency(discountAmount) }}</span>
                         </div>
-                        <div class="flex justify-between font-bold text-lg border-t pt-2">
+                        <div
+                            class="flex justify-between font-bold text-xl border-t pt-2 bg-primary/5 px-3 py-2 rounded">
                             <span>Total:</span>
-                            <span class="text-primary">${{ Number(total).toFixed(2) }}</span>
+                            <span class="text-primary">RD${{ formatCurrency(total) }}</span>
                         </div>
                     </div>
                 </div>
 
-                <AlertDialogFooter>
-                    <AlertDialogCancel class="cursor-pointer">Cancel</AlertDialogCancel>
+                <AlertDialogFooter class="border-t pt-4">
+                    <AlertDialogCancel class="cursor-pointer">
+                        Cancel
+                        <span class="ml-2 text-xs opacity-75">(Esc)</span>
+                    </AlertDialogCancel>
                     <AlertDialogAction class="cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground"
-                        @click="confirmPayment">
+                        :disabled="paymentMethod === 'cash' && !isCashAmountSufficient" @click="confirmPayment">
                         <Icon :name="getCheckoutIcon" class="w-4 h-4 mr-2" />
                         {{ getCheckoutText }}
                         <span class="ml-2 text-xs opacity-75">(Enter/F4)</span>
@@ -717,6 +807,7 @@ import { route } from 'ziggy-js'
 import { Card } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -739,6 +830,7 @@ import InvoiceStatusSelector from './components/InvoiceStatusSelector.vue'
 import PaymentMethodSelector from './components/PaymentMethodSelector.vue'
 import { toast } from 'vue-sonner'
 import SessionStatus from './components/SessionStatus.vue'
+import CashPaymentCalculator from './components/CashPaymentCalculator.vue'
 
 // Stores
 const posStore = usePOSStore()
@@ -773,17 +865,23 @@ const showPaymentConfirmDialog = ref(false)
 const showRemoveItemDialog = ref(false)
 const itemToRemove = ref<{ id: number, name: string } | null>(null)
 const isPrintingInvoice = ref(false)
+const cashReceived = ref(0)
+const cashCalculatorRef = ref<{ focus: () => void, resetToTotalAmount: () => void } | null>(null)
+const selectedQuickSearchIndex = ref(-1)
+const quickSearchItemRefs = ref<HTMLElement[]>([])
+
+// Reference for product search input in the modal
+const productSearchInputRef = ref<HTMLInputElement | null>(null)
+// Reference for customer search input in the customer modal
+const customerSearchInputRef = ref<HTMLInputElement | null>(null)
 
 // States for cart navigation
 const selectedCartItemIndex = ref(-1)
 const isCartNavigationActive = ref(false)
 
-// Refs for the search input in the product and customer modals
-const productSearchInputRef = ref<HTMLInputElement | null>(null)
-const customerSearchInputRef = ref<HTMLInputElement | null>(null)
-
 // Auto-refresh interval for stock updates
 let stockUpdateInterval: number | null = null
+let searchTimeout: number | null = null
 
 // Computed properties for checkout button
 const getCheckoutIcon = computed(() => {
@@ -845,6 +943,19 @@ const getCheckoutButtonShort = computed(() => {
     }
 })
 
+// Cash payment validation
+const isCashAmountSufficient = computed(() => {
+    return paymentMethod.value !== 'cash' || cashReceived.value >= total.value
+})
+
+// Format currency helper
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-DO', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount)
+}
+
 // Methods
 const handleCustomerSelected = (customer: Customer | null) => {
     posStore.setCustomer(customer)
@@ -858,7 +969,17 @@ const handleCustomerCreated = (customer: Customer) => {
 const addToCart = (product: Product, quantity: number = 1) => {
     try {
         posStore.addToCart(product, quantity)
-        toast.success(`${product.name} added to cart`)
+
+        // Enhanced success feedback with product info
+        toast.success(`✅ ${product.name} added to cart`, {
+            description: `Quantity: ${quantity} • Price: RD$${formatCurrency(product.price)}`,
+            duration: 2000,
+        })
+
+        // Clear quick search after adding
+        if (quickSearchTerm.value) {
+            clearQuickSearch()
+        }
     } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Error adding to cart')
     }
@@ -866,15 +987,34 @@ const addToCart = (product: Product, quantity: number = 1) => {
 
 const updateQuantity = (productId: number, quantity: number) => {
     try {
+        const item = cart.value.find(item => item.product_id === productId)
+        const oldQuantity = item?.quantity || 0
+
         posStore.updateCartItemQuantity(productId, quantity)
+
+        if (item) {
+            const difference = quantity - oldQuantity
+            const action = difference > 0 ? 'increased' : 'decreased'
+            toast.success(`Quantity ${action} for ${item.product_name}`, {
+                description: `${oldQuantity} → ${quantity}`,
+                duration: 1500
+            })
+        }
     } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Error updating quantity')
     }
 }
 
 const removeFromCart = (productId: number) => {
+    const item = cart.value.find(item => item.product_id === productId)
     posStore.removeFromCart(productId)
-    toast.success('Item removed from cart')
+
+    if (item) {
+        toast.success(`${item.product_name} removed from cart`, {
+            description: 'Item has been successfully removed',
+            duration: 2000
+        })
+    }
 }
 
 const clearCart = () => {
@@ -1147,15 +1287,42 @@ const cancelRemoveItem = () => {
 }
 
 const processCheckout = async () => {
-    // Always show confirmation regardless of invoice type
+    // Reset cash received to total amount when opening dialog
+    cashReceived.value = total.value
     showPaymentConfirmDialog.value = true
+
+    // Auto-focus cash calculator if payment is cash
+    if (paymentMethod.value === 'cash') {
+        nextTick(() => {
+            if (cashCalculatorRef.value) {
+                cashCalculatorRef.value.focus()
+            }
+        })
+    }
+}
+
+const handleCashReceivedChange = (amount: number) => {
+    cashReceived.value = amount
 }
 
 const executeCheckout = async () => {
     try {
+        // If cash payment, validate amount
+        if (paymentMethod.value === 'cash' && cashReceived.value < total.value) {
+            toast.error('Cash amount is insufficient')
+            return
+        }
+
         await posStore.processSale()
         showSaleSuccessDialog.value = true
-        toast.success('Sale processed successfully!')
+
+        // Show success message with change if cash payment
+        if (paymentMethod.value === 'cash' && cashReceived.value > total.value) {
+            const change = cashReceived.value - total.value
+            toast.success(`Sale processed! Change: RD$${formatCurrency(change)}`, { duration: 5000 })
+        } else {
+            toast.success('Sale processed successfully!')
+        }
     } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Error processing sale')
     }
@@ -1167,16 +1334,69 @@ const confirmPayment = async () => {
 }
 
 const performQuickSearch = async () => {
+    // Clear previous timeout
+    if (searchTimeout) {
+        clearTimeout(searchTimeout)
+    }
+
     if (!quickSearchTerm.value.trim()) {
         quickSearchResults.value = []
+        selectedQuickSearchIndex.value = -1
         return
     }
 
-    try {
-        await productStore.searchProducts(quickSearchTerm.value)
-        quickSearchResults.value = productStore.products.slice(0, 5) // Show top 5 results
-    } catch {
-        toast.error('Error searching products')
+    if (quickSearchTerm.value.length < 2) {
+        return
+    }
+
+    // Debounce the search
+    searchTimeout = setTimeout(async () => {
+        try {
+            await productStore.searchProducts(quickSearchTerm.value)
+            quickSearchResults.value = productStore.products.slice(0, 5) // Show top 5 results
+            selectedQuickSearchIndex.value = quickSearchResults.value.length > 0 ? 0 : -1
+        } catch {
+            toast.error('Error searching products')
+        }
+    }, 300) // 300ms debounce
+}
+
+const navigateQuickSearch = (direction: 'up' | 'down') => {
+    if (quickSearchResults.value.length === 0) return
+
+    if (direction === 'down') {
+        selectedQuickSearchIndex.value = Math.min(
+            selectedQuickSearchIndex.value + 1,
+            quickSearchResults.value.length - 1
+        )
+    } else {
+        selectedQuickSearchIndex.value = Math.max(selectedQuickSearchIndex.value - 1, 0)
+    }
+}
+
+const addFirstSearchResult = () => {
+    if (quickSearchResults.value.length > 0) {
+        const product = quickSearchResults.value[selectedQuickSearchIndex.value] || quickSearchResults.value[0]
+        addToCart(product)
+        clearQuickSearch()
+    }
+}
+
+const focusFirstResult = () => {
+    if (quickSearchResults.value.length > 0) {
+        selectedQuickSearchIndex.value = 0
+    }
+}
+
+const clearQuickSearch = () => {
+    quickSearchTerm.value = ''
+    quickSearchResults.value = []
+    selectedQuickSearchIndex.value = -1
+}
+
+const setQuickSearchItemRef = (el: any, index: number) => {
+    if (el) {
+        quickSearchItemRefs.value[index] = el
     }
 }
 
@@ -1512,6 +1732,9 @@ onMounted(() => {
     onUnmounted(() => {
         if (stockUpdateInterval) {
             clearInterval(stockUpdateInterval)
+        }
+        if (searchTimeout) {
+            clearTimeout(searchTimeout)
         }
         window.removeEventListener('keydown', handleKeyDown)
         document.removeEventListener('keydown', handleDialogKeyDown, true)
