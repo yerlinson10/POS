@@ -177,6 +177,7 @@ import {
     Banknote,
     CreditCard
 } from 'lucide-vue-next'
+import { formatCurrency, formatDateTime } from '@/utils/format'
 import type { PosSession, PosSessionSummary } from '../../types/pos'
 
 interface Props {
@@ -187,23 +188,6 @@ interface Props {
 const props = defineProps<Props>()
 
 // Methods
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-DO', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(amount)
-}
-
-const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    })
-}
-
 const getDuration = () => {
     const start = new Date(props.session.opened_at)
     const end = props.session.closed_at ? new Date(props.session.closed_at) : new Date()

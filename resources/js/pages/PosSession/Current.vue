@@ -118,6 +118,7 @@ import StatsCard from '@/pages/PosSession/components/StatsCard.vue'
 import PaymentMethodIcon from '@/pages/PosSession/components/PaymentMethodIcon.vue'
 import SalesChart from '@/pages/PosSession/components/SalesChart.vue'
 import { ShoppingCart, X } from 'lucide-vue-next'
+import { formatCurrency, formatDateTime } from '@/utils/format'
 import type { PosSession, PosSessionSummary } from '../../types/pos'
 
 interface Props {
@@ -128,23 +129,6 @@ interface Props {
 const props = defineProps<Props>()
 
 // Methods
-const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    })
-}
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-ES', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(amount)
-}
-
 const getPaymentMethodName = (method: string) => {
     const names: Record<string, string> = {
         cash: 'Efectivo',
