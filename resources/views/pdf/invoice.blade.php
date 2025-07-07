@@ -636,7 +636,7 @@
         <footer class="invoice-footer">
             <div style="margin-bottom: 5px;"><strong>Thank you for your purchase | {{ config('app.name') }}</strong>
             </div>
-            <div>This document is a printed representation of the electronic invoice</div>
+            <div>This document is a printed representation of the electronic {{$invoice->status == 'paid' ? 'invoice' : 'quotation'}}</div>
             <div style="margin-top: 5px; font-size: 9px;">Generated on {{ date('d/m/Y H:i') }}</div>
         </footer>
     </div>
