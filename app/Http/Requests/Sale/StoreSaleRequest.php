@@ -33,7 +33,7 @@ class StoreSaleRequest extends FormRequest
             'discount_value' => 'nullable|numeric|min:0',
             'discount_amount' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,paid',
+            'status' => 'required|in:quotation,paid',
             'payment_method' => 'required|in:cash,card,transfer,other',
         ];
     }

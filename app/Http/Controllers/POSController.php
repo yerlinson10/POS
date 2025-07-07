@@ -209,7 +209,7 @@ class POSController extends Controller
 
             $statusMessages = [
                 'paid' => 'Sale processed and payment completed successfully',
-                'pending' => 'Sale registered successfully, payment is pending'
+                'quotation' => 'Quotation registered successfully, payment is pending'
             ];
 
             return response()->json([

@@ -24,7 +24,7 @@ class InvoiceFactory extends Factory
             'discount_type' => $this->faker->randomElement(['percentage', 'fixed', null]),
             'discount_value' => $this->faker->randomFloat(2, 0, 100), // Genera un valor de descuento entre 0 y 100
             'total_amount' => 0,    // se actualizará tras crear ítems
-            'status'       => $this->faker->randomElement(['paid','paid', 'pending' ,'canceled']),
+            'status'       => $this->faker->randomElement(['paid','paid', 'quotation' ,'canceled']),
         ];
     }
 }

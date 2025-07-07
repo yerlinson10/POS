@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Invoice;
-use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Customer;
+use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Services\InvoiceService;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Invoice\UpdateInvoiceRequest;
 
 class InvoiceController extends Controller
 {
@@ -70,7 +73,7 @@ class InvoiceController extends Controller
                 'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
             ]),
             'filters' => $filters,
-            'statuses' => ['pending', 'paid', 'canceled'],
+            'statuses' => ['quotation', 'paid', 'canceled'],
         ]);
     }
 
@@ -131,7 +134,7 @@ class InvoiceController extends Controller
     public function updateStatus(Request $request, string $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,paid,canceled'
+            'status' => 'required|in:quotation,paid,canceled'
         ]);
 
         try {
@@ -225,8 +228,8 @@ class InvoiceController extends Controller
     {
         // Define allowed transitions
         $allowedTransitions = [
-            'pending' => ['paid', 'canceled'],
-            'canceled' => ['pending'],
+            'quotation' => ['paid', 'canceled'],
+            'canceled' => ['quotation'],
             'paid' => [], // No transitions allowed from paid status
         ];
 
@@ -236,6 +239,43 @@ class InvoiceController extends Controller
 
         if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
             throw new \Exception("Cannot change status from '{$currentStatus}' to '{$newStatus}'. Invalid transition.");
+        }
+    }
+
+    /**
+     * Show the form for editing a quotation.
+     */
+    public function edit(string $id)
+    {
+        try {
+            $data = $this->service->getQuotationForEdit((int) $id);
+            return Inertia::render('Invoices/Edit', $data);
+        } catch (\Exception $e) {
+            return redirect()->route('invoices.show', $id)
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => $e->getMessage()
+                ]);
+        }
+    }
+
+    /**
+     * Update the specified quotation.
+     */
+    public function update(UpdateInvoiceRequest $request, string $id)
+    {
+        try {
+            $invoice = $this->service->updateQuotation((int) $id, $request->validated());
+
+            return response()->json([
+                'message' => 'Quotation updated successfully',
+                'invoice' => $invoice
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
         }
     }
 }

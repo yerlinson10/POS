@@ -20,11 +20,11 @@
                         <span class="text-xs text-muted-foreground ml-2">(Invoice fully paid)</span>
                     </div>
                 </SelectItem>
-                <SelectItem value="pending">
+                <SelectItem value="quotation">
                     <div class="flex items-center gap-2">
                         <Icon name="Clock" class="w-4 h-4 text-yellow-600" />
-                        <span>Pending Payment</span>
-                        <span class="text-xs text-muted-foreground ml-2">(Payment pending)</span>
+                        <span>Quotation</span>
+                        <span class="text-xs text-muted-foreground ml-2">(Editable quotation)</span>
                     </div>
                 </SelectItem>
             </SelectContent>
@@ -69,8 +69,8 @@ const getStatusLabel = (status: InvoiceStatus) => {
     switch (status) {
         case 'paid':
             return 'Paid'
-        case 'pending':
-            return 'Pending Payment'
+        case 'quotation':
+            return 'Quotation'
         default:
             return 'Paid'
     }
@@ -80,7 +80,7 @@ const statusIcon = computed(() => {
     switch (selectedStatus.value) {
         case 'paid':
             return 'CheckCircle'
-        case 'pending':
+        case 'quotation':
             return 'Clock'
         default:
             return 'CheckCircle'
@@ -91,7 +91,7 @@ const statusIconClass = computed(() => {
     switch (selectedStatus.value) {
         case 'paid':
             return 'text-green-600'
-        case 'pending':
+        case 'quotation':
             return 'text-yellow-600'
         default:
             return 'text-green-600'
@@ -102,8 +102,8 @@ const statusTitle = computed(() => {
     switch (selectedStatus.value) {
         case 'paid':
             return 'Invoice Paid'
-        case 'pending':
-            return 'Pending Payment'
+        case 'quotation':
+            return 'Quotation'
         default:
             return 'Invoice Paid'
     }
@@ -113,8 +113,8 @@ const statusDescription = computed(() => {
     switch (selectedStatus.value) {
         case 'paid':
             return 'The sale will be registered as fully paid. Stock will be updated immediately.'
-        case 'pending':
-            return 'The sale will be registered but will remain pending payment. Stock will be reserved but not updated until payment.'
+        case 'quotation':
+            return 'The sale will be saved as an editable quotation. Stock will not be updated until the quotation is marked as paid.'
         default:
             return 'The sale will be registered as fully paid.'
     }

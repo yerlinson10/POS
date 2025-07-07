@@ -9,7 +9,7 @@ export const usePOSStore = defineStore('pos', () => {
     const selectedCustomer = ref<Customer | null>(null);
     const discountType = ref<'percentage' | 'fixed' | null>(null);
     const discountValue = ref<number>(0);
-    const invoiceStatus = ref<InvoiceStatus>('paid');
+    const invoiceStatus = ref<InvoiceStatus>('quotation');
     const paymentMethod = ref<'cash' | 'card' | 'transfer' | 'other'>('cash');
     const isProcessingSale = ref(false);
     const lastSale = ref<Sale | null>(null);

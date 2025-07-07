@@ -70,6 +70,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Invoices routes (only index and show - no edit/delete for legal compliance)
     Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::put('invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::patch('invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.update-status');
 
 });

@@ -38,16 +38,16 @@ class UpdateInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => 'required|exists:customers,id',
             'date' => 'required|date',
-            'status' => 'required|in:pending,paid,canceled',
-            'discount_type' => 'nullable|in:percentage,fixed',
-            'discount_value' => 'nullable|numeric|min:0',
             'items' => 'required|array|min:1',
-            'items.*.id' => 'nullable|exists:invoice_items,id',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.line_total' => 'required|numeric|min:0',
+            'subtotal' => 'required|numeric|min:0',
+            'discount_type' => 'nullable|in:percentage,fixed',
+            'discount_value' => 'nullable|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
         ];
     }
 

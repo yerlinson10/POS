@@ -151,17 +151,23 @@
                                     <h3 class="text-lg font-semibold">Status Actions</h3>
                                 </div>
                                 <div class="p-4 space-y-2">
-                                    <Button v-if="invoice.status === 'pending'" @click="updateStatus('paid')"
+                                    <Button v-if="invoice.status === 'quotation'" :as="Link" :href="route('invoices.edit', invoice.id)"
+                                        variant="outline"
+                                        class="w-full text-blue-600 border-blue-600 hover:bg-blue-50 cursor-pointer">
+                                        <Icon name="Edit" class="w-4 h-4 mr-2" />
+                                        Edit Quotation
+                                    </Button>
+                                    <Button v-if="invoice.status === 'quotation'" @click="updateStatus('paid')"
                                         variant="outline"
                                         class="w-full text-green-600 border-green-600 hover:bg-green-50 cursor-pointer">
                                         Mark as Paid
                                     </Button>
-                                    <Button v-if="invoice.status === 'pending'" @click="updateStatus('canceled')"
+                                    <Button v-if="invoice.status === 'quotation'" @click="updateStatus('canceled')"
                                         variant="outline"
                                         class="w-full text-red-600 border-red-600 hover:bg-red-50 cursor-pointer">
                                         Cancel Invoice
                                     </Button>
-                                    <Button v-if="invoice.status === 'canceled'" @click="updateStatus('pending')"
+                                    <Button v-if="invoice.status === 'canceled'" @click="updateStatus('quotation')"
                                         variant="outline"
                                         class="w-full text-yellow-600 border-yellow-600 hover:bg-yellow-50 cursor-pointer">
                                         Reactivate Invoice
@@ -227,7 +233,7 @@ interface Invoice {
     discount_type?: 'percentage' | 'fixed'
     discount_value: number
     total_amount: number
-    status: 'pending' | 'paid' | 'canceled'
+    status: 'quotation' | 'paid' | 'canceled'
     payment_method: 'cash' | 'card' | 'transfer' | 'other'
     items: InvoiceItem[]
     created_at: string
@@ -278,7 +284,7 @@ const getStatusVariant = (status: string) => {
     switch (status) {
         case 'paid':
             return 'success'
-        case 'pending':
+        case 'quotation':
             return 'warning'
         case 'canceled':
             return 'destructive'

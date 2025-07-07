@@ -142,7 +142,7 @@ const getTitleClass = computed(() => {
     switch (props.sale.status) {
         case 'paid':
             return 'text-green-600'
-        case 'pending':
+        case 'quotation':
             return 'text-yellow-600'
         default:
             return 'text-green-600'
@@ -155,7 +155,7 @@ const getTitleIcon = computed(() => {
     switch (props.sale.status) {
         case 'paid':
             return 'CheckCircle'
-        case 'pending':
+        case 'quotation':
             return 'Clock'
         default:
             return 'CheckCircle'
@@ -168,8 +168,8 @@ const getTitleText = computed(() => {
     switch (props.sale.status) {
         case 'paid':
             return 'Payment Completed Successfully!'
-        case 'pending':
-            return 'Invoice Created - Payment Pending'
+        case 'quotation':
+            return 'Quotation Created Successfully!'
         default:
             return 'Sale Completed Successfully!'
     }
@@ -181,8 +181,8 @@ const getDescriptionText = computed(() => {
     switch (props.sale.status) {
         case 'paid':
             return 'Payment has been processed and inventory has been updated.'
-        case 'pending':
-            return 'Invoice has been created and is waiting for payment. Inventory will be updated upon payment.'
+        case 'quotation':
+            return 'Quotation has been created and can be edited until it becomes paid. Inventory will be updated upon payment.'
         default:
             return 'Your sale has been processed and recorded.'
     }
@@ -194,8 +194,8 @@ const getStatusText = computed(() => {
     switch (props.sale.status) {
         case 'paid':
             return 'Paid'
-        case 'pending':
-            return 'Pending Payment'
+        case 'quotation':
+            return 'Quotation'
         default:
             return 'Completed'
     }
@@ -207,7 +207,7 @@ const getStatusBadgeClass = computed(() => {
     switch (props.sale.status) {
         case 'paid':
             return 'bg-green-100 text-green-800'
-        case 'pending':
+        case 'quotation':
             return 'bg-yellow-100 text-yellow-800'
         default:
             return 'bg-green-100 text-green-800'

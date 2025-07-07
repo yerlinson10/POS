@@ -27,7 +27,7 @@ export interface CartItem {
     available_stock: number;
 }
 
-export type InvoiceStatus = 'pending' | 'paid';
+export type InvoiceStatus = 'quotation' | 'paid';
 
 export interface Sale {
     id: number;

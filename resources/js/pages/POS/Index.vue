@@ -843,7 +843,7 @@ const getCheckoutIcon = computed(() => {
     switch (invoiceStatus.value) {
         case 'paid':
             return 'CreditCard'
-        case 'pending':
+        case 'quotation':
             return 'Clock'
         default:
             return 'CreditCard'
@@ -869,8 +869,8 @@ const getCheckoutText = computed(() => {
     switch (invoiceStatus.value) {
         case 'paid':
             return 'Process Payment'
-        case 'pending':
-            return 'Create Pending Invoice'
+        case 'quotation':
+            return 'Create Quotation'
         default:
             return 'Process Sale'
     }
@@ -880,8 +880,8 @@ const getProcessingText = computed(() => {
     switch (invoiceStatus.value) {
         case 'paid':
             return 'Processing Payment...'
-        case 'pending':
-            return 'Creating Invoice...'
+        case 'quotation':
+            return 'Creating Quotation...'
         default:
             return 'Processing Sale...'
     }
@@ -891,8 +891,8 @@ const getCheckoutButtonShort = computed(() => {
     switch (invoiceStatus.value) {
         case 'paid':
             return 'Pay'
-        case 'pending':
-            return 'Pending'
+        case 'quotation':
+            return 'Quote'
         default:
             return 'Pay'
     }
@@ -961,11 +961,11 @@ const clearDiscount = () => {
 }
 
 const toggleInvoiceStatus = () => {
-    // Toggle between 'paid' and 'pending'
-    const newStatus = invoiceStatus.value === 'paid' ? 'pending' : 'paid'
+    // Toggle between 'paid' and 'quotation'
+    const newStatus = invoiceStatus.value === 'paid' ? 'quotation' : 'paid'
     posStore.setInvoiceStatus(newStatus)
 
-    const statusText = newStatus === 'paid' ? 'Paid' : 'Pending Payment'
+    const statusText = newStatus === 'paid' ? 'Paid' : 'Quotation'
     toast.success(`Invoice status switched to: ${statusText}`)
 }
 

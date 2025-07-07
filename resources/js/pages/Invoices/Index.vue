@@ -52,7 +52,7 @@
                                     <SelectValue placeholder="All statuses" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="quotation">Quotation</SelectItem>
                                     <SelectItem value="paid">Paid</SelectItem>
                                     <SelectItem value="canceled">Canceled</SelectItem>
                                 </SelectContent>
@@ -161,9 +161,14 @@
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center gap-1">
                                             <Link :href="route('invoices.show', invoice.id)" prefetch :cacheFor="['30s', '1m']">
-                                                    <Button variant="ghost" class="h-8 w-8 p-0">
-                                                        <Icon name="Eye" class="w-4 h-4" />
-                                                    </Button>
+                                                <Button variant="ghost" class="h-8 w-8 p-0">
+                                                    <Icon name="Eye" class="w-4 h-4" />
+                                                </Button>
+                                            </Link>
+                                            <Link v-if="invoice.status === 'quotation'" :href="route('invoices.edit', invoice.id)">
+                                                <Button variant="ghost" class="h-8 w-8 p-0">
+                                                    <Icon name="Edit" class="w-4 h-4" />
+                                                </Button>
                                             </Link>
                                         </div>
                                     </td>
@@ -251,7 +256,7 @@ interface Invoice {
         email: string
     }
     total_amount: number
-    status: 'pending' | 'paid' | 'canceled'
+    status: 'quotation' | 'paid' | 'canceled'
     payment_method: 'cash' | 'card' | 'transfer' | 'other'
     items_count: number
     created_at: string
@@ -348,7 +353,7 @@ const getStatusVariant = (status: string) => {
     switch (status) {
         case 'paid':
             return 'success'
-        case 'pending':
+        case 'quotation':
             return 'warning'
         case 'canceled':
             return 'destructive'
