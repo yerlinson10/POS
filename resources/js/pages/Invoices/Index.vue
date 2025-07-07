@@ -94,6 +94,7 @@
                                     <th class="text-left px-4 py-3 font-semibold text-sm">Customer</th>
                                     <th class="text-left px-4 py-3 font-semibold text-sm">Date</th>
                                     <th class="text-left px-4 py-3 font-semibold text-sm">Total</th>
+                                    <th class="text-left px-4 py-3 font-semibold text-sm">Payment</th>
                                     <th class="text-left px-4 py-3 font-semibold text-sm">Status</th>
                                     <th class="text-center px-4 py-3 font-semibold text-sm w-32">Actions</th>
                                 </tr>
@@ -138,6 +139,14 @@
                                     <td class="px-4 py-4">
                                         <div class="font-medium text-sm">
                                             ${{ formatCurrency(invoice.total_amount) }}
+                                        </div>
+                                    </td>
+
+                                    <!-- Payment Method -->
+                                    <td class="px-4 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <Icon :name="getPaymentMethodIcon(invoice.payment_method)" class="w-4 h-4 text-muted-foreground" />
+                                            <span class="text-sm capitalize">{{ invoice.payment_method || 'cash' }}</span>
                                         </div>
                                     </td>
 
@@ -243,6 +252,7 @@ interface Invoice {
     }
     total_amount: number
     status: 'pending' | 'paid' | 'canceled'
+    payment_method: 'cash' | 'card' | 'transfer' | 'other'
     items_count: number
     created_at: string
     discount_value?: number
@@ -344,6 +354,21 @@ const getStatusVariant = (status: string) => {
             return 'destructive'
         default:
             return 'default'
+    }
+}
+
+const getPaymentMethodIcon = (method: string) => {
+    switch (method) {
+        case 'cash':
+            return 'Banknote'
+        case 'card':
+            return 'CreditCard'
+        case 'transfer':
+            return 'ArrowRightLeft'
+        case 'other':
+            return 'MoreHorizontal'
+        default:
+            return 'Banknote'
     }
 }
 

@@ -115,6 +115,13 @@
                                         </Badge>
                                     </div>
                                     <div class="flex justify-between">
+                                        <span class="text-sm text-muted-foreground">Payment Method</span>
+                                        <div class="flex items-center gap-2">
+                                            <Icon :name="getPaymentMethodIcon(invoice.payment_method)" class="w-4 h-4 text-muted-foreground" />
+                                            <span class="text-sm font-medium capitalize">{{ invoice.payment_method || 'cash' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between">
                                         <span class="text-sm text-muted-foreground">Subtotal</span>
                                         <span class="text-sm font-medium">${{ invoice.subtotal_amount }}</span>
                                     </div>
@@ -221,6 +228,7 @@ interface Invoice {
     discount_value: number
     total_amount: number
     status: 'pending' | 'paid' | 'canceled'
+    payment_method: 'cash' | 'card' | 'transfer' | 'other'
     items: InvoiceItem[]
     created_at: string
 }
@@ -276,6 +284,21 @@ const getStatusVariant = (status: string) => {
             return 'destructive'
         default:
             return 'default'
+    }
+}
+
+const getPaymentMethodIcon = (method: string) => {
+    switch (method) {
+        case 'cash':
+            return 'Banknote'
+        case 'card':
+            return 'CreditCard'
+        case 'transfer':
+            return 'ArrowRightLeft'
+        case 'other':
+            return 'MoreHorizontal'
+        default:
+            return 'Banknote'
     }
 }
 
