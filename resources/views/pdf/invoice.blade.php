@@ -131,7 +131,7 @@
             color: white;
         }
 
-        .invoice-type.pending {
+        .invoice-type.quotation {
             background-color: var(--accent-color);
             color: white;
         }
@@ -477,7 +477,8 @@
                     </div>
                 </div>
                 <div class="invoice-meta">
-                    <div class="invoice-title">INVOICE</div>
+
+                    <div class="invoice-title">{{$invoice->status == 'paid' ? 'INVOICE' : 'QUOTATION'}}</div>
                     <div class="invoice-number">#{{ $invoice->id ?? 'XXXX' }}</div>
                     <div class="invoice-date">
                         Date: {{ $invoice->created_at ? $invoice->created_at->format('d/m/Y') : date('d/m/Y') }}
@@ -565,15 +566,6 @@
                             <td class="col-qty" style="text-align:center;">{{ number_format($item->quantity, 2) }}</td>
                             <td class="col-price" style="text-align:right;">${{ number_format($item->unit_price, 2) }}
                             </td>
-                            {{-- <td class="col-discount" style="text-align:right;">
-                            @if ($item->discount_percentage > 0)
-                                {{ number_format($item->discount_percentage, 2) }}%
-                            @elseif($item->discount_amount > 0)
-                                ${{ number_format($item->discount_amount, 2) }}
-                            @else
-                                -
-                            @endif
-                        </td> --}}
                             <td class="col-total" style="text-align:right;">${{ number_format($item->line_total, 2) }}
                             </td>
                         </tr>
@@ -586,11 +578,6 @@
             </table>
         </div>
 
-        <!-- Salto de página manual si hay muchos productos -->
-        {{-- @if (count($invoice->items ?? []) > 15)
-            <div class="page-break"></div>
-        @endif --}}
-
         <!-- Totales -->
         <div class="totals-section">
             <div class="totals-table">
@@ -599,6 +586,10 @@
                 </div>
                 <div class="totals-right">
                     <table class="totals-grid">
+                        <tr>
+                            <td class="label">Payment method:</td>
+                            <td class="value">{{ucfirst($invoice->payment_method)}}</td>
+                        </tr>
                         <tr>
                             <td class="label">Subtotal:</td>
                             <td class="value">${{ number_format($invoice->subtotal ?? 0, 2) }}</td>
@@ -634,6 +625,13 @@
             </div>
         </div>
 
+        <!-- Notas -->
+        @if ($invoice->notes ?? false)
+        <div class="notes-section">
+            <div class="notes-title">Notes:</div>
+            <div class="notes-content">{{ $invoice->notes }}</div>
+        </div>
+        @endif
         <!-- Footer -->
         <footer class="invoice-footer">
             <div style="margin-bottom: 5px;"><strong>Thank you for your purchase | {{ config('app.name') }}</strong>
@@ -641,13 +639,6 @@
             <div>This document is a printed representation of the electronic invoice</div>
             <div style="margin-top: 5px; font-size: 9px;">Generated on {{ date('d/m/Y H:i') }}</div>
         </footer>
-        <!-- Notas -->
-        @if ($invoice->notes ?? false)
-            <div class="notes-section">
-                <div class="notes-title">Notes:</div>
-                <div class="notes-content">{{ $invoice->notes }}</div>
-            </div>
-        @endif
     </div>
 </body>
 
