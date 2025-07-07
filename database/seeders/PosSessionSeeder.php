@@ -34,7 +34,7 @@ class PosSessionSeeder extends Seeder
                 'pos_session_id' => $closedSession->id,
                 'user_id' => $user->id,
                 'status' => 'paid',
-                'payment_method' => \Arr::random(['cash', 'card', 'transfer']),
+                'payment_method' => Arr::random(['cash', 'card', 'transfer']),
             ]);
 
             // Sesión abierta actual
@@ -49,7 +49,7 @@ class PosSessionSeeder extends Seeder
                     'pos_session_id' => $openSession->id,
                     'user_id' => $user->id,
                     'status' => 'paid',
-                    'payment_method' => \Arr::random(['cash', 'card']),
+                    'payment_method' => Arr::random(['cash', 'card']),
                 ]);
             }
         }
