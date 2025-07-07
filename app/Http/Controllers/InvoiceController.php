@@ -65,6 +65,7 @@ class InvoiceController extends Controller
                 ] : null,
                 'total_amount' => $invoice->total_amount,
                 'status' => $invoice->status,
+                'payment_method' => $invoice->payment_method,
                 'items_count' => $invoice->items->count(),
                 'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
             ]),
@@ -103,6 +104,7 @@ class InvoiceController extends Controller
                 'tax_amount' => $invoice->tax_amount,
                 'total_amount' => $invoice->total_amount,
                 'status' => $invoice->status,
+                'payment_method' => $invoice->payment_method,
                 'items' => $invoice->items->map(fn($item) => [
                     'id' => $item->id,
                     'product_id' => $item->product_id,

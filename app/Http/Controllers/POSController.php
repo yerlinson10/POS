@@ -10,6 +10,7 @@ use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
 use App\Services\CustomerService;
+use App\Services\PosSessionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Sale\StoreSaleRequest;
@@ -19,11 +20,16 @@ class POSController extends Controller
 {
     protected ProductService $productService;
     protected CustomerService $customerService;
+    protected PosSessionService $posSessionService;
 
-    public function __construct(ProductService $productService, CustomerService $customerService)
-    {
+    public function __construct(
+        ProductService $productService,
+        CustomerService $customerService,
+        PosSessionService $posSessionService
+    ) {
         $this->productService = $productService;
         $this->customerService = $customerService;
+        $this->posSessionService = $posSessionService;
     }
 
     /**
@@ -141,6 +147,15 @@ class POSController extends Controller
         $validated = $data->validated();
 
         try {
+            // Verificar que hay una sesión POS activa
+            $activeSession = $this->posSessionService->getActiveSession();
+            if (!$activeSession) {
+                return response()->json([
+                    'message' => 'No hay una sesión POS activa. Debes abrir una sesión antes de procesar ventas.',
+                    'requires_session' => true
+                ], 422);
+            }
+
             DB::beginTransaction();
 
             // Only query products once and map by id for efficiency
@@ -160,16 +175,18 @@ class POSController extends Controller
                 }
             }
 
-            // Create the invoice
+            // Create the invoice with session reference
             $invoice = Invoice::create([
                 'customer_id' => $validated['customer_id'],
                 'user_id' => Auth::id(),
+                'pos_session_id' => $activeSession->id,
                 'date' => now(),
                 'total_amount' => $validated['total_amount'],
                 'status' => $validated['status'],
                 'subtotal' => $validated['subtotal'],
                 'discount_type' => $validated['discount_type'],
-                'discount_value' => $validated['discount_value']
+                'discount_value' => $validated['discount_value'],
+                'payment_method' => $validated['payment_method'] ?? 'cash',
             ]);
 
             // Create the items and update stock if applicable
@@ -196,7 +213,8 @@ class POSController extends Controller
             ];
 
             return response()->json([
-                'invoice' => $invoice->load(['customer', 'items.product']),
+                'invoice' => $invoice->load(['customer', 'items.product', 'posSession']),
+                'session' => $activeSession,
                 'message' => $statusMessages[$validated['status']]
             ], 201);
 
@@ -229,5 +247,23 @@ class POSController extends Controller
             ]);
 
         return response()->json(['products' => $products]);
+    }
+
+    /**
+     * Get active POS session status for the current user.
+     */
+    public function getSessionStatus()
+    {
+        $activeSession = $this->posSessionService->getActiveSession();
+
+        return response()->json([
+            'has_active_session' => $activeSession !== null,
+            'session' => $activeSession ? [
+                'id' => $activeSession->id,
+                'opened_at' => $activeSession->opened_at,
+                'initial_cash' => $activeSession->initial_cash,
+                'user_name' => $activeSession->user->name,
+            ] : null,
+        ]);
     }
 }

@@ -13,12 +13,14 @@ class Invoice extends Model
     protected $fillable = [
         'customer_id',
         'user_id',
+        'pos_session_id',
         'date',
         'total_amount',
         'status',
         'subtotal',
         'discount_type',
         'discount_value',
+        'payment_method',
     ];
 
     protected $casts = [
@@ -37,6 +39,11 @@ class Invoice extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function posSession()
+    {
+        return $this->belongsTo(PosSession::class);
     }
 
     public function items()
