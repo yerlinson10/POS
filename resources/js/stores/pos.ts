@@ -10,6 +10,7 @@ export const usePOSStore = defineStore('pos', () => {
     const discountType = ref<'percentage' | 'fixed' | null>(null);
     const discountValue = ref<number>(0);
     const invoiceStatus = ref<InvoiceStatus>('paid');
+    const paymentMethod = ref<'cash' | 'card' | 'transfer' | 'other'>('cash');
     const isProcessingSale = ref(false);
     const lastSale = ref<Sale | null>(null);
 
@@ -112,6 +113,10 @@ export const usePOSStore = defineStore('pos', () => {
         invoiceStatus.value = status;
     };
 
+    const setPaymentMethod = (method: 'cash' | 'card' | 'transfer' | 'other') => {
+        paymentMethod.value = method;
+    };
+
     const processSale = async (): Promise<Sale> => {
         if (!canProcessSale.value) {
             throw new Error('Cannot process sale');
@@ -134,6 +139,7 @@ export const usePOSStore = defineStore('pos', () => {
                 discount_amount: discountAmount.value,
                 total_amount: total.value,
                 status: invoiceStatus.value,
+                payment_method: paymentMethod.value,
             };
 
             const response = await axios.post('/pos/sales', saleData);
@@ -146,6 +152,7 @@ export const usePOSStore = defineStore('pos', () => {
             setCustomer(null);
             clearDiscount();
             setInvoiceStatus('paid');
+            setPaymentMethod('cash');
 
             return sale;
         } finally {
@@ -170,6 +177,7 @@ export const usePOSStore = defineStore('pos', () => {
         selectedCustomer,
         discountType,
         discountValue,
+        paymentMethod,
         invoiceStatus,
         isProcessingSale,
         lastSale,
@@ -190,6 +198,7 @@ export const usePOSStore = defineStore('pos', () => {
         setDiscount,
         clearDiscount,
         setInvoiceStatus,
+        setPaymentMethod,
         processSale,
         updateProductStock,
     };

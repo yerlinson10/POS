@@ -1,10 +1,17 @@
 <template>
     <AppLayout title="Point of Sale">
+
+        <!-- Session status notification (moved to top, margin optimized) -->
+        <!-- <SessionStatus class="mx-4 my-4" /> -->
+
         <div class="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-4rem)] gap-4 p-2 md:p-4">
             <!-- Left Panel - Cart and Products -->
             <div class="w-full lg:w-2/3 flex flex-col gap-4">
                 <!-- Cart Section -->
                 <Card class="flex-1 p-3 md:p-6">
+                    <div>
+                        <SessionStatus/>
+                    </div>
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-6 gap-3 sm:gap-0">
                         <div>
                             <div class="flex items-center gap-2">
@@ -113,6 +120,51 @@
                                             </div>
                                         </div>
 
+                                        <!-- Payment Methods -->
+                                        <div>
+                                            <h3
+                                                class="text-xs sm:text-sm font-medium text-muted-foreground mb-2 sm:mb-3 flex items-center gap-2">
+                                                <Icon name="CreditCard" class="w-3 h-3 sm:w-4 sm:h-4" />
+                                                Payment Methods
+                                            </h3>
+                                            <div class="space-y-1 sm:space-y-2">
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Cycle Payment Methods</span>
+                                                    <div class="flex gap-1">
+                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F10</kbd>
+                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Alt+P</kbd>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Cash</span>
+                                                    <div class="flex gap-1">
+                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F11</kbd>
+                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+1</kbd>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Card</span>
+                                                    <div class="flex gap-1">
+                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F12</kbd>
+                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+2</kbd>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Transfer</span>
+                                                    <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+3</kbd>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Other</span>
+                                                    <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+4</kbd>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <!-- Cart Navigation -->
                                         <div>
                                             <h3
@@ -144,6 +196,8 @@
                                                         <kbd
                                                             class="px-1.5 py-1 bg-muted border border-border rounded text-xs font-mono">+</kbd>
                                                         <kbd
+                                                            class="px-1.5 py-1 bg-muted border border-border rounded text-xs font-mono">=</kbd>
+                                                        <kbd
                                                             class="px-1.5 py-1 bg-muted border border-border rounded text-xs font-mono">-</kbd>
                                                     </div>
                                                 </div>
@@ -156,17 +210,62 @@
                                             </div>
                                         </div>
 
+                                        <!-- Dialog Actions -->
+                                        <div>
+                                            <h3
+                                                class="text-xs sm:text-sm font-medium text-muted-foreground mb-2 sm:mb-3 flex items-center gap-2">
+                                                <Icon name="MessageSquare" class="w-3 h-3 sm:w-4 sm:h-4" />
+                                                Dialog Actions
+                                            </h3>
+                                            <div class="space-y-1 sm:space-y-2">
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Confirm Payment</span>
+                                                    <kbd
+                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Enter</kbd>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Confirm Remove Item</span>
+                                                    <div class="flex gap-1">
+                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Enter</kbd>
+                                                        <kbd class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Del</kbd>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Confirm Clear Cart</span>
+                                                    <div class="flex gap-1">
+                                                        <kbd class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Del</kbd>
+                                                        <kbd class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Backspace</kbd>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Cancel Dialog</span>
+                                                    <kbd
+                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Esc</kbd>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <!-- General Navigation -->
                                         <div>
                                             <h3
                                                 class="text-xs sm:text-sm font-medium text-muted-foreground mb-2 sm:mb-3 flex items-center gap-2">
                                                 <Icon name="Navigation" class="w-3 h-3 sm:w-4 sm:h-4" />
-                                                General Navigation
+                                                Navigation & Search
                                             </h3>
                                             <div class="space-y-1 sm:space-y-2">
                                                 <div
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
-                                                    <span class="text-xs sm:text-sm">Navigate Customer Search</span>
+                                                    <span class="text-xs sm:text-sm">Toggle Sidebar</span>
+                                                    <kbd
+                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+B</kbd>
+                                                </div>
+                                                <div
+                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
+                                                    <span class="text-xs sm:text-sm">Navigate Customer Results</span>
                                                     <div class="flex gap-1">
                                                         <kbd
                                                             class="px-1.5 py-1 bg-muted border border-border rounded text-xs font-mono">↑</kbd>
@@ -176,27 +275,9 @@
                                                 </div>
                                                 <div
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
-                                                    <span class="text-xs sm:text-sm">Apply Discount</span>
+                                                    <span class="text-xs sm:text-sm">Show Shortcuts Help</span>
                                                     <kbd
-                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Enter</kbd>
-                                                </div>
-                                                <div
-                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
-                                                    <span class="text-xs sm:text-sm">Confirm Dialogs</span>
-                                                    <kbd
-                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Enter</kbd>
-                                                </div>
-                                                <div
-                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
-                                                    <span class="text-xs sm:text-sm">Confirm Deletions</span>
-                                                    <kbd
-                                                        class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Del</kbd>
-                                                </div>
-                                                <div
-                                                    class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
-                                                    <span class="text-xs sm:text-sm">Cancel Dialogs</span>
-                                                    <kbd
-                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Esc</kbd>
+                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">?</kbd>
                                                 </div>
                                             </div>
                                         </div>
@@ -406,26 +487,106 @@
                         <InvoiceStatusSelector v-model="invoiceStatus" />
                     </div>
 
+                    <!-- Payment Method Selection -->
+                    <div class="border rounded-lg p-3 md:p-4 mb-3 md:mb-4">
+                        <div class="flex items-center justify-between mb-2 md:mb-3">
+                            <span class="text-xs md:text-sm font-medium">Payment Method</span>
+                            <div class="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Icon name="Keyboard" class="w-3 h-3" />
+                                <span class="hidden sm:inline">F10/Alt+P cycle</span>
+                                <span class="sm:hidden">F10</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <Button
+                                @click="posStore.setPaymentMethod('cash')"
+                                :variant="paymentMethod === 'cash' ? 'default' : 'outline'"
+                                size="sm"
+                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
+                                title="Cash - Shortcuts: F11, Ctrl+1"
+                            >
+                                <Icon name="Banknote" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                                <span>Cash</span>
+                            </Button>
+                            <Button
+                                @click="posStore.setPaymentMethod('card')"
+                                :variant="paymentMethod === 'card' ? 'default' : 'outline'"
+                                size="sm"
+                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
+                                title="Card - Shortcuts: F12, Ctrl+2"
+                            >
+                                <Icon name="CreditCard" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                                <span>Card</span>
+                            </Button>
+                            <Button
+                                @click="posStore.setPaymentMethod('transfer')"
+                                :variant="paymentMethod === 'transfer' ? 'default' : 'outline'"
+                                size="sm"
+                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
+                                title="Transfer - Shortcut: Ctrl+3"
+                            >
+                                <Icon name="ArrowRightLeft" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                                <span>Transfer</span>
+                            </Button>
+                            <Button
+                                @click="posStore.setPaymentMethod('other')"
+                                :variant="paymentMethod === 'other' ? 'default' : 'outline'"
+                                size="sm"
+                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
+                                title="Other - Shortcut: Ctrl+4"
+                            >
+                                <Icon name="MoreHorizontal" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                                <span>Other</span>
+                            </Button>
+                        </div>
+                        <div class="mt-2 text-xs text-muted-foreground">
+                            <div class="flex items-center justify-between">
+                                <span>Selected: <span class="font-medium capitalize">{{ paymentMethod }}</span></span>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span class="hidden md:inline">Quick access:</span>
+                                    <div class="flex gap-1">
+                                        <kbd class="px-1 py-0.5 bg-muted border rounded text-xs">Ctrl+1-4</kbd>
+                                        <kbd class="px-1 py-0.5 bg-muted border rounded text-xs hidden sm:inline">Alt+P</kbd>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Discount Section -->
                     <div class="border rounded-lg p-3 md:p-4 mb-3 md:mb-4">
                         <div class="flex items-center justify-between mb-2 md:mb-3">
                             <span class="text-xs md:text-sm font-medium">Apply Discount</span>
-                            <Button v-if="discountType" @click="clearDiscount" variant="ghost" size="sm"
-                                class="cursor-pointer h-6 w-6 md:h-8 md:w-8 p-0">
-                                <Icon name="X" class="w-3 h-3 md:w-4 md:h-4" />
-                            </Button>
+                            <div class="flex items-center gap-2">
+                                <div v-if="!discountType" class="flex items-center gap-1 text-xs text-muted-foreground">
+                                    <Icon name="Keyboard" class="w-3 h-3" />
+                                    <span class="hidden sm:inline">F6/F7</span>
+                                </div>
+                                <Button v-if="discountType" @click="clearDiscount" variant="ghost" size="sm"
+                                    class="cursor-pointer h-6 w-6 md:h-8 md:w-8 p-0">
+                                    <Icon name="X" class="w-3 h-3 md:w-4 md:h-4" />
+                                </Button>
+                            </div>
                         </div>
 
                         <div v-if="!discountType" class="flex flex-col sm:flex-row gap-2">
                             <Button @click="showDiscountDialog('percentage')" variant="outline" size="sm"
-                                class="flex-1 cursor-pointer">
+                                class="flex-1 cursor-pointer relative group"
+                                title="Percentage Discount - Shortcut: F6">
                                 <Icon name="Percent" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Percentage (F6)</span>
+                                <span>Percentage</span>
+                                <div class="absolute -top-1 -right-1 bg-primary/10 text-primary text-xs px-1 rounded border border-primary/20">
+                                    F6
+                                </div>
                             </Button>
                             <Button @click="showDiscountDialog('fixed')" variant="outline" size="sm"
-                                class="flex-1 cursor-pointer">
+                                class="flex-1 cursor-pointer relative group"
+                                title="Fixed Amount Discount - Shortcut: F7">
                                 <Icon name="DollarSign" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Fixed Amount (F7)</span>
+                                <span>Fixed Amount</span>
+                                <div class="absolute -top-1 -right-1 bg-primary/10 text-primary text-xs px-1 rounded border border-primary/20">
+                                    F7
+                                </div>
                             </Button>
                         </div>
 
@@ -509,6 +670,23 @@
                         <h4 class="font-medium text-sm mb-1">Customer:</h4>
                         <p class="text-sm">{{ selectedCustomer.full_name }}</p>
                         <p class="text-xs text-muted-foreground">{{ selectedCustomer.email }}</p>
+                    </div>
+
+                    <!-- Payment Method & Invoice Status -->
+                    <div class="mb-4 p-3 bg-muted/50 rounded-lg">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <h4 class="font-medium text-sm mb-1">Payment Method:</h4>
+                                <div class="flex items-center gap-1">
+                                    <Icon :name="getPaymentMethodIcon(paymentMethod)" class="w-4 h-4" />
+                                    <span class="text-sm capitalize">{{ paymentMethod }}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-sm mb-1">Invoice Status:</h4>
+                                <span class="text-sm capitalize">{{ invoiceStatus }}</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Cart Items -->
@@ -613,6 +791,7 @@ import DiscountDialog from './components/DiscountDialog.vue'
 import SaleSuccessDialog from './components/SaleSuccessDialog.vue'
 import InvoiceStatusSelector from './components/InvoiceStatusSelector.vue'
 import { toast } from 'vue-sonner'
+import SessionStatus from './components/SessionStatus.vue'
 
 // Stores
 const posStore = usePOSStore()
@@ -626,6 +805,7 @@ const {
     discountValue,
     discountAmount,
     invoiceStatus,
+    paymentMethod,
     subtotal,
     total,
     itemCount,
@@ -669,6 +849,21 @@ const getCheckoutIcon = computed(() => {
             return 'CreditCard'
     }
 })
+
+const getPaymentMethodIcon = (method: string) => {
+    switch (method) {
+        case 'cash':
+            return 'Banknote'
+        case 'card':
+            return 'CreditCard'
+        case 'transfer':
+            return 'ArrowRightLeft'
+        case 'other':
+            return 'MoreHorizontal'
+        default:
+            return 'CreditCard'
+    }
+}
 
 const getCheckoutText = computed(() => {
     switch (invoiceStatus.value) {
@@ -1231,6 +1426,69 @@ onMounted(() => {
         if (e.key === 'F8') {
             e.preventDefault()
             toggleInvoiceStatus()
+        }
+
+        // F10: Cycle through payment methods
+        if (e.key === 'F10') {
+            e.preventDefault()
+            const methods: Array<'cash' | 'card' | 'transfer' | 'other'> = ['cash', 'card', 'transfer', 'other']
+            const currentIndex = methods.indexOf(paymentMethod.value)
+            const nextIndex = (currentIndex + 1) % methods.length
+            posStore.setPaymentMethod(methods[nextIndex])
+            toast.success(`Payment method: ${methods[nextIndex].charAt(0).toUpperCase() + methods[nextIndex].slice(1)}`)
+        }
+
+        // F11: Set payment method to cash
+        if (e.key === 'F11') {
+            e.preventDefault()
+            posStore.setPaymentMethod('cash')
+            toast.success('Payment method: Cash')
+        }
+
+        // F12: Set payment method to card
+        if (e.key === 'F12') {
+            e.preventDefault()
+            posStore.setPaymentMethod('card')
+            toast.success('Payment method: Card')
+        }
+
+        // Additional shortcuts for payment methods (more intuitive)
+        // Ctrl+1: Cash
+        if (e.ctrlKey && e.key === '1') {
+            e.preventDefault()
+            posStore.setPaymentMethod('cash')
+            toast.success('Payment method: Cash (Ctrl+1)')
+        }
+
+        // Ctrl+2: Card
+        if (e.ctrlKey && e.key === '2') {
+            e.preventDefault()
+            posStore.setPaymentMethod('card')
+            toast.success('Payment method: Card (Ctrl+2)')
+        }
+
+        // Ctrl+3: Transfer
+        if (e.ctrlKey && e.key === '3') {
+            e.preventDefault()
+            posStore.setPaymentMethod('transfer')
+            toast.success('Payment method: Transfer (Ctrl+3)')
+        }
+
+        // Ctrl+4: Other
+        if (e.ctrlKey && e.key === '4') {
+            e.preventDefault()
+            posStore.setPaymentMethod('other')
+            toast.success('Payment method: Other (Ctrl+4)')
+        }
+
+        // Alt+P: Cycle through payment methods (alternative)
+        if (e.altKey && e.key === 'p') {
+            e.preventDefault()
+            const methods: Array<'cash' | 'card' | 'transfer' | 'other'> = ['cash', 'card', 'transfer', 'other']
+            const currentIndex = methods.indexOf(paymentMethod.value)
+            const nextIndex = (currentIndex + 1) % methods.length
+            posStore.setPaymentMethod(methods[nextIndex])
+            toast.success(`Payment method: ${methods[nextIndex].charAt(0).toUpperCase() + methods[nextIndex].slice(1)} (Alt+P)`)
         }
 
         // Handle Delete/Backspace in confirmation dialogs
