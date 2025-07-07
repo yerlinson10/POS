@@ -24,7 +24,7 @@
                             </Button>
                             <div class="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                                 <Icon name="Package" class="w-3 h-3 md:w-4 md:h-4" />
-                                <span v-if="products.total">{{ products.total }} items</span>
+                                <span v-if="products?.total">{{ products.total }} items</span>
                             </div>
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="p in products.data" :key="p.id"
+                                <tr v-for="p in (products?.data || [])" :key="p.id"
                                     class="border-b hover:bg-muted/50 transition-colors group">
                                     <!-- Product Info -->
                                     <td class="px-4 py-4">
@@ -184,25 +184,25 @@
                 </div>
 
                 <!-- Compact Pagination -->
-                <div v-if="products.data.length > 0"
+                <div v-if="(products?.data?.length || 0) > 0"
                     class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-4 p-2 md:p-4 border-t bg-muted/20">
                     <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4">
                         <div class="text-xs text-muted-foreground">
-                            <span class="font-medium">{{ products.from || 0 }}-{{ products.to || 0 }}</span>
+                            <span class="font-medium">{{ products?.from || 0 }}-{{ products?.to || 0 }}</span>
                             <span class="hidden xs:inline"> of </span>
                             <span class="xs:hidden">/</span>
-                            <span class="font-medium">{{ products.total }}</span>
+                            <span class="font-medium">{{ products?.total || 0 }}</span>
                         </div>
                         <div class="text-xs text-muted-foreground">
-                            Page {{ products.current_page }}/{{ products.last_page }}
+                            Page {{ products?.current_page || 1 }}/{{ products?.last_page || 1 }}
                         </div>
                     </div>
 
                     <Pagination v-slot="{ page: internalPage }" :items-per-page="filters.per_page"
-                        :total="products.last_page" :page="filters.page" @page-change="onPageChange" class="flex">
+                        :total="products?.last_page || 1" :page="filters.page" @page-change="onPageChange" class="flex">
                         <PaginationContent v-slot="{ items: pages }" class="justify-center sm:justify-end">
                             <PaginationPrevious @click="onPageChange(internalPage - 1)"
-                                :disabled="products.current_page <= 1" class="h-8 md:h-9" />
+                                :disabled="(products?.current_page || 1) <= 1" class="h-8 md:h-9" />
                             <template v-for="(item, idx) in pages" :key="idx">
                                 <PaginationItem v-if="item.type === 'page'" :value="item.value"
                                     :is-active="item.value === internalPage" @click="onPageChange(item.value)"
@@ -210,9 +210,9 @@
                                     {{ item.value }}
                                 </PaginationItem>
                             </template>
-                            <PaginationEllipsis :index="4" v-if="products.last_page >= 4" class="h-8 md:h-9" />
+                            <PaginationEllipsis :index="4" v-if="(products?.last_page || 1) >= 4" class="h-8 md:h-9" />
                             <PaginationNext @click="onPageChange(internalPage + 1)"
-                                :disabled="products.current_page >= products.last_page" class="h-8 md:h-9" />
+                                :disabled="(products?.current_page || 1) >= (products?.last_page || 1)" class="h-8 md:h-9" />
                         </PaginationContent>
                     </Pagination>
                 </div>
