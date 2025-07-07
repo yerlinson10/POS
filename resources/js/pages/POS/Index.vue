@@ -10,7 +10,7 @@
                 <!-- Cart Section -->
                 <Card class="flex-1 p-3 md:p-6">
                     <div>
-                        <SessionStatus/>
+                        <SessionStatus />
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-6 gap-3 sm:gap-0">
                         <div>
@@ -132,35 +132,43 @@
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
                                                     <span class="text-xs sm:text-sm">Cycle Payment Methods</span>
                                                     <div class="flex gap-1">
-                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F10</kbd>
-                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Alt+P</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F10</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Alt+P</kbd>
                                                     </div>
                                                 </div>
                                                 <div
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
                                                     <span class="text-xs sm:text-sm">Cash</span>
                                                     <div class="flex gap-1">
-                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F11</kbd>
-                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+1</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F11</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+1</kbd>
                                                     </div>
                                                 </div>
                                                 <div
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
                                                     <span class="text-xs sm:text-sm">Card</span>
                                                     <div class="flex gap-1">
-                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F12</kbd>
-                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+2</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">F12</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+2</kbd>
                                                     </div>
                                                 </div>
                                                 <div
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
                                                     <span class="text-xs sm:text-sm">Transfer</span>
-                                                    <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+3</kbd>
+                                                    <kbd
+                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+3</kbd>
                                                 </div>
                                                 <div
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
                                                     <span class="text-xs sm:text-sm">Other</span>
-                                                    <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+4</kbd>
+                                                    <kbd
+                                                        class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Ctrl+4</kbd>
                                                 </div>
                                             </div>
                                         </div>
@@ -228,16 +236,20 @@
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
                                                     <span class="text-xs sm:text-sm">Confirm Remove Item</span>
                                                     <div class="flex gap-1">
-                                                        <kbd class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Enter</kbd>
-                                                        <kbd class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Del</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-muted border border-border rounded text-xs font-mono">Enter</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Del</kbd>
                                                     </div>
                                                 </div>
                                                 <div
                                                     class="flex items-center justify-between p-2 sm:p-3 rounded-md hover:bg-accent/50 transition-colors">
                                                     <span class="text-xs sm:text-sm">Confirm Clear Cart</span>
                                                     <div class="flex gap-1">
-                                                        <kbd class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Del</kbd>
-                                                        <kbd class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Backspace</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Del</kbd>
+                                                        <kbd
+                                                            class="px-2 py-1 bg-destructive/10 border border-destructive/20 text-destructive rounded text-xs font-mono">Backspace</kbd>
                                                     </div>
                                                 </div>
                                                 <div
@@ -369,7 +381,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="font-medium text-sm md:text-base mb-1">{{ item.product_name }}</div>
                                 <div class="text-xs md:text-sm text-muted-foreground mb-1 md:mb-2">{{ item.product_sku
-                                }}</div>
+                                    }}</div>
                                 <div class="text-xs md:text-sm font-medium text-primary">
                                     ${{ Number(item.unit_price).toFixed(2) }} per unit
                                 </div>
@@ -463,10 +475,10 @@
             </div>
 
             <!-- Right Panel - Customer and Checkout -->
-            <div class="w-full lg:w-1/3 flex flex-col gap-4">
+            <div class="w-full lg:w-1/3 flex flex-col gap-2">
                 <!-- Customer Selection -->
                 <Card class="p-3 md:p-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 md:mb-4 gap-2 sm:gap-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                         <h3 class="text-base md:text-lg font-medium">Customer</h3>
                         <Button @click="showNewCustomerDialog = true" variant="outline" size="sm"
                             class="text-xs md:text-sm">
@@ -480,81 +492,20 @@
 
                 <!-- Checkout Section -->
                 <Card class="flex-1 p-3 md:p-4">
-                    <h3 class="text-base md:text-lg font-medium mb-3 md:mb-4">Order Summary</h3>
+                    <h3 class="text-base md:text-lg font-medium">Order Summary</h3>
 
                     <!-- Invoice Status Selection -->
-                    <div class="border rounded-lg p-3 md:p-4 mb-3 md:mb-4">
+                    <div class="border rounded-lg p-3 md:p-4">
                         <InvoiceStatusSelector v-model="invoiceStatus" />
                     </div>
 
                     <!-- Payment Method Selection -->
-                    <div class="border rounded-lg p-3 md:p-4 mb-3 md:mb-4">
-                        <div class="flex items-center justify-between mb-2 md:mb-3">
-                            <span class="text-xs md:text-sm font-medium">Payment Method</span>
-                            <div class="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Icon name="Keyboard" class="w-3 h-3" />
-                                <span class="hidden sm:inline">F10/Alt+P cycle</span>
-                                <span class="sm:hidden">F10</span>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <Button
-                                @click="posStore.setPaymentMethod('cash')"
-                                :variant="paymentMethod === 'cash' ? 'default' : 'outline'"
-                                size="sm"
-                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
-                                title="Cash - Shortcuts: F11, Ctrl+1"
-                            >
-                                <Icon name="Banknote" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Cash</span>
-                            </Button>
-                            <Button
-                                @click="posStore.setPaymentMethod('card')"
-                                :variant="paymentMethod === 'card' ? 'default' : 'outline'"
-                                size="sm"
-                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
-                                title="Card - Shortcuts: F12, Ctrl+2"
-                            >
-                                <Icon name="CreditCard" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Card</span>
-                            </Button>
-                            <Button
-                                @click="posStore.setPaymentMethod('transfer')"
-                                :variant="paymentMethod === 'transfer' ? 'default' : 'outline'"
-                                size="sm"
-                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
-                                title="Transfer - Shortcut: Ctrl+3"
-                            >
-                                <Icon name="ArrowRightLeft" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Transfer</span>
-                            </Button>
-                            <Button
-                                @click="posStore.setPaymentMethod('other')"
-                                :variant="paymentMethod === 'other' ? 'default' : 'outline'"
-                                size="sm"
-                                class="cursor-pointer h-9 text-xs md:text-sm relative group"
-                                title="Other - Shortcut: Ctrl+4"
-                            >
-                                <Icon name="MoreHorizontal" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Other</span>
-                            </Button>
-                        </div>
-                        <div class="mt-2 text-xs text-muted-foreground">
-                            <div class="flex items-center justify-between">
-                                <span>Selected: <span class="font-medium capitalize">{{ paymentMethod }}</span></span>
-                                <div class="flex items-center gap-2 text-xs">
-                                    <span class="hidden md:inline">Quick access:</span>
-                                    <div class="flex gap-1">
-                                        <kbd class="px-1 py-0.5 bg-muted border rounded text-xs">Ctrl+1-4</kbd>
-                                        <kbd class="px-1 py-0.5 bg-muted border rounded text-xs hidden sm:inline">Alt+P</kbd>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="border rounded-lg p-3 md:p-4">
+                        <PaymentMethodSelector v-model="paymentMethod" />
                     </div>
 
                     <!-- Discount Section -->
-                    <div class="border rounded-lg p-3 md:p-4 mb-3 md:mb-4">
+                    <div class="border rounded-lg p-3 md:p-4">
                         <div class="flex items-center justify-between mb-2 md:mb-3">
                             <span class="text-xs md:text-sm font-medium">Apply Discount</span>
                             <div class="flex items-center gap-2">
@@ -571,22 +522,15 @@
 
                         <div v-if="!discountType" class="flex flex-col sm:flex-row gap-2">
                             <Button @click="showDiscountDialog('percentage')" variant="outline" size="sm"
-                                class="flex-1 cursor-pointer relative group"
-                                title="Percentage Discount - Shortcut: F6">
+                                class="flex-1 cursor-pointer relative group" title="Percentage Discount - Shortcut: F6">
                                 <Icon name="Percent" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Percentage</span>
-                                <div class="absolute -top-1 -right-1 bg-primary/10 text-primary text-xs px-1 rounded border border-primary/20">
-                                    F6
-                                </div>
+                                <span>Percentage (F6)</span>
                             </Button>
                             <Button @click="showDiscountDialog('fixed')" variant="outline" size="sm"
                                 class="flex-1 cursor-pointer relative group"
                                 title="Fixed Amount Discount - Shortcut: F7">
                                 <Icon name="DollarSign" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                                <span>Fixed Amount</span>
-                                <div class="absolute -top-1 -right-1 bg-primary/10 text-primary text-xs px-1 rounded border border-primary/20">
-                                    F7
-                                </div>
+                                <span>Fixed Amount (F7)</span>
                             </Button>
                         </div>
 
@@ -604,7 +548,7 @@
                     </div>
 
                     <!-- Totals -->
-                    <div class="space-y-2 md:space-y-3 border rounded-lg p-3 md:p-4 mb-4 md:mb-6">
+                    <div class="space-y-2 md:space-y-3 border rounded-lg p-3 md:p-4">
                         <div class="flex justify-between text-xs md:text-sm">
                             <span>Subtotal:</span>
                             <span class="font-medium">${{ Number(subtotal).toFixed(2) }}</span>
@@ -625,7 +569,7 @@
                         size="lg" :disabled="!canProcessSale" :loading="isProcessingSale">
                         <Icon :name="getCheckoutIcon" class="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />
                         <span class="hidden sm:inline">{{ isProcessingSale ? getProcessingText : getCheckoutText
-                        }}</span>
+                            }}</span>
                         <span class="sm:hidden">{{ isProcessingSale ? 'Processing...' : getCheckoutButtonShort }}</span>
                         <span v-if="!isProcessingSale" class="ml-2 text-xs opacity-75 hidden md:inline">(F4)</span>
                     </Button>
@@ -652,7 +596,8 @@
             @discount-applied="handleDiscountApplied" />
 
         <!-- Sale Success Dialog -->
-        <SaleSuccessDialog v-model:open="showSaleSuccessDialog" :sale="lastSale" :is-printing="isPrintingInvoice" @print-invoice="printInvoice" />
+        <SaleSuccessDialog v-model:open="showSaleSuccessDialog" :sale="lastSale" :is-printing="isPrintingInvoice"
+            @print-invoice="printInvoice" />
 
         <!-- Payment Confirmation Dialog -->
         <AlertDialog v-model:open="showPaymentConfirmDialog">
@@ -660,7 +605,8 @@
                 <AlertDialogHeader>
                     <AlertDialogTitle>Confirm Invoice</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Please review the order details before processing the invoice. Press F4 again to print after processing.
+                        Please review the order details before processing the invoice. Press F4 again to print after
+                        processing.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -790,6 +736,7 @@ import NewCustomerDialog from './components/NewCustomerDialog.vue'
 import DiscountDialog from './components/DiscountDialog.vue'
 import SaleSuccessDialog from './components/SaleSuccessDialog.vue'
 import InvoiceStatusSelector from './components/InvoiceStatusSelector.vue'
+import PaymentMethodSelector from './components/PaymentMethodSelector.vue'
 import { toast } from 'vue-sonner'
 import SessionStatus from './components/SessionStatus.vue'
 
