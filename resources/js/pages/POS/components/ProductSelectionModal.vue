@@ -22,7 +22,7 @@
                     <div class="relative flex-1">
                         <Icon name="Search"
                             class="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
-                        <Input v-model="filters.search" placeholder="Search products..."
+                        <Input v-model="filters.search" ref="searchInputRef" data-product-search-input placeholder="Search products..."
                             class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                     </div>
                     <Button @click="search" :disabled="isLoading" size="sm"
@@ -400,6 +400,7 @@ const showFilters = ref(false)
 const isMobile = ref(window.innerWidth < 768)
 const selectedIndex = ref(0) // index of the selected product
 const tableRef = ref<HTMLElement | null>(null)
+const searchInputRef = ref<any>(null)
 
 // Handle window resize for mobile detection
 const handleResize = () => {
@@ -426,12 +427,65 @@ const focusRow = async (idx: number) => {
     }
 }
 
+// Helper function to focus the search input
+const focusSearchInput = () => {
+    // First try: use the ref
+    if (searchInputRef.value) {
+        let inputElement = searchInputRef.value
+
+        // If it's a component wrapper, look for the input inside
+        if (inputElement && typeof inputElement.focus !== 'function') {
+            // Try multiple ways to find the input
+            const input = inputElement.$el?.querySelector('input') ||
+                         inputElement.querySelector?.('input') ||
+                         inputElement
+
+            if (input) {
+                inputElement = input
+            }
+        }
+
+        // Try to focus the element we found
+        if (inputElement && typeof inputElement.focus === 'function') {
+            inputElement.focus()
+            if (typeof inputElement.select === 'function') {
+                inputElement.select()
+            }
+            return
+        }
+    }
+
+    // Second try: use data attribute selector
+    setTimeout(() => {
+        const searchInput = document.querySelector('[data-product-search-input]') as HTMLInputElement
+        if (searchInput) {
+            searchInput.focus()
+            searchInput.select()
+            return
+        }
+
+        // Third try: general search input selector within the modal
+        const modalInput = document.querySelector('[data-radix-dialog-content] input[placeholder*="Search"]') as HTMLInputElement
+        if (modalInput) {
+            modalInput.focus()
+            modalInput.select()
+        }
+    }, 50)
+}
+
 // Methods
 const search = async () => {
     try {
         filters.value.current_page = 1
         await productStore.fetchProducts()
         initializeQuantities()
+
+        // After search, reset selection to first product and focus it
+        if (products.value.length > 0) {
+            selectedIndex.value = 0
+            await nextTick()
+            await focusRow(0)
+        }
     } catch {
         toast.error('Error searching products')
     }
@@ -512,6 +566,12 @@ watch(() => props.open, (newValue) => {
         // Load initial products when modal opens
         productStore.fetchProducts()
     }
+    if (newValue) {
+        // Auto-focus search input when modal opens
+        nextTick(() => {
+            focusSearchInput()
+        })
+    }
 })
 
 watch(isOpen, (newValue) => {
@@ -530,13 +590,14 @@ onMounted(() => {
     window.addEventListener('resize', handleResize)
     handleResize() // Initial check
 
-    window.addEventListener('keydown', handleKeydown)
+    // Add keydown listener with capture to handle F2 before other handlers
+    window.addEventListener('keydown', handleKeydown, true)
 })
 
 // Cleanup on unmount
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
-    window.removeEventListener('keydown', handleKeydown)
+    window.removeEventListener('keydown', handleKeydown, true)
 })
 
 // Watch for products changes to initialize quantities
@@ -546,7 +607,30 @@ watch(products, () => {
 }, { immediate: true })
 
 const handleKeydown = async (e: KeyboardEvent) => {
-    if (!isOpen.value || products.value.length === 0) return
+    if (!isOpen.value) return
+
+    // F2: Focus search input
+    if (e.key === 'F2') {
+        e.preventDefault()
+        e.stopPropagation() // Prevent event from bubbling up
+        focusSearchInput()
+        return
+    }
+
+    // If Enter is pressed and the search input is focused, only do search
+    if (e.key === 'Enter') {
+        const searchInput = document.querySelector('[data-product-search-input]') as HTMLInputElement
+        const isSearchInputFocused = searchInput && document.activeElement === searchInput
+
+        if (isSearchInputFocused) {
+            e.preventDefault()
+            e.stopPropagation()
+            await search()
+            return
+        }
+    }
+
+    if (products.value.length === 0) return
     if (window.innerWidth < 768) return // Solo desktop
     const max = products.value.length - 1
     if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) {
@@ -577,6 +661,7 @@ const handleKeydown = async (e: KeyboardEvent) => {
         const prod = products.value[selectedIndex.value]
         increaseQuantity(prod.id, prod.stock)
     } else if (e.key === "Enter") {
+        // This will only execute if Enter wasn't handled by search input above
         const prod = products.value[selectedIndex.value]
         addProduct(prod)
     }

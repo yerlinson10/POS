@@ -1478,6 +1478,12 @@ onMounted(() => {
         // F2: Open product modal and focus on search engine
         if (e.key === 'F2') {
             e.preventDefault()
+
+            // If modal is already open, don't handle F2 here - let the modal handle it
+            if (showProductModal.value) {
+                return
+            }
+
             showProductModal.value = true
             await nextTick()
             // Try to focus the search input if it exists
