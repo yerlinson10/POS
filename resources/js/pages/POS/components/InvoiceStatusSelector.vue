@@ -29,17 +29,6 @@
                 </SelectItem>
             </SelectContent>
         </Select>
-
-        <!-- Status Description -->
-        <div class="p-3 bg-muted rounded-lg">
-            <div class="flex items-start gap-2">
-                <Icon :name="statusIcon" :class="statusIconClass" class="w-4 h-4 mt-0.5" />
-                <div class="text-sm">
-                    <p class="font-medium">{{ statusTitle }}</p>
-                    <p class="text-muted-foreground text-xs mt-1">{{ statusDescription }}</p>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -98,25 +87,4 @@ const statusIconClass = computed(() => {
     }
 })
 
-const statusTitle = computed(() => {
-    switch (selectedStatus.value) {
-        case 'paid':
-            return 'Invoice Paid'
-        case 'quotation':
-            return 'Quotation'
-        default:
-            return 'Invoice Paid'
-    }
-})
-
-const statusDescription = computed(() => {
-    switch (selectedStatus.value) {
-        case 'paid':
-            return 'The sale will be registered as fully paid. Stock will be updated immediately.'
-        case 'quotation':
-            return 'The sale will be saved as an editable quotation. Stock will not be updated until the quotation is marked as paid.'
-        default:
-            return 'The sale will be registered as fully paid.'
-    }
-})
 </script>
