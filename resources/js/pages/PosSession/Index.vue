@@ -178,10 +178,13 @@
                                     <!-- Actions -->
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center gap-1">
-                                            <Button @click="viewSession(session)" variant="ghost" size="sm"
-                                                class="h-8 w-8 p-0">
-                                                <Eye class="h-4 w-4" />
-                                            </Button>
+                                            <Link prefetch :cacheFor="['30s', '1m']" :href="route('sessions.show', session.id)">
+                                                <Button variant="ghost" size="sm"
+                                                    class="h-8 w-8 p-0">
+                                                    <Eye class="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+
                                             <Button v-if="session.status === 'open'" @click="closeSession(session)"
                                                 variant="ghost" size="sm"
                                                 class="h-8 w-8 p-0 text-red-600 hover:text-red-700">
@@ -259,7 +262,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { router, Head } from '@inertiajs/vue3'
+import { router, Head, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import AppLayout from '../../layouts/AppLayout.vue'
 import { Button } from '../../components/ui/button'
@@ -419,10 +422,6 @@ const createSession = () => {
 
 const viewCurrentSession = () => {
     router.visit(route('sessions.current'))
-}
-
-const viewSession = (session: PosSession) => {
-    router.visit(route('sessions.show', session.id))
 }
 
 const closeSession = (session: PosSession) => {

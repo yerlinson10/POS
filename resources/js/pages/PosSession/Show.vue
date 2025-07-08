@@ -15,18 +15,22 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <Button @click="goBack" variant="outline" size="sm"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
-                                <ArrowLeft class="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                                Back to Sessions
-                            </Button>
-                            <Button v-if="session?.status === 'open'" @click="goToPOS" size="sm"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
-                                <ShoppingCart class="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                                Go to POS
-                            </Button>
+                            <Link prefetch :href="route('sessions.index')">
+                                <Button variant="outline" size="sm"
+                                    class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
+                                    <ArrowLeft class="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                    Back to Sessions
+                                </Button>
+                            </Link>
+                            <Link prefetch :href="route('pos.index')">
+                                <Button v-if="session?.status === 'open'" size="sm"
+                                    class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
+                                    <ShoppingCart class="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                    Go to POS
+                                </Button>
+                            </Link>
                             <Button v-if="session?.status === 'open'" @click="closeSession" variant="destructive" size="sm"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                                 <X class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                 Close Session
                             </Button>
@@ -160,7 +164,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { router, Head } from '@inertiajs/vue3'
+import { router, Head, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import AppLayout from '../../layouts/AppLayout.vue'
 import { Button } from '../../components/ui/button'
@@ -197,13 +201,6 @@ const getDuration = () => {
     return `${diffHours}h ${diffMinutes}m`
 }
 
-const goBack = () => {
-    router.visit(route('sessions.index'))
-}
-
-const goToPOS = () => {
-    router.visit(route('pos.index'))
-}
 
 const closeSession = () => {
     if (props.session?.id) {
