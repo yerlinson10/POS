@@ -597,7 +597,7 @@
                     </Button>
 
                     <!-- Additional Info and Status -->
-                    <div v-if="cart.length > 0" class="mt-3 md:mt-4 space-y-2">
+                    <div v-if="cart.length > 0" class="mt-3 md:mt-1 space-y-2">
                         <!-- Validation Messages -->
                         <div v-if="!canProcessSale"
                             class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
