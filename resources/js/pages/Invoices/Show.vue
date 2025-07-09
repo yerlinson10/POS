@@ -22,6 +22,16 @@
                                 <Icon name="ArrowLeft" class="w-3 h-3 md:w-4 md:h-4" />
                                 <span>Back</span>
                             </Button>
+                            <Button variant="outline" @click="downloadInvoicePDF"
+                                class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm flex items-center gap-2">
+                                <Icon name="Download" class="w-3 h-3 md:w-4 md:h-4" />
+                                <span>Descargar PDF</span>
+                            </Button>
+                            <Button variant="outline" @click="printInvoicePDF"
+                                class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm flex items-center gap-2">
+                                <Icon name="Printer" class="w-3 h-3 md:w-4 md:h-4" />
+                                <span>Imprimir</span>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -202,6 +212,9 @@ import StockErrorDialog from '@/components/StockErrorDialog.vue'
 import { toast } from 'vue-sonner'
 import { type BreadcrumbItem } from '@/types'
 
+// Para rutas de Laravel
+import { route } from 'ziggy-js'
+
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Invoices', href: '/invoices' },
     { title: 'Details', href: '' },
@@ -247,24 +260,51 @@ interface Props {
 
 const props = defineProps<Props>()
 
+// Download invoice PDF
+const downloadInvoicePDF = () => {
+    try {
+        const link = document.createElement('a')
+        link.href = route('invoice.pdf', props.invoice.id)
+        link.download = `invoice-${props.invoice.id}.pdf`
+        link.target = '_blank'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        toast.success('Downloading invoice PDF...')
+    } catch {
+        toast.error('Error downloading PDF')
+    }
+}
+
+// Print invoice PDF
+const printInvoicePDF = () => {
+    try {
+        const pdfUrl = route('invoice.pdf', props.invoice.id)
+        const printWindow = window.open(pdfUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes')
+        if (!printWindow) {
+            toast.error('Could not open print window')
+        } else {
+            toast.success('Opening PDF for printing...')
+        }
+    } catch {
+        toast.error('Error opening PDF for printing')
+    }
+}
+
 // State for stock error dialog
 const showStockError = ref(false)
 const stockErrorData = ref<any>(null)
 
 // Watch for stock errors in the errors prop
 onMounted(() => {
-
     // Check if we have the structured stock_error prop
     if (props.stock_error) {
-
         stockErrorData.value = props.stock_error
         showStockError.value = true
-
     }
     // If not, show a simple notification for now (fallback)
     else if (props.message && props.message.type === 'error' && props.message.text &&
         (props.message.text.includes('insufficient stock') || props.message.text.includes('stock insuficiente'))) {
-
         toast.error('Insufficient stock detected. Please check the logs for more details.')
     }
 })
