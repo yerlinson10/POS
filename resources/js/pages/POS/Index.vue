@@ -1056,22 +1056,6 @@ const toggleInvoiceStatus = () => {
     toast.success(`Invoice status switched to: ${statusText}`)
 }
 
-// Print functionality
-const detectPrinters = async (): Promise<boolean> => {
-    try {
-        // Check if we're in a desktop environment where printing might be available
-        const isDesktop = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
-
-        if (isDesktop && typeof window.print === 'function') {
-            return true
-        }
-        return false
-    } catch (error) {
-        console.error('Error detecting printers:', error)
-        return false
-    }
-}
-
 const printInvoice = async (invoiceId: number) => {
     if (isPrintingInvoice.value) return
 
@@ -1089,69 +1073,7 @@ const printInvoice = async (invoiceId: number) => {
     }
 }
 
-const printInvoiceDirectly = async (invoiceId: number) => {
-    try {
-        // Strategy 1: Try to open PDF in new window and trigger print
-        const printWindow = window.open(route('invoice.pdf', invoiceId), '_blank', 'width=800,height=600')
 
-        if (printWindow) {
-            // Wait for the PDF to load in the new window
-            await new Promise((resolve, reject) => {
-                const checkLoad = () => {
-                    try {
-                        // Check if window is ready
-                        if (printWindow.document.readyState === 'complete') {
-                            // Give a moment for PDF to render
-                            setTimeout(() => {
-                                try {
-                                    printWindow.print()
-                                    toast.success('Print dialog opened')
-                                    resolve(true)
-                                } catch (printError) {
-                                    // If print fails, keep window open for manual printing
-                                    toast.info('PDF opened in new window - use Ctrl+P to print')
-                                    resolve(true)
-                                }
-                            }, 1500)
-                        } else {
-                            // Keep checking
-                            setTimeout(checkLoad, 100)
-                        }
-                    } catch (error) {
-                        // If we can't access the window (cross-origin), that's normal for PDFs
-                        // Just wait a bit and try to print
-                        setTimeout(() => {
-                            try {
-                                printWindow.print()
-                                toast.success('Print dialog opened')
-                                resolve(true)
-                            } catch (printError) {
-                                toast.info('PDF opened in new window - use Ctrl+P to print')
-                                resolve(true)
-                            }
-                        }, 2000)
-                    }
-                }
-
-                // Start checking
-                setTimeout(checkLoad, 500)
-
-                // Timeout after 10 seconds
-                setTimeout(() => {
-                    toast.info('PDF opened in new window - use Ctrl+P to print')
-                    resolve(true)
-                }, 10000)
-            })
-        } else {
-            // Popup blocked, fallback to download
-            throw new Error('Popup blocked')
-        }
-
-    } catch (error) {
-        console.error('Error printing directly:', error)
-        throw error
-    }
-}
 
 const downloadInvoicePDF = async (invoiceId: number) => {
     try {
@@ -1200,11 +1122,6 @@ const printInvoiceWithOptions = async (invoiceId: number) => {
     }
 }
 
-const handlePrintFromConfirmDialog = async () => {
-    if (lastSale.value?.id) {
-        await printInvoice(lastSale.value.id)
-    }
-}
 
 // Cart navigation
 const activateCartNavigation = () => {
@@ -1379,12 +1296,6 @@ const addFirstSearchResult = () => {
         const product = quickSearchResults.value[selectedQuickSearchIndex.value] || quickSearchResults.value[0]
         addToCart(product)
         clearQuickSearch()
-    }
-}
-
-const focusFirstResult = () => {
-    if (quickSearchResults.value.length > 0) {
-        selectedQuickSearchIndex.value = 0
     }
 }
 
