@@ -16,17 +16,21 @@ class SystemSettingController extends Controller
     public function __construct(SystemSettingService $service)
     {
         $this->service = $service;
+        $this->service->forUser(Auth::id());
     }
 
     public function index()
     {
+        // Aseguramos que el servicio tenga el usuario correcto
+        $this->service->forUser(Auth::id());
         $settings = $this->service->all()->map(function ($setting) {
             return [
                 'key' => $setting->key,
                 'label' => $setting->label,
                 'type' => $setting->type,
                 'default' => $setting->default,
-                'value' => $setting->default,
+                // Aquí traemos el valor real del usuario, no el default
+                'value' => $this->service->get($setting->key, $setting->default),
                 'description' => $setting->description,
                 'options' => $setting->options->map(function ($option) {
                     return [
@@ -45,8 +49,7 @@ class SystemSettingController extends Controller
 
     public function show($key)
     {
-        $userId = Auth::id();
-        $value = $this->service->get($key, null, $userId);
+        $value = $this->service->get($key, null);
         if ($value === null) {
             return response()->json(['message' => 'Setting not found'], 404);
         }
@@ -57,9 +60,8 @@ class SystemSettingController extends Controller
     {
         try {
 
-            $userId = $request->input('user_id', Auth::id());
             $value = $request->input('value');
-            $setting = $this->service->set($key, $value, $userId);
+            $this->service->set($key, $value);
 
             return redirect()->back()->with('message', [
                 'type' => 'success',
@@ -81,7 +83,8 @@ class SystemSettingController extends Controller
 
             $data = $request->all();
             foreach ($data as $key => $value) {
-                $this->service->set($key, $value, Auth::id());
+
+                $this->service->set($key, $value);
             }
             return redirect()->back()->with('message', [
                 'type' => 'success',

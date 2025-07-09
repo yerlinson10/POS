@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use PDF;
+use App\Services\SystemSettingService;
 
 class PdfController extends Controller
 {
@@ -22,8 +23,10 @@ class PdfController extends Controller
             $taxAmountFormatted = '$' . number_format($invoice->tax_amount, 2);
         }
 
-        $typeInvoice = app(\App\Services\SystemSettingService::class)->get('invoice_type', 'A4', auth()->id());
 
+        // No pasamos usuario porque puede no haber sesión activa
+        $systemSettingService = new SystemSettingService(null);
+        $typeInvoice = $systemSettingService->get('invoice_type', 'A4');
         $templateInvoice = $typeInvoice === 'A4' ? 'pdf.invoice' : 'pdf.invoice80mm';
 
         $pdf = \PDF::loadView($templateInvoice, [
@@ -31,15 +34,15 @@ class PdfController extends Controller
             'tax_label' => $taxLabel,
             'tax_amount_formatted' => $taxAmountFormatted,
         ])->setOptions([
-                'isHtml5ParserEnabled' => true,
-                'isPhpEnabled' => false,
-                'isRemoteEnabled' => false, // si no usas imágenes remotas
-                'show_warnings' => false,
-                'enable_font_subsetting' => true,
-                'defaultFont' => 'sans-serif',
-            ]);
+                    'isHtml5ParserEnabled' => true,
+                    'isPhpEnabled' => false,
+                    'isRemoteEnabled' => false, // si no usas imágenes remotas
+                    'show_warnings' => false,
+                    'enable_font_subsetting' => true,
+                    'defaultFont' => 'sans-serif',
+                ]);
 
-        if($typeInvoice === 'A4') {
+        if ($typeInvoice === 'A4') {
             $pdf->setPaper('A4', 'portrait');
         } else {
             $pdf->setPaper(array(0, 0, 204, 1000));
