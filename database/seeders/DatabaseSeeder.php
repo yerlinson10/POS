@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             InvoiceSeeder::class,
             InvoiceItemSeeder::class,
             PosSessionSeeder::class,
+            SystemSettingSeeder::class,
         ]);
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SystemSettingController;
 use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
@@ -14,6 +15,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
     Route::put('settings/password', [PasswordController::class, 'update'])->name('password.update');
+
+    // Settings system
+    Route::get('/settings/system', [SystemSettingController::class, 'index'])->name('settings.system');
+    Route::put('/settings/system', [SystemSettingController::class, 'updateAll'])->name('settings.update');
 
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/Appearance');
