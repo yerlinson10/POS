@@ -81,7 +81,7 @@ class SystemSettingController extends Controller
 
             $data = $request->all();
             foreach ($data as $key => $value) {
-                $this->service->set($key, $value);
+                $this->service->set($key, $value, Auth::id());
             }
             return redirect()->back()->with('message', [
                 'type' => 'success',
