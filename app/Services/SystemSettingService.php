@@ -8,6 +8,14 @@ use Illuminate\Support\Facades\Auth;
 
 class SystemSettingService
 {
+    /**
+     * Retrieves the value of a system setting by its key.
+     *
+     * @param string $key The key of the system setting to retrieve.
+     * @param mixed $default The default value to return if the setting is not found.
+     * @param int|null $userId Optional user ID to retrieve a user-specific setting value.
+     * @return mixed The value of the setting, a user-specific value, a default option, the table default, or the provided default.
+     */
     public function get($key, $default = null, $userId = null)
     {
         $setting = SystemSetting::where('key', $key)->first();

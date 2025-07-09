@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use PDF;
 
 class PdfController extends Controller
@@ -15,11 +14,6 @@ class PdfController extends Controller
             'items'
         ])->findOrFail($id);
 
-        // Prepara los valores formateados para la vista
-        $customerFullName = '';
-        if ($invoice->customer) {
-            $customerFullName = trim($invoice->customer->first_name . ' ' . $invoice->customer->last_name);
-        }
         $taxLabel = '';
         $taxAmountFormatted = '';
         if (isset($invoice->tax_amount) && $invoice->tax_amount > 0) {
@@ -28,16 +22,15 @@ class PdfController extends Controller
             $taxAmountFormatted = '$' . number_format($invoice->tax_amount, 2);
         }
 
-        // Puedes preparar otros valores formateados aquí si lo deseas
+        $typeInvoice = app(\App\Services\SystemSettingService::class)->get('invoice_type', 'A4', auth()->id());
 
-        $pdf = \PDF::loadView('pdf.invoice', [
+        $templateInvoice = $typeInvoice === 'A4' ? 'pdf.invoice' : 'pdf.invoice80mm';
+
+        $pdf = \PDF::loadView($templateInvoice, [
             'invoice' => $invoice,
             'tax_label' => $taxLabel,
             'tax_amount_formatted' => $taxAmountFormatted,
-            // Agrega aquí otros valores formateados si los usas en la vista
-        ])
-            ->setPaper('A4', 'portrait')
-            ->setOptions([
+        ])->setOptions([
                 'isHtml5ParserEnabled' => true,
                 'isPhpEnabled' => false,
                 'isRemoteEnabled' => false, // si no usas imágenes remotas
@@ -46,6 +39,12 @@ class PdfController extends Controller
                 'defaultFont' => 'sans-serif',
             ]);
 
+        if($typeInvoice === 'A4') {
+            $pdf->setPaper('A4', 'portrait');
+        } else {
+            $pdf->setPaper(array(0, 0, 204, 1000));
+
+        }
         return $pdf->stream("invoice-{$invoice->id}.pdf");
     }
 }
