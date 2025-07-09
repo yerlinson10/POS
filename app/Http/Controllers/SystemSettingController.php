@@ -26,7 +26,7 @@ class SystemSettingController extends Controller
                 'label' => $setting->label,
                 'type' => $setting->type,
                 'default' => $setting->default,
-                'value' => $setting->default, // Puedes personalizar esto si hay valores por usuario
+                'value' => $setting->default,
                 'description' => $setting->description,
                 'options' => $setting->options->map(function ($option) {
                     return [
@@ -55,18 +55,45 @@ class SystemSettingController extends Controller
 
     public function update(Request $request, $key)
     {
-        $userId = $request->input('user_id', Auth::id());
-        $value = $request->input('value');
-        $setting = $this->service->set($key, $value, $userId);
-        return response()->json($setting);
+        try {
+
+            $userId = $request->input('user_id', Auth::id());
+            $value = $request->input('value');
+            $setting = $this->service->set($key, $value, $userId);
+
+            return redirect()->back()->with('message', [
+                'type' => 'success',
+                'text' => 'Updated configuration'
+            ]);
+
+        } catch (\Throwable $th) {
+            session()->flash('message', [
+                'type' => 'error',
+                'text' => 'Error when updating the configuration: ' . $th->getMessage()
+            ]);
+            return response()->json(['message' => 'Error when updating the configuration'], 500);
+        }
     }
 
     public function updateAll(Request $request)
     {
-        $data = $request->all();
-        foreach ($data as $key => $value) {
-            $this->service->set($key, $value);
+        try {
+
+            $data = $request->all();
+            foreach ($data as $key => $value) {
+                $this->service->set($key, $value);
+            }
+            return redirect()->back()->with('message', [
+                'type' => 'success',
+                'text' => 'Updated configurations'
+            ]);
+
+
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('message', [
+                'type' => 'error',
+                'text' => 'Error when updating the configurations: ' . $th->getMessage()
+            ]);
         }
-        return redirect()->back()->with('success', 'Configuraciones actualizadas');
     }
 }
