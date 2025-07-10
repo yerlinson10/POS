@@ -59,11 +59,12 @@
                                         <span class="text-red-600 font-medium">{{ product.missing_stock }}</span>
                                     </td>
                                     <td class="p-3">
-                                        <Button v-if="product.product_id" @click="goToProduct(product.product_id)"
-                                            variant="outline" size="sm" class="h-7 px-2 text-xs cursor-pointer">
-                                            <Icon name="ExternalLink" class="w-3 h-3 mr-1" />
-                                            View
-                                        </Button>
+                                        <Link v-if="product.product_id" :href="`/products/${product.product_id}/edit`" prefetch>
+                                            <Button variant="outline" size="sm" class="h-7 px-2 text-xs cursor-pointer">
+                                                <Icon name="ExternalLink" class="w-3 h-3 mr-1" />
+                                                View
+                                            </Button>
+                                        </Link>
                                     </td>
                                 </tr>
                             </tbody>
@@ -79,7 +80,7 @@
                             <p class="font-medium">To continue, you can:</p>
                             <ul class="mt-1 space-y-1 ml-4 list-disc">
                                 <li>Update the stock for the missing products</li>
-                                <!-- <li>Modify the quantities in the invoice</li> -->
+                                <li>Modify the quantities in the invoice</li>
                                 <li>Cancel the operation</li>
                             </ul>
                         </div>
@@ -101,7 +102,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import Icon from '@/components/Icon.vue'
@@ -142,11 +143,6 @@ watch(() => props.open, (newValue) => {
 watch(isOpen, (newValue) => {
     emit('update:open', newValue)
 })
-
-const goToProduct = (productId: number) => {
-    isOpen.value = false
-    router.visit(`/products/${productId}`)
-}
 
 const goToProducts = () => {
     isOpen.value = false
