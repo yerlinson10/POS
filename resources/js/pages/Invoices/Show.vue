@@ -202,8 +202,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { router } from '@inertiajs/vue3'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
