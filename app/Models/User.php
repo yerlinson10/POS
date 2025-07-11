@@ -47,7 +47,7 @@ class User extends Authenticatable
     }
     public function invoices()
     {
-        return $this->hasMany(Invoice::class, 'pos_user_id');
+        return $this->hasMany(Invoice::class, 'user_id');
     }
 
     public function posSessions()
