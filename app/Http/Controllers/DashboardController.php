@@ -54,6 +54,7 @@ class DashboardController extends Controller
             'salesChart' => $salesChart,
             'topProducts' => $topProducts,
             'activeSession' => $activeSession,
+            'hasDynamicDashboard' => true, // Indicar que hay dashboard dinámico disponible
         ]);
     }
 

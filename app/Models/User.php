@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(PosSession::class);
     }
+
+    public function dashboardWidgets()
+    {
+        return $this->hasMany(DashboardWidget::class);
+    }
 }
