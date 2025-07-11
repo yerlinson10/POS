@@ -18,17 +18,17 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <Button variant="outline" :as="Link" :href="route('invoices.index')"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm flex items-center gap-2">
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm flex items-center gap-2 cursor-pointer">
                                 <Icon name="ArrowLeft" class="w-3 h-3 md:w-4 md:h-4" />
                                 <span>Back</span>
                             </Button>
                             <Button variant="outline" @click="downloadInvoicePDF"
-                                class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm flex items-center gap-2">
+                                class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm flex items-center gap-2 cursor-pointer">
                                 <Icon name="Download" class="w-3 h-3 md:w-4 md:h-4" />
                                 <span>Descargar PDF</span>
                             </Button>
                             <Button variant="outline" @click="printInvoicePDF"
-                                class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm flex items-center gap-2">
+                                class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm flex items-center gap-2 cursor-pointer">
                                 <Icon name="Printer" class="w-3 h-3 md:w-4 md:h-4" />
                                 <span>Imprimir</span>
                             </Button>

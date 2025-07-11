@@ -37,11 +37,11 @@
                             <Input v-model="filters.search" placeholder="Search units..."
                                 class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                         </div>
-                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                             <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                         <Button v-if="hasActiveFilters" @click="resetFilters" variant="outline" size="sm"
-                            class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
+                            class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm cursor-pointer">
                             <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                     </div>
@@ -110,14 +110,14 @@
                                     <!-- Actions -->
                                     <div class="flex items-center justify-center gap-1 px-4 py-4">
                                         <Link :href="`/unit-measures/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']">
-                                        <Button variant="ghost" class="h-8 w-8 p-0">
+                                        <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
                                             <Icon name="Edit" class="w-4 h-4" />
                                         </Button>
                                         </Link>
                                         <AlertDialog>
                                             <AlertDialogTrigger as-child>
                                                 <Button variant="ghost" size="sm"
-                                                    class="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                                                    class="h-8 w-8 p-0 text-red-600 hover:text-red-700 cursor-pointer">
                                                     <Icon name="Trash2" class="w-4 h-4" />
                                                 </Button>
                                             </AlertDialogTrigger>
@@ -133,7 +133,7 @@
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                     <AlertDialogAction @click="destroy(p.id)"
-                                                        class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]">
+                                                        class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px] ">
                                                         Continue
                                                     </AlertDialogAction>
                                                 </AlertDialogFooter>

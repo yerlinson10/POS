@@ -147,7 +147,7 @@
                                 as="a"
                                 variant="outline"
                                 :href="route('customers.index')"
-                                class="flex items-center gap-2 h-10 px-6"
+                                class="flex items-center gap-2 h-10 px-6 cursor-pointer"
                             >
                                 <Icon name="X" class="w-4 h-4" />
                                 Cancel

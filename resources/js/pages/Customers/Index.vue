@@ -18,7 +18,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <Button as="a" href="/customers/create" size="sm"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                                 <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                 New Customer
                             </Button>
@@ -37,11 +37,11 @@
                             <Input v-model="filters.search" placeholder="Search customers..."
                                 class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                         </div>
-                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                             <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                         <Button v-if="hasActiveFilters" @click="resetFilters" variant="outline" size="sm"
-                            class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
+                            class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm cursor-pointer">
                             <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                     </div>

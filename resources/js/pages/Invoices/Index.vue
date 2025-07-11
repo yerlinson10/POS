@@ -31,11 +31,11 @@
                             <Input v-model="filters.search" placeholder="Search invoices..."
                                 class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                         </div>
-                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                             <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                         <Button v-if="hasActiveFilters" @click="resetFilters" variant="outline" size="sm"
-                            class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
+                            class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm cursor-pointer">
                             <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                     </div>
@@ -161,12 +161,12 @@
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center gap-1">
                                             <Link :href="route('invoices.show', invoice.id)" prefetch :cacheFor="['30s', '1m']">
-                                                <Button variant="ghost" class="h-8 w-8 p-0">
+                                                <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
                                                     <Icon name="Eye" class="w-4 h-4" />
                                                 </Button>
                                             </Link>
-                                            <Link v-if="invoice.status === 'quotation'" :href="route('invoices.edit', invoice.id)">
-                                                <Button variant="ghost" class="h-8 w-8 p-0">
+                                            <Link v-if="invoice.status === 'quotation'" :href="route('invoices.edit', invoice.id)" prefetch :cacheFor="['30s', '1m']">
+                                                <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
                                                     <Icon name="Edit" class="w-4 h-4" />
                                                 </Button>
                                             </Link>

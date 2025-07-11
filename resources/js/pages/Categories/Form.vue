@@ -99,7 +99,7 @@
                                 :disabled="form.processing || !form.name"
                                 class="flex items-center gap-2 h-10 px-6 cursor-pointer"
                             >
-                                <Icon v-if="form.processing" name="Loader2" class="w-4 h-4 animate-spin" />
+                                <Icon v-if="form.processing" name="Loader2" class="w-4 h-4 animate-spin cursor-pointer" />
                                 <Icon v-else name="Save" class="w-4 h-4" />
                                 {{ form.processing ? 'Saving...' : 'Save Category' }}
                             </Button>
@@ -108,7 +108,7 @@
                                 as="a"
                                 variant="outline"
                                 :href="route('categories.index')"
-                                class="flex items-center gap-2 h-10 px-6"
+                                class="flex items-center gap-2 h-10 px-6 cursor-pointer"
                             >
                                 <Icon name="X" class="w-4 h-4" />
                                 Cancel

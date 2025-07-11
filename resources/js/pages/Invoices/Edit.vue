@@ -63,7 +63,7 @@
                                     <div class="p-4 border-b bg-muted/30 flex justify-between items-center">
                                         <h3 class="text-lg font-semibold">Items</h3>
                                         <Button type="button" @click="openProductModal" variant="outline" size="sm">
-                                            <Icon name="Plus" class="w-4 h-4 mr-2" />
+                                            <Icon name="Plus" class="w-4 h-4 mr-2 cursor-pointer" />
                                             Add Item
                                         </Button>
                                     </div>
@@ -495,7 +495,7 @@ const updateLineTotal = (index: number) => {
 const initializeLineTotals = () => {
     if (!form.value.items) return
 
-    form.value.items.forEach((item, index) => {
+    form.value.items.forEach((item) => {
         const quantity = Number(item.quantity) || 0
         const unitPrice = Number(item.unit_price) || 0
         item.line_total = quantity * unitPrice
@@ -571,7 +571,7 @@ const submitForm = async () => {
 
         console.log('Sending data:', data)
 
-        const response = await axios.put(route('invoices.update', props.invoice.id), data)
+        await axios.put(route('invoices.update', props.invoice.id), data)
 
         toast.success('Quotation updated successfully')
         router.visit(route('invoices.show', props.invoice.id))
