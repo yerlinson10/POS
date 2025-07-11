@@ -1,11 +1,16 @@
 import { type NavItem } from '@/types';
-import { BookOpen, FolderOpenIcon, Folder, LayoutGrid, RulerIcon, PackageIcon, Users, ShoppingCartIcon, FileText, Monitor } from 'lucide-vue-next';
+import { BookOpen, FolderOpenIcon, Folder, LayoutGrid, RulerIcon, PackageIcon, Users, ShoppingCartIcon, FileText, Monitor, Grid3x3 } from 'lucide-vue-next';
 
 export const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'Dashboard Dinámico',
+        href: '/dashboard/dynamic',
+        icon: Grid3x3,
     },
     {
         title: 'Point of Sale',

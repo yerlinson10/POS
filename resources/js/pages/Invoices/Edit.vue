@@ -575,7 +575,6 @@ const submitForm = async () => {
             total_amount: form.value.total_amount || 0
         }
 
-        console.log('Sending data:', data)
 
         await axios.put(route('invoices.update', props.invoice.id), data)
 

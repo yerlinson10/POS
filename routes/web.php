@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UnitMeasureController;
 use App\Http\Controllers\PosSessionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardWidgetController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -18,6 +19,18 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Dynamic Dashboard routes
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/dynamic', [DashboardWidgetController::class, 'index'])->name('dynamic');
+        Route::get('/widgets', [DashboardWidgetController::class, 'getWidgets'])->name('widgets.index');
+        Route::post('/widgets', [DashboardWidgetController::class, 'store'])->name('widgets.store');
+        Route::put('/widgets/{id}', [DashboardWidgetController::class, 'update'])->name('widgets.update');
+        Route::delete('/widgets/{id}', [DashboardWidgetController::class, 'destroy'])->name('widgets.destroy');
+        Route::post('/widgets/positions', [DashboardWidgetController::class, 'updatePositions'])->name('widgets.positions');
+        Route::get('/widgets/{id}/refresh', [DashboardWidgetController::class, 'refreshWidget'])->name('widgets.refresh');
+        Route::get('/filter-options', [DashboardWidgetController::class, 'getFilterOptions'])->name('filter-options');
+    });
 
     Route::get('/invoice/{id}', [PdfController::class, 'Invoice'])->name('invoice.pdf');
 

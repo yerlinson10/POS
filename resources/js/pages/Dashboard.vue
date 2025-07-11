@@ -95,6 +95,17 @@ const getPaymentMethodText = (method: string) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 rounded-xl p-4 w-full  mx-auto">
 
+            <!-- Dashboard Options -->
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold">Dashboard Estático</h2>
+                <Link :href="route('dashboard.dynamic')" class="inline-flex items-center">
+                    <Button variant="outline">
+                        <Icon name="grid-3x3" class="h-4 w-4 mr-2" />
+                        Dashboard Dinámico
+                    </Button>
+                </Link>
+            </div>
+
             <!-- Active POS Session Alert -->
             <div v-if="!activeSession"
                 class="rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950">
