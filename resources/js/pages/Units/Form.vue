@@ -3,7 +3,8 @@
     <Head :title="isEdit ? 'Edit Units Measurement' : 'Create Units Measurement'" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
+            <div
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
 
                 <!-- Header -->
                 <div class="flex flex-col gap-2 md:gap-4 p-4 md:p-6 border-b bg-muted/30">
@@ -40,14 +41,9 @@
                                         Unit Name
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
-                                    <Input
-                                        id="name"
-                                        v-model="form.name"
-                                        required
-                                        placeholder="e.g., Kilogram, Meter, Piece"
-                                        class="h-10"
-                                        :class="{ 'border-destructive focus:border-destructive': errors.name }"
-                                    />
+                                    <Input id="name" v-model="form.name" required
+                                        placeholder="e.g., Kilogram, Meter, Piece" class="h-10"
+                                        :class="{ 'border-destructive focus:border-destructive': errors.name }" />
                                     <InputError field="name" :message="errors.name" />
                                     <p class="text-xs text-muted-foreground">
                                         Full name of the unit of measurement
@@ -59,14 +55,9 @@
                                         Unit Code
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
-                                    <Input
-                                        id="code"
-                                        v-model="form.code"
-                                        required
-                                        placeholder="e.g., kg, m, pcs"
+                                    <Input id="code" v-model="form.code" required placeholder="e.g., kg, m, pcs"
                                         class="h-10 font-mono"
-                                        :class="{ 'border-destructive focus:border-destructive': errors.code }"
-                                    />
+                                        :class="{ 'border-destructive focus:border-destructive': errors.code }" />
                                     <InputError field="code" :message="errors.code" />
                                     <p class="text-xs text-muted-foreground">
                                         Short abbreviation used in displays and reports
@@ -108,7 +99,8 @@
                             <div class="p-4 rounded-lg border bg-muted/20">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-mono bg-primary/10 text-primary px-2 py-1 rounded-md text-sm font-medium">
+                                        <span
+                                            class="font-mono bg-primary/10 text-primary px-2 py-1 rounded-md text-sm font-medium">
                                             {{ form.code }}
                                         </span>
                                         <span class="font-medium">{{ form.name }}</span>
@@ -120,22 +112,15 @@
 
                         <!-- Action Buttons -->
                         <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-muted">
-                            <Button
-                                type="submit"
-                                :disabled="form.processing || !form.name || !form.code"
-                                class="flex items-center gap-2 h-10 px-6 cursor-pointer"
-                            >
+                            <Button type="submit" :disabled="form.processing || !form.name || !form.code"
+                                class="flex items-center gap-2 h-10 px-6 cursor-pointer">
                                 <Icon v-if="form.processing" name="Loader2" class="w-4 h-4 animate-spin" />
                                 <Icon v-else name="Save" class="w-4 h-4" />
                                 {{ form.processing ? 'Saving...' : 'Save Unit' }}
                             </Button>
 
-                            <Button
-                                as="a"
-                                variant="outline"
-                                :href="route('unit-measures.index')"
-                                class="flex items-center gap-2 h-10 px-6"
-                            >
+                            <Button as="a" variant="outline" :href="route('unit-measures.index')"
+                                class="flex items-center gap-2 h-10 px-6">
                                 <Icon name="X" class="w-4 h-4" />
                                 Cancel
                             </Button>
@@ -208,12 +193,15 @@ function submit() {
     .xs\:flex-row {
         flex-direction: row;
     }
+
     .xs\:items-center {
         align-items: center;
     }
+
     .xs\:gap-0 {
         gap: 0;
     }
+
     .xs\:block {
         display: block;
     }

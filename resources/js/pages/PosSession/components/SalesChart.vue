@@ -9,16 +9,10 @@
         <div v-else class="h-full">
             <!-- Simple bar chart representation -->
             <div class="flex items-end justify-between h-full space-x-1 px-4 py-6">
-                <div
-                    v-for="item in chartData"
-                    :key="item.hour"
-                    class="flex flex-col items-center flex-1"
-                >
-                    <div
-                        class="bg-blue-500 rounded-t-sm transition-all duration-300 hover:bg-blue-600 w-full min-h-[2px]"
+                <div v-for="item in chartData" :key="item.hour" class="flex flex-col items-center flex-1">
+                    <div class="bg-blue-500 rounded-t-sm transition-all duration-300 hover:bg-blue-600 w-full min-h-[2px]"
                         :style="{ height: `${(item.total / maxValue) * 100}%` }"
-                        :title="`${item.hour}: $${formatCurrency(item.total)} (${item.count} ventas)`"
-                    ></div>
+                        :title="`${item.hour}: $${formatCurrency(item.total)} (${item.count} ventas)`"></div>
                     <span class="text-xs text-gray-600 mt-1 transform -rotate-45 origin-left">
                         {{ item.hour }}
                     </span>

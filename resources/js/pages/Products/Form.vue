@@ -1,8 +1,10 @@
 <template>
+
     <Head :title="isEdit ? 'Edit Product' : 'Create Product'" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
+            <div
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
 
                 <!-- Header -->
                 <div class="flex flex-col gap-2 md:gap-4 p-4 md:p-6 border-b bg-muted/30">
@@ -40,14 +42,9 @@
                                         SKU (Stock Keeping Unit)
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
-                                    <Input
-                                        id="sku"
-                                        v-model="form.sku"
-                                        required
-                                        placeholder="e.g., PROD-001, ELC-TV-55"
+                                    <Input id="sku" v-model="form.sku" required placeholder="e.g., PROD-001, ELC-TV-55"
                                         class="h-10 font-mono"
-                                        :class="{ 'border-destructive focus:border-destructive': errors.sku }"
-                                    />
+                                        :class="{ 'border-destructive focus:border-destructive': errors.sku }" />
                                     <InputError field="sku" :message="errors.sku" />
                                     <p class="text-xs text-muted-foreground">
                                         Unique identifier for inventory tracking
@@ -59,14 +56,9 @@
                                         Product Name
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
-                                    <Input
-                                        id="name"
-                                        v-model="form.name"
-                                        required
-                                        placeholder="Enter product name"
+                                    <Input id="name" v-model="form.name" required placeholder="Enter product name"
                                         class="h-10"
-                                        :class="{ 'border-destructive focus:border-destructive': errors.name }"
-                                    />
+                                        :class="{ 'border-destructive focus:border-destructive': errors.name }" />
                                     <InputError field="name" :message="errors.name" />
                                 </div>
                             </div>
@@ -86,11 +78,8 @@
                                         Category
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
-                                    <Select
-                                        id="category"
-                                        v-model="form.category_id"
-                                        :class="{ 'border-destructive': errors.category_id }"
-                                    >
+                                    <Select id="category" v-model="form.category_id"
+                                        :class="{ 'border-destructive': errors.category_id }">
                                         <SelectTrigger class="w-full h-10">
                                             <SelectValue placeholder="Select a category" />
                                         </SelectTrigger>
@@ -109,11 +98,8 @@
                                         Unit of Measurement
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
-                                    <Select
-                                        id="unit"
-                                        v-model="form.unit_measure_id"
-                                        :class="{ 'border-destructive': errors.unit_measure_id }"
-                                    >
+                                    <Select id="unit" v-model="form.unit_measure_id"
+                                        :class="{ 'border-destructive': errors.unit_measure_id }">
                                         <SelectTrigger class="w-full h-10">
                                             <SelectValue placeholder="Select a unit" />
                                         </SelectTrigger>
@@ -143,18 +129,11 @@
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
                                     <div class="relative">
-                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
-                                        <Input
-                                            id="price"
-                                            type="number"
-                                            v-model.number="form.price"
-                                            step="0.01"
-                                            min="0"
-                                            required
-                                            placeholder="0.00"
-                                            class="h-10 pl-8 price-input"
-                                            :class="{ 'border-destructive focus:border-destructive': errors.price }"
-                                        />
+                                        <span
+                                            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                                        <Input id="price" type="number" v-model.number="form.price" step="0.01" min="0"
+                                            required placeholder="0.00" class="h-10 pl-8 price-input"
+                                            :class="{ 'border-destructive focus:border-destructive': errors.price }" />
                                     </div>
                                     <InputError field="price" :message="errors.price" />
                                 </div>
@@ -165,16 +144,9 @@
                                         Stock Quantity
                                         <span class="text-destructive text-xs">*</span>
                                     </Label>
-                                    <Input
-                                        id="stock"
-                                        type="number"
-                                        v-model.number="form.stock"
-                                        min="0"
-                                        required
-                                        placeholder="0"
-                                        class="h-10"
-                                        :class="{ 'border-destructive focus:border-destructive': errors.stock }"
-                                    />
+                                    <Input id="stock" type="number" v-model.number="form.stock" min="0" required
+                                        placeholder="0" class="h-10"
+                                        :class="{ 'border-destructive focus:border-destructive': errors.stock }" />
                                     <InputError field="stock" :message="errors.stock" />
                                     <p class="text-xs text-muted-foreground">
                                         Current inventory quantity
@@ -192,13 +164,10 @@
 
                             <div class="space-y-2">
                                 <Label for="description" class="text-sm font-medium">Product Description</Label>
-                                <Textarea
-                                    id="description"
-                                    v-model="form.description"
+                                <Textarea id="description" v-model="form.description"
                                     placeholder="Describe the product features, specifications, or other details..."
                                     class="min-h-[100px] resize-none"
-                                    :class="{ 'border-destructive focus:border-destructive': errors.description }"
-                                />
+                                    :class="{ 'border-destructive focus:border-destructive': errors.description }" />
                                 <InputError field="description" :message="errors.description" />
                                 <p class="text-xs text-muted-foreground">
                                     Optional: Additional information about the product
@@ -226,7 +195,8 @@
                                     </div>
 
                                     <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <span v-if="form.sku" class="font-mono bg-muted px-1.5 py-0.5 rounded">{{ form.sku }}</span>
+                                        <span v-if="form.sku" class="font-mono bg-muted px-1.5 py-0.5 rounded">{{
+                                            form.sku }}</span>
                                         <span v-if="form.stock !== undefined">Stock: {{ form.stock }}</span>
                                     </div>
 
@@ -239,22 +209,15 @@
 
                         <!-- Action Buttons -->
                         <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-muted">
-                            <Button
-                                type="submit"
-                                :disabled="form.processing || !form.name || !form.sku"
-                                class="flex items-center gap-2 h-10 px-6 cursor-pointer"
-                            >
+                            <Button type="submit" :disabled="form.processing || !form.name || !form.sku"
+                                class="flex items-center gap-2 h-10 px-6 cursor-pointer">
                                 <Icon v-if="form.processing" name="Loader2" class="w-4 h-4 animate-spin" />
                                 <Icon v-else name="Save" class="w-4 h-4" />
                                 {{ form.processing ? 'Saving...' : 'Save Product' }}
                             </Button>
 
-                            <Button
-                                as="a"
-                                variant="outline"
-                                :href="route('products.index')"
-                                class="flex items-center gap-2 h-10 px-6 cursor-pointer"
-                            >
+                            <Button as="a" variant="outline" :href="route('products.index')"
+                                class="flex items-center gap-2 h-10 px-6 cursor-pointer">
                                 <Icon name="X" class="w-4 h-4" />
                                 Cancel
                             </Button>
@@ -356,12 +319,15 @@ function submit() {
     .xs\:flex-row {
         flex-direction: row;
     }
+
     .xs\:items-center {
         align-items: center;
     }
+
     .xs\:gap-0 {
         gap: 0;
     }
+
     .xs\:block {
         display: block;
     }

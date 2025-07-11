@@ -8,14 +8,8 @@
                     <Label class="text-sm font-medium">
                         RD${{ formatDenomination(bill) }}
                     </Label>
-                    <Input
-                        v-model.number="billQuantities[bill]"
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        @input="updateBreakdown"
-                        class="text-center"
-                    />
+                    <Input v-model.number="billQuantities[bill]" type="number" min="0" placeholder="0"
+                        @input="updateBreakdown" class="text-center" />
                     <p class="text-xs text-muted-foreground text-center">
                         RD${{ formatCurrency(bill * (billQuantities[bill] || 0)) }}
                     </p>
@@ -37,14 +31,8 @@
                     <Label class="text-sm font-medium">
                         RD${{ formatDenomination(coin) }}
                     </Label>
-                    <Input
-                        v-model.number="coinQuantities[coin]"
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        @input="updateBreakdown"
-                        class="text-center"
-                    />
+                    <Input v-model.number="coinQuantities[coin]" type="number" min="0" placeholder="0"
+                        @input="updateBreakdown" class="text-center" />
                     <p class="text-xs text-muted-foreground text-center">
                         RD${{ formatCurrency(coin * (coinQuantities[coin] || 0)) }}
                     </p>

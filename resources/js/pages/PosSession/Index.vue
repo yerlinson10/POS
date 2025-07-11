@@ -1,9 +1,11 @@
 <template>
+
     <Head title="POS Sessions" />
 
     <AppLayout title="POS Sessions">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
+            <div
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
 
                 <!-- Header -->
                 <div class="flex flex-col gap-2 md:gap-4 p-4 md:p-6 border-b bg-muted/30">
@@ -16,17 +18,17 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <Button @click="refreshData" variant="outline" size="sm"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                                 <RefreshCw class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                 Refresh
                             </Button>
                             <Button @click="createSession" v-if="!stats?.open_sessions" size="sm"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                                 <Plus class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                 New Session
                             </Button>
                             <Button @click="viewCurrentSession" v-else variant="outline" size="sm"
-                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                                 <Monitor class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                 Current Session
                             </Button>
@@ -37,14 +39,14 @@
                 <!-- Stats Cards -->
                 <div class="p-4 md:p-6 border-b bg-background">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                        <StatsCard title="Total Sessions" :value="(stats?.total_sessions || 0).toString()" icon="Monitor"
-                            color="blue" />
-                        <StatsCard title="Open Sessions" :value="(stats?.open_sessions || 0).toString()" icon="PlayCircle"
-                            color="green" />
-                        <StatsCard title="Closed Sessions" :value="(stats?.closed_sessions || 0).toString()" icon="StopCircle"
-                            color="purple" />
-                        <StatsCard title="Total Sales" :value="formatCurrency(stats?.total_sales || 0)" icon="DollarSign"
-                            color="emerald" />
+                        <StatsCard title="Total Sessions" :value="(stats?.total_sessions || 0).toString()"
+                            icon="Monitor" color="blue" />
+                        <StatsCard title="Open Sessions" :value="(stats?.open_sessions || 0).toString()"
+                            icon="PlayCircle" color="green" />
+                        <StatsCard title="Closed Sessions" :value="(stats?.closed_sessions || 0).toString()"
+                            icon="StopCircle" color="purple" />
+                        <StatsCard title="Total Sales" :value="formatCurrency(stats?.total_sales || 0)"
+                            icon="DollarSign" color="emerald" />
                         <StatsCard title="Cash Difference" :value="formatCurrency(stats?.total_cash_difference || 0)"
                             icon="TrendingUp" :color="(stats?.total_cash_difference || 0) >= 0 ? 'green' : 'red'" />
                     </div>
@@ -73,22 +75,22 @@
                         </div>
                         <div class="space-y-2">
                             <Label class="text-sm font-medium">From Date</Label>
-                            <Input v-model="filters.date_from" type="date"
-                                class="h-8 md:h-9 text-sm" @change="applyFilters" />
+                            <Input v-model="filters.date_from" type="date" class="h-8 md:h-9 text-sm"
+                                @change="applyFilters" />
                         </div>
                         <div class="space-y-2">
                             <Label class="text-sm font-medium">To Date</Label>
-                            <Input v-model="filters.date_to" type="date"
-                                class="h-8 md:h-9 text-sm" @change="applyFilters" />
+                            <Input v-model="filters.date_to" type="date" class="h-8 md:h-9 text-sm"
+                                @change="applyFilters" />
                         </div>
                     </div>
                     <div class="flex justify-end gap-2">
                         <Button @click="clearFilters" variant="outline" size="sm"
-                            class="h-8 md:h-9 px-2 md:px-4 text-xs md:text-sm">
+                            class="h-8 md:h-9 px-2 md:px-4 text-xs md:text-sm cursor-pointer">
                             Clear Filters
                         </Button>
                         <Button @click="applyFilters" size="sm"
-                            class="h-8 md:h-9 px-2 md:px-4 text-xs md:text-sm">
+                            class="h-8 md:h-9 px-2 md:px-4 text-xs md:text-sm cursor-pointer">
                             Apply Filters
                         </Button>
                     </div>
@@ -98,7 +100,8 @@
                 <div class="flex-1 overflow-hidden">
                     <div class="h-full overflow-y-auto">
                         <table class="w-full">
-                            <thead class="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
+                            <thead
+                                class="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
                                 <tr class="h-12">
                                     <th class="text-left px-4 py-3 font-semibold text-sm">Cashier</th>
                                     <th class="text-left px-4 py-3 font-semibold text-sm">Opening Date/Time</th>
@@ -156,8 +159,10 @@
                                     <!-- Sales -->
                                     <td class="px-4 py-4">
                                         <div class="text-sm">
-                                            <div class="font-semibold">RD${{ formatCurrency(session.total_sales || 0) }}</div>
-                                            <div class="text-xs text-muted-foreground">{{ session.sales_count || 0 }} sales</div>
+                                            <div class="font-semibold">RD${{ formatCurrency(session.total_sales || 0) }}
+                                            </div>
+                                            <div class="text-xs text-muted-foreground">{{ session.sales_count || 0 }}
+                                                sales</div>
                                         </div>
                                     </td>
 
@@ -178,11 +183,11 @@
                                     <!-- Actions -->
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center gap-1">
-                                            <Link prefetch :cacheFor="['30s', '1m']" :href="route('sessions.show', session.id)">
-                                                <Button variant="ghost" size="sm"
-                                                    class="h-8 w-8 p-0">
-                                                    <Eye class="h-4 w-4" />
-                                                </Button>
+                                            <Link prefetch :cacheFor="['30s', '1m']"
+                                                :href="route('sessions.show', session.id)">
+                                            <Button variant="ghost" size="sm" class="h-8 w-8 p-0">
+                                                <Eye class="h-4 w-4" />
+                                            </Button>
                                             </Link>
 
                                             <Button v-if="session.status === 'open'" @click="closeSession(session)"
@@ -218,36 +223,32 @@
                     class="flex flex-col xs:flex-row xs:items-center justify-between gap-2 xs:gap-4 p-4 md:p-6 border-t bg-muted/20">
                     <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-4">
                         <div class="text-xs text-muted-foreground">
-                            <span class="font-medium">{{ sessions?.pagination?.from || 0 }}-{{ sessions?.pagination?.to || 0 }}</span>
+                            <span class="font-medium">{{ sessions?.pagination?.from || 0 }}-{{ sessions?.pagination?.to
+                                || 0 }}</span>
                             <span class="hidden xs:inline"> of </span>
                             <span class="xs:hidden">/</span>
                             <span class="font-medium">{{ sessions?.pagination?.total || 0 }}</span>
                         </div>
                         <div class="text-xs text-muted-foreground">
-                            Page {{ sessions?.pagination?.current_page || 1 }}/{{ sessions?.pagination?.last_page || 1 }}
+                            Page {{ sessions?.pagination?.current_page || 1 }}/{{ sessions?.pagination?.last_page || 1
+                            }}
                         </div>
                     </div>
 
-                    <Pagination v-slot="{ page: internalPage }"
-                        :items-per-page="sessions?.pagination?.per_page || 15"
-                        :total="sessions?.pagination?.last_page || 1"
-                        :page="sessions?.pagination?.current_page || 1"
-                        @page-change="changePage"
-                        class="flex">
+                    <Pagination v-slot="{ page: internalPage }" :items-per-page="sessions?.pagination?.per_page || 15"
+                        :total="sessions?.pagination?.last_page || 1" :page="sessions?.pagination?.current_page || 1"
+                        @page-change="changePage" class="flex">
                         <PaginationContent v-slot="{ items: pages }" class="justify-center sm:justify-end">
                             <PaginationPrevious @click="changePage(internalPage - 1)"
-                                :disabled="(sessions?.pagination?.current_page || 1) <= 1"
-                                class="h-8 md:h-9" />
+                                :disabled="(sessions?.pagination?.current_page || 1) <= 1" class="h-8 md:h-9" />
                             <template v-for="(item, idx) in pages" :key="idx">
                                 <PaginationItem v-if="item.type === 'page'" :value="item.value"
-                                    :is-active="item.value === internalPage"
-                                    @click="changePage(item.value)"
+                                    :is-active="item.value === internalPage" @click="changePage(item.value)"
                                     class="h-8 md:h-9 w-8 md:w-9 text-xs md:text-sm">
                                     {{ item.value }}
                                 </PaginationItem>
                             </template>
-                            <PaginationEllipsis :index="4"
-                                v-if="(sessions?.pagination?.last_page || 1) >= 4"
+                            <PaginationEllipsis :index="4" v-if="(sessions?.pagination?.last_page || 1) >= 4"
                                 class="h-8 md:h-9" />
                             <PaginationNext @click="changePage(internalPage + 1)"
                                 :disabled="(sessions?.pagination?.current_page || 1) >= (sessions?.pagination?.last_page || 1)"
@@ -261,7 +262,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { reactive } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import AppLayout from '../../layouts/AppLayout.vue'
@@ -291,10 +292,6 @@ import {
     Monitor,
     Eye,
     X,
-    PlayCircle,
-    StopCircle,
-    DollarSign,
-    TrendingUp
 } from 'lucide-vue-next'
 import { debounce } from 'lodash-es'
 import type { PosSession } from '../../types/pos'

@@ -5,10 +5,11 @@
                 <DialogTitle class="flex items-center gap-2 text-lg md:text-xl" :class="getTitleClass">
                     <Icon :name="getTitleIcon" class="w-4 h-4 md:w-5 md:h-5" />
                     {{ getTitleText }}
-                </DialogTitle>            <DialogDescription class="text-sm">
-                {{ getDescriptionText }}
-                <br><span class="text-xs text-muted-foreground mt-1 block">Press F4 to open PDF for printing</span>
-            </DialogDescription>
+                </DialogTitle>
+                <DialogDescription class="text-sm">
+                    {{ getDescriptionText }}
+                    <br><span class="text-xs text-muted-foreground mt-1 block">Press F4 to open PDF for printing</span>
+                </DialogDescription>
             </DialogHeader>
 
             <div v-if="sale" class="space-y-3 md:space-y-4">
@@ -79,7 +80,7 @@
 
                 <!-- Actions -->
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <Button @click="startNewSale" class="flex-1 cursor-pointer h-9 md:h-10 text-sm">
+                    <Button @click="startNewSale" class="flex-1 cursor-pointer h-9 md:h-10 text-sm ">
                         <Icon name="Plus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                         New Sale
                     </Button>

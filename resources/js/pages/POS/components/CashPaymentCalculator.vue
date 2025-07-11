@@ -29,14 +29,14 @@
                 <!-- Quick Amount Buttons -->
                 <div class="grid grid-cols-4 gap-2">
                     <Button v-for="amount in quickAmounts" :key="amount" @click="setCashReceived(amount)"
-                        variant="outline" size="sm" class="text-xs">
+                        variant="outline" size="sm" class="text-xs cursor-pointer">
                         {{ Number(amount).toFixed(2) }}
                     </Button>
                 </div>
 
                 <!-- Exact Amount Button -->
                 <div class="flex justify-center">
-                    <Button @click="resetToTotalAmount" variant="secondary" size="sm" class="text-xs font-medium"
+                    <Button @click="resetToTotalAmount" variant="secondary" size="sm" class="text-xs font-medium cursor-pointer"
                         title="Set exact amount (no change required)">
                         <Icon name="Target" class="w-3 h-3 mr-1" />
                         Exact Amount ({{ Number(totalAmount).toFixed(2) }})

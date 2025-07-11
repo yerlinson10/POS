@@ -1,4 +1,5 @@
 <template>
+
     <Head title="Invoices" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -31,7 +32,8 @@
                             <Input v-model="filters.search" placeholder="Search invoices..."
                                 class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                         </div>
-                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
+                        <Button @click="search" size="sm"
+                            class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                             <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                         <Button v-if="hasActiveFilters" @click="resetFilters" variant="outline" size="sm"
@@ -45,7 +47,8 @@
                 <div
                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:gap-4 p-2 md:p-4 bg-background border-b">
                     <div class="flex flex-col sm:flex-row sm:items-center gap-2 md:gap-3">
-                        <span class="text-xs md:text-sm font-medium text-muted-foreground hidden sm:inline">Filters:</span>
+                        <span
+                            class="text-xs md:text-sm font-medium text-muted-foreground hidden sm:inline">Filters:</span>
                         <div class="flex gap-2">
                             <Select v-model="filters.status" @update:modelValue="search">
                                 <SelectTrigger class="w-full sm:w-32 md:w-40 h-7 md:h-9 text-xs md:text-sm">
@@ -118,7 +121,8 @@
 
                                     <!-- Customer -->
                                     <td class="px-4 py-4">
-                                        <div v-if="invoice.customer" class="font-medium text-sm group-hover:text-primary transition-colors">
+                                        <div v-if="invoice.customer"
+                                            class="font-medium text-sm group-hover:text-primary transition-colors">
                                             {{ invoice.customer.name }}
                                         </div>
                                         <div v-else class="text-sm text-muted-foreground">
@@ -132,7 +136,8 @@
                                     <!-- Date -->
                                     <td class="px-4 py-4">
                                         <div class="text-sm">{{ formatDate(invoice.date) }}</div>
-                                        <div class="text-xs text-muted-foreground">{{ formatDate(invoice.created_at) }}</div>
+                                        <div class="text-xs text-muted-foreground">{{ formatDate(invoice.created_at) }}
+                                        </div>
                                     </td>
 
                                     <!-- Total -->
@@ -145,8 +150,10 @@
                                     <!-- Payment Method -->
                                     <td class="px-4 py-4">
                                         <div class="flex items-center gap-2">
-                                            <Icon :name="getPaymentMethodIcon(invoice.payment_method)" class="w-4 h-4 text-muted-foreground" />
-                                            <span class="text-sm capitalize">{{ invoice.payment_method || 'cash' }}</span>
+                                            <Icon :name="getPaymentMethodIcon(invoice.payment_method)"
+                                                class="w-4 h-4 text-muted-foreground" />
+                                            <span class="text-sm capitalize">{{ invoice.payment_method || 'cash'
+                                                }}</span>
                                         </div>
                                     </td>
 
@@ -160,15 +167,18 @@
                                     <!-- Actions -->
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center gap-1">
-                                            <Link :href="route('invoices.show', invoice.id)" prefetch :cacheFor="['30s', '1m']">
-                                                <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
-                                                    <Icon name="Eye" class="w-4 h-4" />
-                                                </Button>
+                                            <Link :href="route('invoices.show', invoice.id)" prefetch
+                                                :cacheFor="['30s', '1m']">
+                                            <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
+                                                <Icon name="Eye" class="w-4 h-4" />
+                                            </Button>
                                             </Link>
-                                            <Link v-if="invoice.status === 'quotation'" :href="route('invoices.edit', invoice.id)" prefetch :cacheFor="['30s', '1m']">
-                                                <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
-                                                    <Icon name="Edit" class="w-4 h-4" />
-                                                </Button>
+                                            <Link v-if="invoice.status === 'quotation'"
+                                                :href="route('invoices.edit', invoice.id)" prefetch
+                                                :cacheFor="['30s', '1m']">
+                                            <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
+                                                <Icon name="Edit" class="w-4 h-4" />
+                                            </Button>
                                             </Link>
                                         </div>
                                     </td>
@@ -193,8 +203,8 @@
                         </div>
                     </div>
 
-                    <Pagination :items-per-page="parseInt(filters.per_page)"
-                        :total="invoices.total" :page="invoices.current_page" @page-change="onPageChange" class="flex">
+                    <Pagination :items-per-page="parseInt(filters.per_page)" :total="invoices.total"
+                        :page="invoices.current_page" @page-change="onPageChange" class="flex">
                         <PaginationContent v-slot="{ items: pages }" class="justify-center sm:justify-end">
                             <PaginationPrevious @click="onPageChange(invoices.current_page - 1)"
                                 :disabled="invoices.current_page <= 1" class="h-8 md:h-9" />

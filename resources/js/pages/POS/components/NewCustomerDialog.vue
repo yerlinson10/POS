@@ -40,7 +40,8 @@
 
                 <div class="space-y-2">
                     <Label for="phone" class="text-sm">Phone</Label>
-                    <Input id="phone" v-model="form.phone" placeholder="Enter phone number" :disabled="isCreating" class="h-9 md:h-10 text-sm" />
+                    <Input id="phone" v-model="form.phone" placeholder="Enter phone number" :disabled="isCreating"
+                        class="h-9 md:h-10 text-sm" />
                     <div v-if="errors.phone" class="text-xs text-red-500">
                         {{ errors.phone }}
                     </div>
@@ -61,11 +62,11 @@
 
                 <DialogFooter class="flex flex-col sm:flex-row gap-2 sm:gap-0">
                     <Button type="button" @click="closeDialog" variant="outline" :disabled="isCreating"
-                        class="w-full sm:w-auto h-9 md:h-10 text-sm mr-2">
+                        class="w-full sm:w-auto h-9 md:h-10 text-sm mr-2 cursor-pointer">
                         Cancel
                     </Button>
                     <Button type="submit" :loading="isCreating" :disabled="!canSubmit"
-                        class="w-full sm:w-auto h-9 md:h-10 text-sm">
+                        class="w-full sm:w-auto h-9 md:h-10 text-sm cursor-pointer">
                         <Icon name="UserPlus" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                         {{ isCreating ? 'Creating...' : 'Create Customer' }}
                     </Button>

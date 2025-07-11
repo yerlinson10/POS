@@ -22,22 +22,23 @@
                     <div class="relative flex-1">
                         <Icon name="Search"
                             class="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 md:w-4 md:h-4 text-muted-foreground" />
-                        <Input v-model="filters.search" ref="searchInputRef" data-product-search-input placeholder="Search products..."
-                            class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
+                        <Input v-model="filters.search" ref="searchInputRef" data-product-search-input
+                            placeholder="Search products..." class="pl-7 md:pl-10 h-8 md:h-11 text-sm"
+                            @keyup.enter="search" />
                     </div>
                     <Button @click="search" :disabled="isLoading" size="sm"
-                        class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm">
+                        class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                         <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                     <!-- Collapsible Filters Button for Mobile -->
                     <Button @click="showFilters = !showFilters" variant="outline" size="sm"
-                        class="h-8 md:hidden px-2 text-xs">
+                        class="h-8 md:hidden px-2 text-xs cursor-pointer">
                         <Icon name="Filter" class="w-3 h-3 mr-1" />
                         <span>{{ showFilters ? 'Hide' : 'Show' }}</span>
                     </Button>
                     <Button v-if="filters.search || filters.sort_by !== 'name' || filters.sort_dir !== 'asc'"
                         @click="clearSearch" variant="outline" size="sm"
-                        class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm">
+                        class="h-8 md:h-11 px-2 md:px-4 text-xs md:text-sm cursor-pointer">
                         <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                 </div>
@@ -108,7 +109,7 @@
                             <p class="text-xs md:text-sm text-muted-foreground">{{ error }}</p>
                         </div>
                         <Button @click="search" variant="outline" size="sm" class="text-xs md:text-sm">
-                            <Icon name="RefreshCw" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                            <Icon name="RefreshCw" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 cursor-pointer" />
                             Try Again
                         </Button>
                     </div>
@@ -123,7 +124,7 @@
                             <p class="text-xs md:text-sm text-muted-foreground">Try adjusting your search or filters</p>
                         </div>
                         <Button @click="clearSearch" variant="outline" size="sm" class="text-xs md:text-sm">
-                            <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                            <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 cursor-pointer" />
                             Clear Filters
                         </Button>
                     </div>
@@ -162,7 +163,8 @@
                                 <div class="flex items-center justify-between gap-2">
                                     <div class="flex items-center gap-1 bg-muted rounded p-1">
                                         <Button size="sm" variant="ghost" @click="decreaseQuantity(product.id)"
-                                            :disabled="(productQuantities[product.id] || 1) <= 1" class="h-5 w-5 p-0">
+                                            :disabled="(productQuantities[product.id] || 1) <= 1"
+                                            class="h-5 w-5 p-0 cursor-pointer">
                                             <Icon name="Minus" class="w-3 h-3" />
                                         </Button>
                                         <span class="w-6 text-center text-xs font-medium">{{
@@ -170,14 +172,14 @@
                                         <Button size="sm" variant="ghost"
                                             @click="increaseQuantity(product.id, product.stock)"
                                             :disabled="(productQuantities[product.id] || 1) >= product.stock"
-                                            class="h-5 w-5 p-0">
+                                            class="h-5 w-5 p-0 cursor-pointer">
                                             <Icon name="Plus" class="w-3 h-3" />
                                         </Button>
                                     </div>
 
                                     <Button @click="addProduct(product)"
                                         :disabled="product.stock === 0 || (productQuantities[product.id] || 1) > product.stock"
-                                        size="sm" class="flex-1 text-xs h-7">
+                                        size="sm" class="flex-1 text-xs h-7 cursor-pointer">
                                         <Icon name="ShoppingCart" class="w-3 h-3 mr-1" />
                                         Add
                                     </Button>
@@ -259,7 +261,7 @@
                                     <td class="px-4 py-4 text-center">
                                         <Button @click="addProduct(product)" size="sm"
                                             :disabled="product.stock === 0 || !productQuantities[product.id] || productQuantities[product.id] <= 0"
-                                            class="h-9 px-3">
+                                            class="h-9 px-3 cursor-pointer">
                                             <Icon name="ShoppingCart" class="w-4 h-4 mr-1" />
                                             Add
                                         </Button>
@@ -289,7 +291,7 @@
                 <!-- Simplified Mobile Pagination -->
                 <div class="flex md:hidden items-center justify-center gap-2">
                     <Button @click="onPageChange(pagination.current_page - 1)" :disabled="pagination.current_page <= 1"
-                        size="sm" variant="outline" class="h-7 w-7 p-0">
+                        size="sm" variant="outline" class="h-7 w-7 p-0 cursor-pointer">
                         <Icon name="ChevronLeft" class="w-3 h-3" />
                     </Button>
                     <span class="text-xs font-medium px-2">
@@ -297,7 +299,7 @@
                     </span>
                     <Button @click="onPageChange(pagination.current_page + 1)"
                         :disabled="pagination.current_page >= pagination.last_page" size="sm" variant="outline"
-                        class="h-7 w-7 p-0">
+                        class="h-7 w-7 p-0 cursor-pointer">
                         <Icon name="ChevronRight" class="w-3 h-3" />
                     </Button>
                 </div>
@@ -332,11 +334,13 @@
                     <span class="sm:hidden">Press Enter to add</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <Button @click="clearSearch" variant="ghost" size="sm" class="text-xs md:text-sm h-7 ">
+                    <Button @click="clearSearch" variant="ghost" size="sm"
+                        class="text-xs md:text-sm h-7 cursor-pointer">
                         <Icon name="RotateCcw" class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         <span class="hidden xs:inline">Reset</span>
                     </Button>
-                    <Button @click="closeModal" variant="outline" size="sm" class="text-xs md:text-sm h-7">
+                    <Button @click="closeModal" variant="outline" size="sm"
+                        class="text-xs md:text-sm h-7 cursor-pointer">
                         <Icon name="X" class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                         Close
                     </Button>
@@ -437,8 +441,8 @@ const focusSearchInput = () => {
         if (inputElement && typeof inputElement.focus !== 'function') {
             // Try multiple ways to find the input
             const input = inputElement.$el?.querySelector('input') ||
-                         inputElement.querySelector?.('input') ||
-                         inputElement
+                inputElement.querySelector?.('input') ||
+                inputElement
 
             if (input) {
                 inputElement = input

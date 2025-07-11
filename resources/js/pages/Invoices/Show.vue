@@ -127,8 +127,10 @@
                                     <div class="flex justify-between">
                                         <span class="text-sm text-muted-foreground">Payment Method</span>
                                         <div class="flex items-center gap-2">
-                                            <Icon :name="getPaymentMethodIcon(invoice.payment_method)" class="w-4 h-4 text-muted-foreground" />
-                                            <span class="text-sm font-medium capitalize">{{ invoice.payment_method || 'cash' }}</span>
+                                            <Icon :name="getPaymentMethodIcon(invoice.payment_method)"
+                                                class="w-4 h-4 text-muted-foreground" />
+                                            <span class="text-sm font-medium capitalize">{{ invoice.payment_method ||
+                                                'cash' }}</span>
                                         </div>
                                     </div>
                                     <div class="flex justify-between">
@@ -161,8 +163,8 @@
                                     <h3 class="text-lg font-semibold">Status Actions</h3>
                                 </div>
                                 <div class="p-4 space-y-2">
-                                    <Button v-if="invoice.status === 'quotation'" :as="Link" :href="route('invoices.edit', invoice.id)"
-                                        variant="outline"
+                                    <Button v-if="invoice.status === 'quotation'" :as="Link"
+                                        :href="route('invoices.edit', invoice.id)" variant="outline"
                                         class="w-full text-blue-600 border-blue-600 hover:bg-blue-50 cursor-pointer">
                                         <Icon name="Edit" class="w-4 h-4 mr-2" />
                                         Edit Quotation

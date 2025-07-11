@@ -5,7 +5,7 @@
                 class="pr-10" data-customer-selector-input @input="handleSearch" @focus="showDropdown = true"
                 @keydown="handleKeyDown" />
             <Button v-if="searchTerm" @click="clearSearch" variant="ghost" size="sm"
-                class="absolute right-1 top-1 h-8 w-8 p-0">
+                class="absolute right-1 top-1 h-8 w-8 p-0 cursor-pointer">
                 <Icon name="X" class="h-4 w-4" />
             </Button>
         </div>

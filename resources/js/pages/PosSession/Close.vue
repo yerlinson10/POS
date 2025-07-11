@@ -1,7 +1,8 @@
 <template>
     <AppLayout title="Close POS Session">
         <div class="max-w-4xl mx-auto p-6">
-            <div class="rounded-xl border bg-card text-card-foreground shadow-sm dark:bg-[#18181b] dark:border-[#27272a]">
+            <div
+                class="rounded-xl border bg-card text-card-foreground shadow-sm dark:bg-[#18181b] dark:border-[#27272a]">
                 <div class="p-6 border-b border-border dark:border-[#27272a]">
                     <h1 class="text-2xl font-bold text-foreground dark:text-white">Close POS Session</h1>
                     <p class="text-muted-foreground mt-2 dark:text-gray-400">
@@ -44,32 +45,25 @@
                     <form @submit.prevent="submitForm" class="space-y-6">
                         <!-- Final cash -->
                         <div>
-                            <label for="final_cash" class="block text-sm font-medium text-foreground dark:text-gray-200 mb-2">
+                            <label for="final_cash"
+                                class="block text-sm font-medium text-foreground dark:text-gray-200 mb-2">
                                 Final Counted Cash *
                             </label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                                <Input
-                                    id="final_cash"
-                                    v-model="form.final_cash"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    class="pl-8"
-                                    :class="{ 'border-destructive': errors.final_cash }"
-                                    required
-                                />
+                                <span
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                                <Input id="final_cash" v-model="form.final_cash" type="number" step="0.01" min="0"
+                                    placeholder="0.00" class="pl-8" :class="{ 'border-destructive': errors.final_cash }"
+                                    required />
                             </div>
                             <p v-if="errors.final_cash" class="text-destructive text-sm mt-1">
                                 {{ errors.final_cash }}
                             </p>
 
                             <!-- Cash difference -->
-                            <div v-if="cashDifference !== 0" class="mt-2 p-3 rounded-lg"
-                                 :class="cashDifference > 0
-                                    ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
-                                    : 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'">
+                            <div v-if="cashDifference !== 0" class="mt-2 p-3 rounded-lg" :class="cashDifference > 0
+                                ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
+                                : 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'">
                                 <div class="flex items-center">
                                     <AlertTriangle v-if="cashDifference < 0" class="h-4 w-4 mr-2" />
                                     <CheckCircle v-else class="h-4 w-4 mr-2" />
@@ -83,16 +77,13 @@
 
                         <!-- Closing notes -->
                         <div>
-                            <label for="closing_notes" class="block text-sm font-medium text-foreground dark:text-gray-200 mb-2">
+                            <label for="closing_notes"
+                                class="block text-sm font-medium text-foreground dark:text-gray-200 mb-2">
                                 Closing Notes
                             </label>
-                            <Textarea
-                                id="closing_notes"
-                                v-model="form.closing_notes"
-                                placeholder="Additional notes about the session closing..."
-                                rows="3"
-                                :class="{ 'border-destructive': errors.closing_notes }"
-                            />
+                            <Textarea id="closing_notes" v-model="form.closing_notes"
+                                placeholder="Additional notes about the session closing..." rows="3"
+                                :class="{ 'border-destructive': errors.closing_notes }" />
                             <p v-if="errors.closing_notes" class="text-destructive text-sm mt-1">
                                 {{ errors.closing_notes }}
                             </p>
@@ -104,12 +95,8 @@
                                 <label class="block text-sm font-medium text-foreground dark:text-gray-200">
                                     Final Cash Breakdown (Optional)
                                 </label>
-                                <Button
-                                    type="button"
-                                    @click="showBreakdown = !showBreakdown"
-                                    variant="outline"
-                                    size="sm"
-                                >
+                                <Button type="button" @click="showBreakdown = !showBreakdown" variant="outline"
+                                    size="sm">
                                     {{ showBreakdown ? 'Hide' : 'Show' }} Breakdown
                                 </Button>
                             </div>
@@ -120,13 +107,17 @@
                         </div>
 
                         <!-- Confirmation -->
-                        <div class="border rounded-lg p-4 bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-900">
+                        <div
+                            class="border rounded-lg p-4 bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-900">
                             <div class="flex items-start">
-                                <AlertTriangle class="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
+                                <AlertTriangle
+                                    class="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
                                 <div>
-                                    <h3 class="font-medium text-yellow-800 dark:text-yellow-200">Confirm Session Closing</h3>
+                                    <h3 class="font-medium text-yellow-800 dark:text-yellow-200">Confirm Session Closing
+                                    </h3>
                                     <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                        Once the session is closed, you will not be able to process more sales until a new session is opened.
+                                        Once the session is closed, you will not be able to process more sales until a
+                                        new session is opened.
                                         Make sure all information is correct.
                                     </p>
                                 </div>
@@ -135,20 +126,12 @@
 
                         <!-- Action buttons -->
                         <div class="flex justify-end space-x-3 pt-6 border-t border-border dark:border-[#27272a]">
-                            <Button
-                                class="cursor-pointer"
-                                type="button"
-                                @click="goBack"
-                                variant="outline"
-                                :disabled="isSubmitting"
-                            >
+                            <Button class="cursor-pointer" type="button" @click="goBack" variant="outline"
+                                :disabled="isSubmitting">
                                 Cancel
                             </Button>
-                            <Button
-                                type="submit"
-                                :disabled="isSubmitting"
-                                class="min-w-[120px] bg-destructive hover:bg-destructive/90 text-white cursor-pointer"
-                            >
+                            <Button type="submit" :disabled="isSubmitting"
+                                class="min-w-[120px] bg-destructive hover:bg-destructive/90 text-white cursor-pointer">
                                 <Loader2 v-if="isSubmitting" class="h-4 w-4 animate-spin mr-2" />
                                 {{ isSubmitting ? 'Closing...' : 'Close Session' }}
                             </Button>
@@ -231,7 +214,7 @@ const submitForm = async () => {
         }
 
         await router.patch(route('sessions.update', props.session.id), formData, {
-            onSuccess: (page) => {
+            onSuccess: () => {
                 toast.success('POS session closed successfully')
                 // Permitir que Inertia maneje la navegación automáticamente
             },

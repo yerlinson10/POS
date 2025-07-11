@@ -16,7 +16,7 @@
                             <ShoppingCart class="h-4 w-4 mr-2" />
                             Go to POS
                         </Button>
-                        <Button @click="closeSession" variant="destructive"  class="cursor-pointer">
+                        <Button @click="closeSession" variant="destructive" class="cursor-pointer">
                             <X class="h-4 w-4 mr-2" />
                             Close Session
                         </Button>
@@ -26,30 +26,13 @@
 
             <!-- Main statistics -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-                <StatsCard
-                    title="Total Sales"
-                    :value="formatCurrency(summary.total_sales)"
-                    icon="DollarSign"
-                    color="green"
-                />
-                <StatsCard
-                    title="Sales"
-                    :value="summary.sales_count.toString()"
-                    icon="Receipt"
-                    color="blue"
-                />
-                <StatsCard
-                    title="Cash Sales"
-                    :value="formatCurrency(summary.cash_sales)"
-                    icon="Banknote"
-                    color="emerald"
-                />
-                <StatsCard
-                    title="Card Sales"
-                    :value="formatCurrency(summary.card_sales)"
-                    icon="CreditCard"
-                    color="purple"
-                />
+                <StatsCard title="Total Sales" :value="formatCurrency(summary.total_sales)" icon="DollarSign"
+                    color="green" />
+                <StatsCard title="Sales" :value="summary.sales_count.toString()" icon="Receipt" color="blue" />
+                <StatsCard title="Cash Sales" :value="formatCurrency(summary.cash_sales)" icon="Banknote"
+                    color="emerald" />
+                <StatsCard title="Card Sales" :value="formatCurrency(summary.card_sales)" icon="CreditCard"
+                    color="purple" />
             </div>
 
             <!-- Cash information -->
@@ -64,7 +47,8 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-zinc-400">Cash sales:</span>
-                            <span class="font-medium text-green-600 dark:text-green-400">+${{ formatCurrency(summary.cash_sales) }}</span>
+                            <span class="font-medium text-green-600 dark:text-green-400">+${{
+                                formatCurrency(summary.cash_sales) }}</span>
                         </div>
                         <div class="border-t border-gray-200 dark:border-zinc-700 pt-3 flex justify-between">
                             <span class="font-semibold text-gray-900 dark:text-zinc-100">Expected cash:</span>
@@ -78,7 +62,7 @@
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-zinc-100 mb-4">Payment Methods</h2>
                     <div class="space-y-3">
                         <div v-for="(method, key) in summary.payment_methods_breakdown" :key="key"
-                             class="flex justify-between items-center">
+                            class="flex justify-between items-center">
                             <div class="flex items-center space-x-2">
                                 <PaymentMethodIcon :method="key" />
                                 <span class="capitalize dark:text-zinc-200">{{ getPaymentMethodName(key) }}</span>
@@ -101,14 +85,14 @@
             <!-- Opening notes -->
             <div v-if="session.opening_notes" class="bg-white dark:bg-zinc-900 rounded-lg shadow p-6">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-zinc-100 mb-4">Opening Notes</h2>
-                <p class="text-gray-700 dark:text-zinc-200 bg-gray-50 dark:bg-zinc-800 p-4 rounded-lg">{{ session.opening_notes }}</p>
+                <p class="text-gray-700 dark:text-zinc-200 bg-gray-50 dark:bg-zinc-800 p-4 rounded-lg">{{
+                    session.opening_notes }}</p>
             </div>
         </div>
     </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import AppLayout from '../../layouts/AppLayout.vue'

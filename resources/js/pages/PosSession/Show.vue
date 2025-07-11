@@ -1,9 +1,11 @@
 <template>
+
     <Head title="POS Session Details" />
 
     <AppLayout title="POS Session Details">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
+            <div
+                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border p-0">
 
                 <!-- Header -->
                 <div class="flex flex-col gap-2 md:gap-4 p-4 md:p-6 border-b bg-muted/30">
@@ -16,21 +18,21 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <Link prefetch :href="route('sessions.index')">
-                                <Button variant="outline" size="sm"
-                                    class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
-                                    <ArrowLeft class="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                                    Back to Sessions
-                                </Button>
+                            <Button variant="outline" size="sm"
+                                class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
+                                <ArrowLeft class="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                Back to Sessions
+                            </Button>
                             </Link>
                             <Link prefetch :href="route('pos.index')">
-                                <Button v-if="session?.status === 'open'" size="sm"
-                                    class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
-                                    <ShoppingCart class="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                                    Go to POS
-                                </Button>
-                            </Link>
-                            <Button v-if="session?.status === 'open'" @click="closeSession" variant="destructive" size="sm"
+                            <Button v-if="session?.status === 'open'" size="sm"
                                 class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
+                                <ShoppingCart class="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                Go to POS
+                            </Button>
+                            </Link>
+                            <Button v-if="session?.status === 'open'" @click="closeSession" variant="destructive"
+                                size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                                 <X class="w-3 h-3 md:w-4 md:h-4 mr-1" />
                                 Close Session
                             </Button>
@@ -58,7 +60,8 @@
                         </div>
                         <div class="space-y-2">
                             <Label class="text-sm font-medium text-muted-foreground">Initial Cash</Label>
-                            <div class="text-base font-semibold">RD${{ formatCurrency(session?.initial_cash || 0) }}</div>
+                            <div class="text-base font-semibold">RD${{ formatCurrency(session?.initial_cash || 0) }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -67,30 +70,14 @@
                 <div class="p-4 md:p-6 border-b bg-muted/30">
                     <h3 class="text-lg font-semibold mb-4">Sales Summary</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <StatsCard
-                            title="Total Sales"
-                            :value="`RD$${formatCurrency(summary?.total_sales || 0)}`"
-                            icon="DollarSign"
-                            color="green"
-                        />
-                        <StatsCard
-                            title="Number of Sales"
-                            :value="(summary?.sales_count || 0).toString()"
-                            icon="Receipt"
-                            color="blue"
-                        />
-                        <StatsCard
-                            title="Cash Sales"
-                            :value="`RD$${formatCurrency(summary?.cash_sales || 0)}`"
-                            icon="Banknote"
-                            color="emerald"
-                        />
-                        <StatsCard
-                            title="Card Sales"
-                            :value="`RD$${formatCurrency(summary?.card_sales || 0)}`"
-                            icon="CreditCard"
-                            color="purple"
-                        />
+                        <StatsCard title="Total Sales" :value="`RD$${formatCurrency(summary?.total_sales || 0)}`"
+                            icon="DollarSign" color="green" />
+                        <StatsCard title="Number of Sales" :value="(summary?.sales_count || 0).toString()"
+                            icon="Receipt" color="blue" />
+                        <StatsCard title="Cash Sales" :value="`RD$${formatCurrency(summary?.cash_sales || 0)}`"
+                            icon="Banknote" color="emerald" />
+                        <StatsCard title="Card Sales" :value="`RD$${formatCurrency(summary?.card_sales || 0)}`"
+                            icon="CreditCard" color="purple" />
                     </div>
                 </div>
 
@@ -100,7 +87,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="space-y-2">
                             <Label class="text-sm font-medium text-muted-foreground">Expected Cash</Label>
-                            <div class="text-lg font-semibold">RD${{ formatCurrency(summary?.expected_cash || 0) }}</div>
+                            <div class="text-lg font-semibold">RD${{ formatCurrency(summary?.expected_cash || 0) }}
+                            </div>
                         </div>
                         <div class="space-y-2">
                             <Label class="text-sm font-medium text-muted-foreground">Final Cash</Label>
@@ -108,12 +96,12 @@
                         </div>
                         <div class="space-y-2">
                             <Label class="text-sm font-medium text-muted-foreground">Cash Difference</Label>
-                            <div class="text-lg font-semibold"
-                                :class="{
-                                    'text-green-600': (summary?.cash_difference || 0) >= 0,
-                                    'text-red-600': (summary?.cash_difference || 0) < 0
-                                }">
-                                {{ (summary?.cash_difference || 0) >= 0 ? '+' : '' }}RD${{ formatCurrency(Math.abs(summary?.cash_difference || 0)) }}
+                            <div class="text-lg font-semibold" :class="{
+                                'text-green-600': (summary?.cash_difference || 0) >= 0,
+                                'text-red-600': (summary?.cash_difference || 0) < 0
+                            }">
+                                {{ (summary?.cash_difference || 0) >= 0 ? '+' : '' }}RD${{
+                                    formatCurrency(Math.abs(summary?.cash_difference || 0)) }}
                             </div>
                         </div>
                     </div>
@@ -132,7 +120,8 @@
                             </div>
                             <div class="space-y-1">
                                 <div class="text-lg font-semibold">RD${{ formatCurrency(method.total) }}</div>
-                                <div class="text-sm text-muted-foreground">{{ method.count }} transaction{{ method.count !== 1 ? 's' : '' }}</div>
+                                <div class="text-sm text-muted-foreground">{{ method.count }} transaction{{ method.count
+                                    !== 1 ? 's' : '' }}</div>
                             </div>
                         </div>
                     </div>
@@ -163,7 +152,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { router, Head, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import AppLayout from '../../layouts/AppLayout.vue'
@@ -175,13 +163,9 @@ import PaymentMethodIcon from '../../pages/PosSession/components/PaymentMethodIc
 import {
     ArrowLeft,
     ShoppingCart,
-    X,
-    DollarSign,
-    Receipt,
-    Banknote,
-    CreditCard
+    X
 } from 'lucide-vue-next'
-import { formatCurrency, formatDateTime } from '@/utils/format'
+import { formatCurrency } from '@/utils/format'
 import type { PosSession, PosSessionSummary } from '../../types/pos'
 
 interface Props {

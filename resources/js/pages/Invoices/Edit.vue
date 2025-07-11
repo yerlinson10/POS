@@ -1,4 +1,5 @@
 <template>
+
     <Head title="Edit Quotation" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -43,13 +44,19 @@
                                                     <Icon name="User" class="w-5 h-5 text-muted-foreground" />
                                                     <div>
                                                         <p class="font-medium">{{ invoice.customer.full_name }}</p>
-                                                        <p class="text-sm text-muted-foreground">{{ invoice.customer.email }}</p>
-                                                        <p v-if="invoice.customer.phone" class="text-sm text-muted-foreground">{{ invoice.customer.phone }}</p>
+                                                        <p class="text-sm text-muted-foreground">{{
+                                                            invoice.customer.email }}</p>
+                                                        <p v-if="invoice.customer.phone"
+                                                            class="text-sm text-muted-foreground">{{
+                                                            invoice.customer.phone }}</p>
                                                     </div>
                                                 </div>
-                                                <p v-if="invoice.customer.address" class="text-sm text-muted-foreground mt-2 ml-8">{{ invoice.customer.address }}</p>
+                                                <p v-if="invoice.customer.address"
+                                                    class="text-sm text-muted-foreground mt-2 ml-8">{{
+                                                    invoice.customer.address }}</p>
                                             </div>
-                                            <p class="text-xs text-muted-foreground">Customer cannot be changed for existing quotations</p>
+                                            <p class="text-xs text-muted-foreground">Customer cannot be changed for
+                                                existing quotations</p>
                                         </div>
                                         <div v-else class="text-center py-4 text-muted-foreground">
                                             <Icon name="UserX" class="w-8 h-8 mx-auto mb-2" />
@@ -68,13 +75,16 @@
                                         </Button>
                                     </div>
                                     <div class="p-4">
-                                        <div v-if="!form.items || form.items.length === 0" class="text-center py-8 text-muted-foreground">
-                                            <Icon name="Package" class="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+                                        <div v-if="!form.items || form.items.length === 0"
+                                            class="text-center py-8 text-muted-foreground">
+                                            <Icon name="Package"
+                                                class="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
                                             <p class="text-lg font-medium mb-2">No items added yet</p>
                                             <p class="text-sm">Click "Add Item" to browse products from the catalog</p>
                                         </div>
                                         <div v-else-if="form.items && form.items.length > 0" class="space-y-4">
-                                            <div v-for="(item, index) in form.items" :key="item.temp_id || `item-${index}`"
+                                            <div v-for="(item, index) in form.items"
+                                                :key="item.temp_id || `item-${index}`"
                                                 class="p-4 border rounded-lg bg-muted/20">
                                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                                     <!-- Product Information (Read-only) -->
@@ -85,13 +95,17 @@
                                                                 <div class="flex items-center gap-3">
                                                                     <Icon name="Package" class="w-5 h-5 text-primary" />
                                                                     <div class="flex-1">
-                                                                        <p class="font-medium text-sm">{{ getProductName(item.product_id) }}</p>
-                                                                        <p class="text-xs text-muted-foreground">SKU: {{ getProductSKU(item.product_id) }}</p>
+                                                                        <p class="font-medium text-sm">{{
+                                                                            getProductName(item.product_id) }}</p>
+                                                                        <p class="text-xs text-muted-foreground">SKU: {{
+                                                                            getProductSKU(item.product_id) }}</p>
                                                                     </div>
                                                                 </div>
                                                                 <div class="text-right">
-                                                                    <p class="text-sm font-medium">${{ formatCurrency(item.unit_price) }}</p>
-                                                                    <p class="text-xs text-muted-foreground">per unit</p>
+                                                                    <p class="text-sm font-medium">${{
+                                                                        formatCurrency(item.unit_price) }}</p>
+                                                                    <p class="text-xs text-muted-foreground">per unit
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -100,34 +114,27 @@
                                                     <!-- Quantity -->
                                                     <div>
                                                         <label class="text-sm font-medium">Quantity</label>
-                                                        <Input
-                                                            v-model.number="item.quantity"
-                                                            type="number"
-                                                            step="0.01"
-                                                            min="0.01"
-                                                            :max="getProductStock(item.product_id)"
+                                                        <Input v-model.number="item.quantity" type="number" step="0.01"
+                                                            min="0.01" :max="getProductStock(item.product_id)"
                                                             @input="validateAndUpdateLineTotal(index)"
-                                                            @change="validateAndUpdateLineTotal(index)"
-                                                        />
-                                                        <p v-if="getProductStock(item.product_id)" class="text-xs text-muted-foreground mt-1">
+                                                            @change="validateAndUpdateLineTotal(index)" />
+                                                        <p v-if="getProductStock(item.product_id)"
+                                                            class="text-xs text-muted-foreground mt-1">
                                                             Available: {{ getProductStock(item.product_id) }} units
                                                         </p>
-                                                        <p v-if="item.quantity > getProductStock(item.product_id)" class="text-xs text-destructive mt-1">
-                                                            ⚠️ Exceeds available stock ({{ getProductStock(item.product_id) }} units)
+                                                        <p v-if="item.quantity > getProductStock(item.product_id)"
+                                                            class="text-xs text-destructive mt-1">
+                                                            ⚠️ Exceeds available stock ({{
+                                                            getProductStock(item.product_id) }} units)
                                                         </p>
                                                     </div>
 
                                                     <!-- Unit Price -->
                                                     <div>
                                                         <label class="text-sm font-medium">Unit Price</label>
-                                                        <Input
-                                                            v-model.number="item.unit_price"
-                                                            type="number"
-                                                            step="0.01"
-                                                            min="0"
-                                                            @input="updateLineTotal(index)"
-                                                            @change="updateLineTotal(index)"
-                                                        />
+                                                        <Input v-model.number="item.unit_price" type="number"
+                                                            step="0.01" min="0" @input="updateLineTotal(index)"
+                                                            @change="updateLineTotal(index)" />
                                                     </div>
                                                 </div>
 
@@ -135,7 +142,8 @@
                                                     <div class="text-sm font-medium">
                                                         Line Total: ${{ formatCurrency(item.line_total) }}
                                                     </div>
-                                                    <Button type="button" @click="removeItem(index)" variant="destructive" size="sm">
+                                                    <Button type="button" @click="removeItem(index)"
+                                                        variant="destructive" size="sm">
                                                         <Icon name="Trash2" class="w-4 h-4" />
                                                     </Button>
                                                 </div>
@@ -155,7 +163,8 @@
                                     <div class="p-4 space-y-4">
                                         <div>
                                             <label class="text-sm font-medium">Discount Type</label>
-                                            <Select :model-value="form.discount_type" @update:model-value="updateDiscountType">
+                                            <Select :model-value="form.discount_type"
+                                                @update:model-value="updateDiscountType">
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="No discount" />
                                                 </SelectTrigger>
@@ -167,16 +176,12 @@
                                         </div>
                                         <div v-if="form.discount_type">
                                             <label class="text-sm font-medium">
-                                                {{ form.discount_type === 'percentage' ? 'Percentage (%)' : 'Amount ($)' }}
+                                                {{ form.discount_type === 'percentage' ? 'Percentage (%)' : 'Amount ($)'
+                                                }}
                                             </label>
-                                            <Input
-                                                v-model.number="form.discount_value"
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                :max="form.discount_type === 'percentage' ? 100 : undefined"
-                                                @input="calculateTotals"
-                                            />
+                                            <Input v-model.number="form.discount_value" type="number" step="0.01"
+                                                min="0" :max="form.discount_type === 'percentage' ? 100 : undefined"
+                                                @input="calculateTotals" />
                                         </div>
                                     </div>
                                 </div>
@@ -210,21 +215,25 @@
                                         <h3 class="text-lg font-semibold">Actions</h3>
                                     </div>
                                     <div class="p-4 space-y-2">
-                                        <div v-if="hasStockIssues" class="p-3 bg-destructive/10 border border-destructive/20 rounded-lg mb-3">
+                                        <div v-if="hasStockIssues"
+                                            class="p-3 bg-destructive/10 border border-destructive/20 rounded-lg mb-3">
                                             <div class="flex items-center gap-2 text-destructive">
                                                 <Icon name="AlertTriangle" class="w-4 h-4" />
                                                 <span class="text-sm font-medium">Stock Issues Detected</span>
                                             </div>
                                             <p class="text-xs text-destructive/80 mt-1">
-                                                Some items exceed available stock. Please adjust quantities before saving.
+                                                Some items exceed available stock. Please adjust quantities before
+                                                saving.
                                             </p>
                                         </div>
                                         <Button type="submit" :disabled="!canSubmit" class="w-full cursor-pointer">
-                                            <Icon v-if="isSubmitting" name="Loader2" class="w-4 h-4 mr-2 animate-spin" />
+                                            <Icon v-if="isSubmitting" name="Loader2"
+                                                class="w-4 h-4 mr-2 animate-spin" />
                                             <Icon v-else name="Save" class="w-4 h-4 mr-2" />
                                             {{ isSubmitting ? 'Saving...' : 'Save Quotation' }}
                                         </Button>
-                                        <Button type="button" variant="outline" :as="Link" :href="route('invoices.show', invoice.id)" class="w-full cursor-pointer">
+                                        <Button type="button" variant="outline" :as="Link"
+                                            :href="route('invoices.show', invoice.id)" class="w-full cursor-pointer">
                                             <Icon name="X" class="w-4 h-4 mr-2" />
                                             Cancel
                                         </Button>
@@ -238,10 +247,7 @@
         </div>
 
         <!-- Product Selection Modal -->
-        <ProductSelectionModal
-            v-model:open="showProductModal"
-            @product-selected="addProductToCart"
-        />
+        <ProductSelectionModal v-model:open="showProductModal" @product-selected="addProductToCart" />
     </AppLayout>
 </template>
 
@@ -360,8 +366,8 @@ const hasStockIssues = computed(() => {
 
 const canSubmit = computed(() => {
     return !isSubmitting.value &&
-           form.value.items.length > 0 &&
-           !hasStockIssues.value
+        form.value.items.length > 0 &&
+        !hasStockIssues.value
 })
 
 // Methods

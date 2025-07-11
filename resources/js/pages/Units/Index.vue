@@ -37,7 +37,8 @@
                             <Input v-model="filters.search" placeholder="Search units..."
                                 class="pl-7 md:pl-10 h-8 md:h-11 text-sm" @keyup.enter="search" />
                         </div>
-                        <Button @click="search" size="sm" class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
+                        <Button @click="search" size="sm"
+                            class="h-8 md:h-11 px-2 md:px-6 text-xs md:text-sm cursor-pointer">
                             <Icon name="Search" class="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                         <Button v-if="hasActiveFilters" @click="resetFilters" variant="outline" size="sm"
@@ -96,7 +97,7 @@
                                         <div class="flex items-center gap-2">
                                             <span
                                                 class="font-mono bg-primary/10 text-primary px-2 py-1 rounded-md text-sm font-medium">{{
-                                                p.code }}</span>
+                                                    p.code }}</span>
                                         </div>
                                     </td>
 

@@ -2,7 +2,6 @@
     <AppLayout title="Point of Sale">
 
         <!-- Session status notification (moved to top, margin optimized) -->
-        <!-- <SessionStatus class="mx-4 my-4" /> -->
 
         <div class="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-4rem)] gap-4 p-2 md:p-4">
             <!-- Left Panel - Cart and Products -->
@@ -382,7 +381,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="font-medium text-sm md:text-base mb-1">{{ item.product_name }}</div>
                                 <div class="text-xs md:text-sm text-muted-foreground mb-1 md:mb-2">{{ item.product_sku
-                                    }}</div>
+                                }}</div>
                                 <div class="text-xs md:text-sm font-medium text-primary">
                                     ${{ Number(item.unit_price).toFixed(2) }} per unit
                                 </div>
@@ -591,7 +590,7 @@
                         :title="`${getCheckoutText} - Shortcut: F4`">
                         <Icon :name="getCheckoutIcon" class="w-5 h-5 md:w-6 md:h-6 mr-2" />
                         <span class="hidden sm:inline">{{ isProcessingSale ? getProcessingText : getCheckoutText
-                        }}</span>
+                            }}</span>
                         <span class="sm:hidden">{{ isProcessingSale ? 'Processing...' : getCheckoutButtonShort }}</span>
                         <span v-if="!isProcessingSale" class="ml-2 text-sm opacity-90 hidden md:inline">(F4)</span>
                     </Button>
@@ -671,7 +670,7 @@
                             <div>
                                 <p class="text-sm text-muted-foreground">Items</p>
                                 <p class="text-lg font-semibold">{{ itemCount }} {{ itemCount === 1 ? 'item' : 'items'
-                                }}</p>
+                                    }}</p>
                             </div>
                         </div>
                     </div>
@@ -731,7 +730,7 @@
                                 </div>
                                 <div class="text-right ml-2">
                                     <div class="font-medium">{{ item.quantity }}x RD${{ formatCurrency(item.unit_price)
-                                    }}</div>
+                                        }}</div>
                                     <div class="text-xs text-muted-foreground">RD${{ formatCurrency(item.line_total) }}
                                     </div>
                                 </div>

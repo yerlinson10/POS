@@ -33,7 +33,7 @@
                 <Eye class="h-5 w-5" />
             </Button>
             <Button @click="closeSession" size="icon" variant="outline"
-                class="ml-1 h-7 w-7 text-destructive border-destructive/30 hover:bg-destructive/10"
+                class="ml-1 h-7 w-7 text-destructive border-destructive/30 hover:bg-destructive/10 cursor-pointer"
                 title="Close Session">
                 <X class="h-5 w-5" />
             </Button>
