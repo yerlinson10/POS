@@ -138,15 +138,15 @@
 
                                     <!-- Actions -->
                                     <div class="flex items-center justify-center gap-1 px-4 py-4">
-                                        <Link :href="`/customers/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']">
-                                        <Button variant="ghost" class="h-8 w-8 p-0">
+                                        <Link :href="`/customers/${p.id}/edit`" prefetch :cacheFor="['30s', '1m']" >
+                                        <Button variant="ghost" class="h-8 w-8 p-0 cursor-pointer">
                                             <Icon name="Edit" class="w-4 h-4" />
                                         </Button>
                                         </Link>
                                         <AlertDialog>
                                             <AlertDialogTrigger as-child>
                                                 <Button variant="ghost" size="sm"
-                                                    class="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                                                    class="h-8 w-8 p-0 text-red-600 hover:text-red-700 cursor-pointer">
                                                     <Icon name="Trash2" class="w-4 h-4" />
                                                 </Button>
                                             </AlertDialogTrigger>

@@ -52,9 +52,13 @@
                                 </div>
 
                                 <div class="space-y-2">
-                                    <Label for="last_name" class="text-sm font-medium">Last Name</Label>
+                                    <Label for="last_name" class="text-sm font-medium flex items-center gap-1">
+                                        Last Name
+                                        <span class="text-destructive text-xs">*</span>
+                                    </Label>
                                     <Input
                                         id="last_name"
+                                        required
                                         v-model="form.last_name"
                                         placeholder="Enter last name"
                                         class="h-10"
@@ -95,7 +99,7 @@
                                         Phone Number
                                     </Label>
                                     <Input
-                                        type="tel"
+                                        type="number"
                                         id="phone"
                                         v-model="form.phone"
                                         placeholder="+1 (555) 123-4567"
