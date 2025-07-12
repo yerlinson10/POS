@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             InvoiceItemSeeder::class,
             PosSessionSeeder::class,
             SystemSettingSeeder::class,
+            ExampleDashboardWidgetsSeeder::class,
         ]);
     }
 }
