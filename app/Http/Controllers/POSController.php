@@ -151,7 +151,7 @@ class POSController extends Controller
             $activeSession = $this->posSessionService->getActiveSession();
             if (!$activeSession) {
                 return response()->json([
-                    'message' => 'No hay una sesión POS activa. Debes abrir una sesión antes de procesar ventas.',
+                    'message' => 'There is no active POS session. You must open one before processing sales.',
                     'requires_session' => true
                 ], 422);
             }
@@ -177,7 +177,7 @@ class POSController extends Controller
 
             // Create the invoice with session reference
             $invoice = Invoice::create([
-                'customer_id' => $validated['customer_id'],
+                'customer_id' => $validated['customer_id'] ?? 1,
                 'user_id' => Auth::id(),
                 'pos_session_id' => $activeSession->id,
                 'date' => now(),
