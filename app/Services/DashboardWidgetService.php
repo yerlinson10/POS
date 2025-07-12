@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 class DashboardWidgetService
 {
     /**
-     * Obtener todos los widgets del usuario actual
+     * Get all widgets for the current user
      */
     public function getUserWidgets($userId = null): array
     {
@@ -45,13 +45,13 @@ class DashboardWidgetService
     }
 
     /**
-     * Crear un nuevo widget
+     * Create a new widget
      */
     public function createWidget(array $data): DashboardWidget
     {
         $data['user_id'] = $data['user_id'] ?? Auth::id();
 
-        // Obtener la definición del widget para el tamaño por defecto
+        // Get widget definition for default size
         $widgetDefinitions = [
             'sales_chart' => ['w' => 6, 'h' => 4],
             'sales_stats' => ['w' => 4, 'h' => 2],
@@ -60,16 +60,25 @@ class DashboardWidgetService
             'recent_sales' => ['w' => 6, 'h' => 4],
             'payment_methods' => ['w' => 4, 'h' => 3],
             'monthly_revenue' => ['w' => 6, 'h' => 4],
-            'customer_stats' => ['w' => 4, 'h' => 3]
+            'customer_stats' => ['w' => 4, 'h' => 3],
+            // New widgets
+            'inventory_value' => ['w' => 4, 'h' => 3],
+            'daily_targets' => ['w' => 6, 'h' => 3],
+            'hourly_sales' => ['w' => 6, 'h' => 4],
+            'category_performance' => ['w' => 5, 'h' => 4],
+            'profit_margin' => ['w' => 4, 'h' => 3],
+            'expense_tracking' => ['w' => 5, 'h' => 3],
+            'top_customers' => ['w' => 6, 'h' => 4],
+            'sales_forecast' => ['w' => 6, 'h' => 4]
         ];
 
         $widgetType = $data['widget_type'];
         $defaultSize = $widgetDefinitions[$widgetType] ?? ['w' => 4, 'h' => 3];
 
-        // Calcular la próxima posición disponible
+        // Calculate next available position
         $position = $this->calculateNextPosition($data['user_id'], $defaultSize['w'], $defaultSize['h']);
 
-        // Asignar posición y tamaño automáticamente
+        // Assign position and size automatically
         $data['x'] = $position['x'];
         $data['y'] = $position['y'];
         $data['width'] = $defaultSize['w'];
@@ -79,24 +88,24 @@ class DashboardWidgetService
     }
 
     /**
-     * Calcular la próxima posición disponible en el grid
+     * Calculate next available position in the grid
      */
     private function calculateNextPosition(int $userId, int $width, int $height): array
     {
-        // Obtener todos los widgets existentes del usuario
+        // Get all existing widgets for the user
         $existingWidgets = DashboardWidget::where('user_id', $userId)
             ->where('is_active', true)
             ->get(['x', 'y', 'width', 'height']);
 
-        $gridColumns = 12; // GridStack usa 12 columnas
+        $gridColumns = 12; // GridStack uses 12 columns
         $currentRow = 0;
 
-        // Si no hay widgets, empezar en (0,0)
+        // If no widgets, start at (0,0)
         if ($existingWidgets->isEmpty()) {
             return ['x' => 0, 'y' => 0];
         }
 
-        // Crear un mapa de posiciones ocupadas
+        // Create a map of occupied positions
         $occupiedPositions = [];
         foreach ($existingWidgets as $widget) {
             for ($y = $widget->y; $y < $widget->y + $widget->height; $y++) {
@@ -106,7 +115,7 @@ class DashboardWidgetService
             }
         }
 
-        // Buscar la primera posición libre
+        // Find the first free position
         while (true) {
             for ($x = 0; $x <= $gridColumns - $width; $x++) {
                 if ($this->isPositionFree($occupiedPositions, $x, $currentRow, $width, $height)) {
@@ -118,7 +127,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Verificar si una posición está libre
+     * Check if a position is free
      */
     private function isPositionFree(array $occupiedPositions, int $x, int $y, int $width, int $height): bool
     {
@@ -133,7 +142,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Actualizar un widget existente
+     * Update an existing widget
      */
     public function updateWidget(int $id, array $data): DashboardWidget
     {
@@ -146,7 +155,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Actualizar posiciones de múltiples widgets
+     * Update positions of multiple widgets
      */
     public function updateWidgetPositions(array $widgets): void
     {
@@ -161,7 +170,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Eliminar un widget
+     * Delete a widget
      */
     public function deleteWidget(int $id): void
     {
@@ -171,7 +180,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Obtener datos para un widget específico
+     * Get data for a specific widget
      */
     public function getWidgetData(DashboardWidget $widget): array
     {
@@ -195,13 +204,30 @@ class DashboardWidgetService
                 return $this->getMonthlyRevenueData($filters, $advancedFilters);
             case 'customer_stats':
                 return $this->getCustomerStats($filters, $advancedFilters);
+            // New widget cases
+            case 'inventory_value':
+                return $this->getInventoryValueData($filters, $advancedFilters);
+            case 'daily_targets':
+                return $this->getDailyTargetsData($filters, $advancedFilters);
+            case 'hourly_sales':
+                return $this->getHourlySalesData($filters, $advancedFilters);
+            case 'category_performance':
+                return $this->getCategoryPerformanceData($filters, $advancedFilters);
+            case 'profit_margin':
+                return $this->getProfitMarginData($filters, $advancedFilters);
+            case 'expense_tracking':
+                return $this->getExpenseTrackingData($filters, $advancedFilters);
+            case 'top_customers':
+                return $this->getTopCustomersData($filters, $advancedFilters);
+            case 'sales_forecast':
+                return $this->getSalesForecastData($filters, $advancedFilters);
             default:
                 return [];
         }
     }
 
     /**
-     * Datos de gráfico de ventas
+     * Sales chart data
      */
     private function getSalesChartData(array $filters, array $advancedFilters = []): array
     {
@@ -212,7 +238,7 @@ class DashboardWidgetService
         $query = Invoice::where('status', 'paid')
             ->whereBetween('date', [$dateFrom, $dateTo]);
 
-        // Aplicar filtros avanzados
+        // Apply advanced filters
         $query = $this->applyAdvancedFilters($query, $advancedFilters);
 
         if (isset($filters['payment_method']) && $filters['payment_method'] !== 'all' && !empty($filters['payment_method'])) {
@@ -281,7 +307,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Estadísticas de ventas
+     * Sales statistics
      */
     private function getSalesStats(array $filters, array $advancedFilters = []): array
     {
@@ -291,7 +317,7 @@ class DashboardWidgetService
         $query = Invoice::where('status', 'paid')
             ->whereBetween('date', [$dateFrom, $dateTo]);
 
-        // Aplicar filtros avanzados
+        // Apply advanced filters
         $query = $this->applyAdvancedFilters($query, $advancedFilters);
 
         if (isset($filters['payment_method']) && $filters['payment_method'] !== 'all' && !empty($filters['payment_method'])) {
@@ -310,7 +336,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Top productos vendidos
+     * Top sold products
      */
     private function getTopProducts(array $filters, array $advancedFilters = []): array
     {
@@ -325,7 +351,7 @@ class DashboardWidgetService
             ->where('invoices.status', 'paid')
             ->whereBetween('invoices.date', [$dateFrom, $dateTo]);
 
-        // Aplicar filtros avanzados (nota: se necesita adaptar para query builder)
+        // Apply advanced filters (note: needs adaptation for query builder)
         if (!empty($advancedFilters)) {
             foreach ($advancedFilters as $group) {
                 $groupOperator = $group['operator'] ?? 'AND';
@@ -336,8 +362,8 @@ class DashboardWidgetService
                         $operator = $filter['operator'];
                         $value = $filter['value'];
 
-                        // Los campos ya vienen con el prefijo correcto (products.name, categories.name, etc.)
-                        // Solo mapear si no tienen prefijo
+                        // Fields already have correct prefix (products.name, categories.name, etc.)
+                        // Only map if no prefix
                         if (!str_contains($field, '.')) {
                             $field = 'products.' . $field;
                         }
@@ -440,14 +466,14 @@ class DashboardWidgetService
     }
 
     /**
-     * Productos con bajo stock
+     * Products with low stock
      */
     private function getLowStockProducts(array $filters, array $advancedFilters = []): array
     {
         $threshold = $filters['stock_threshold'] ?? 10;
         $limit = $filters['limit'] ?? 10;
 
-        // Verificar si hay filtros avanzados que requieren joins
+        // Check if advanced filters require joins
         $needsJoins = false;
         if (!empty($advancedFilters)) {
             foreach ($advancedFilters as $group) {
@@ -461,13 +487,13 @@ class DashboardWidgetService
         }
 
         if ($needsJoins) {
-            // Usar query builder con joins cuando se necesitan filtros de relaciones
+            // Use query builder with joins when relation filters are needed
             $query = DB::table('products')
                 ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
                 ->leftJoin('unit_measures', 'products.unit_measure_id', '=', 'unit_measures.id')
                 ->where('products.stock', '<=', $threshold);
 
-            // Aplicar filtros avanzados (versión para query builder)
+            // Apply advanced filters (query builder version)
             if (!empty($advancedFilters)) {
                 foreach ($advancedFilters as $group) {
                     $groupOperator = $group['operator'] ?? 'AND';
@@ -478,7 +504,7 @@ class DashboardWidgetService
                             $operator = $filter['operator'];
                             $value = $filter['value'];
 
-                            // Asegurar que los campos tengan el prefijo correcto
+                            // Ensure fields have correct prefix
                             if (!str_contains($field, '.')) {
                                 $field = 'products.' . $field;
                             }
@@ -572,17 +598,17 @@ class DashboardWidgetService
                     'name' => $item->name,
                     'sku' => $item->sku,
                     'stock' => $item->stock,
-                    'category' => $item->category_name ?? 'Sin categoría',
+                    'category' => $item->category_name ?? 'No category',
                     'unit' => $item->unit_code ?? 'UN',
                 ];
             })
             ->toArray();
         } else {
-            // Usar Eloquent cuando no hay filtros de relaciones
+            // Use Eloquent when there are no relation filters
             $query = Product::with(['category', 'unitMeasure'])
                 ->where('stock', '<=', $threshold);
 
-            // Debug: Ver cuántos productos hay antes de filtros avanzados
+            // Debug: See how many products before advanced filters
             $countBeforeAdvanced = Product::where('stock', '<=', $threshold)->count();
             $countWithA = Product::where('stock', '<=', $threshold)->where('name', 'LIKE', '%a%')->count();
 
@@ -592,14 +618,14 @@ class DashboardWidgetService
                 'with_letter_a' => $countWithA
             ]);
 
-            // Aplicar filtros avanzados
+            // Apply advanced filters
             $query = $this->applyAdvancedFilters($query, $advancedFilters);
 
             if (isset($filters['category_id']) && $filters['category_id'] !== 'all') {
                 $query->where('category_id', $filters['category_id']);
             }
 
-            // Debug: Log SQL y resultados
+            // Debug: Log SQL and results
             Log::info('LowStockProducts Query SQL:', [
                 'sql' => $query->toSql(),
                 'bindings' => $query->getBindings()
@@ -611,7 +637,7 @@ class DashboardWidgetService
 
             Log::info('LowStockProducts Results:', [
                 'count' => $results->count(),
-                'results' => $results->take(3)->toArray() // Solo los primeros 3 para no llenar logs
+                'results' => $results->take(3)->toArray() // Only first 3 to avoid filling logs
             ]);
 
             return $results->map(function ($product) {
@@ -620,7 +646,7 @@ class DashboardWidgetService
                         'name' => $product->name,
                         'sku' => $product->sku,
                         'stock' => $product->stock,
-                        'category' => $product->category->name ?? 'Sin categoría',
+                        'category' => $product->category->name ?? 'No category',
                         'unit' => $product->unitMeasure->code ?? 'UN',
                     ];
                 })
@@ -629,7 +655,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Ventas recientes
+     * Recent sales
      */
     private function getRecentSales(array $filters, array $advancedFilters = []): array
     {
@@ -638,7 +664,7 @@ class DashboardWidgetService
         $query = Invoice::with(['customer', 'user'])
             ->where('status', 'paid');
 
-        // Aplicar filtros avanzados
+        // Apply advanced filters
         $query = $this->applyAdvancedFilters($query, $advancedFilters);
 
         if (isset($filters['payment_method']) && $filters['payment_method'] !== 'all' && !empty($filters['payment_method'])) {
@@ -655,7 +681,7 @@ class DashboardWidgetService
             ->map(function ($invoice) {
                 return [
                     'id' => $invoice->id,
-                    'customer_name' => $invoice->customer->full_name ?? 'Cliente genérico',
+                    'customer_name' => $invoice->customer->full_name ?? 'Generic customer',
                     'total_amount' => (float) $invoice->total_amount,
                     'payment_method' => $invoice->payment_method,
                     'date' => $invoice->date->format('Y-m-d H:i'),
@@ -666,7 +692,7 @@ class DashboardWidgetService
     }
 
     /**
-     * Datos de métodos de pago
+     * Payment methods data
      */
     private function getPaymentMethodsData(array $filters, array $advancedFilters = []): array
     {
@@ -676,7 +702,7 @@ class DashboardWidgetService
         $query = Invoice::where('status', 'paid')
             ->whereBetween('date', [$dateFrom, $dateTo]);
 
-        // Aplicar filtros avanzados
+        // Apply advanced filters
         $query = $this->applyAdvancedFilters($query, $advancedFilters);
 
         return $query->select(
@@ -691,14 +717,14 @@ class DashboardWidgetService
                 'method' => $item->payment_method,
                 'count' => (int) $item->count,
                 'total' => (float) $item->total,
-                'label' => $item->payment_method === 'cash' ? 'Efectivo' : 'Tarjeta'
+                'label' => $item->payment_method === 'cash' ? 'Cash' : 'Card'
             ];
         })
         ->toArray();
     }
 
     /**
-     * Datos de ingresos mensuales
+     * Monthly revenue data
      */
     private function getMonthlyRevenueData(array $filters, array $advancedFilters = []): array
     {
@@ -708,7 +734,7 @@ class DashboardWidgetService
         $query = Invoice::where('status', 'paid')
             ->where('date', '>=', $startDate);
 
-        // Aplicar filtros avanzados
+        // Apply advanced filters
         $query = $this->applyAdvancedFilters($query, $advancedFilters);
 
         if (isset($filters['payment_method']) && $filters['payment_method'] !== 'all' && !empty($filters['payment_method'])) {
@@ -734,31 +760,33 @@ class DashboardWidgetService
     }
 
     /**
-     * Estadísticas de clientes
+     * Customer statistics
      */
     private function getCustomerStats(array $filters, array $advancedFilters = []): array
     {
         $dateFrom = $filters['date_from'] ?? Carbon::now()->subDays(30)->format('Y-m-d');
         $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
 
-        // Aplicar filtros avanzados a la consulta de nuevos clientes
+        // Apply advanced filters to new customers query
         $newCustomersQuery = Customer::whereBetween('created_at', [$dateFrom, $dateTo]);
         $newCustomersQuery = $this->applyAdvancedFilters($newCustomersQuery, $advancedFilters);
         $newCustomers = $newCustomersQuery->count();
 
-        // Clientes con compras
+        // Customers with purchases
         $customersWithPurchasesQuery = Invoice::where('status', 'paid')
             ->whereBetween('date', [$dateFrom, $dateTo]);
         $customersWithPurchasesQuery = $this->applyAdvancedFilters($customersWithPurchasesQuery, $advancedFilters);
         $customersWithPurchases = $customersWithPurchasesQuery->distinct('customer_id')->count();
 
-        // Top clientes (aplicar filtros avanzados es más complejo aquí, se omite por ahora)
+        // Top customers (applying advanced filters is more complex here, omitted for now)
         $topCustomers = DB::table('invoices')
             ->join('customers', 'invoices.customer_id', '=', 'customers.id')
             ->where('invoices.status', 'paid')
             ->whereBetween('invoices.date', [$dateFrom, $dateTo])
             ->select(
                 'customers.id',
+                'customers.first_name',
+                'customers.last_name',
                 DB::raw('CONCAT(customers.first_name, " ", customers.last_name) as name'),
                 DB::raw('SUM(invoices.total_amount) as total_spent'),
                 DB::raw('COUNT(invoices.id) as purchase_count')
@@ -775,7 +803,9 @@ class DashboardWidgetService
             'top_customers' => $topCustomers->map(function ($customer) {
                 return [
                     'id' => $customer->id,
-                    'name' => $customer->name,
+                    'first_name' => $customer->first_name,
+                    'last_name' => $customer->last_name,
+                    'name' => $customer->name, // Ya viene de la consulta SQL
                     'total_spent' => (float) $customer->total_spent,
                     'purchase_count' => (int) $customer->purchase_count
                 ];
@@ -784,32 +814,33 @@ class DashboardWidgetService
     }
 
     /**
-     * Obtener opciones de filtros disponibles
+     * Get available filter options
      */
     public function getFilterOptions(string $widgetType = null): array
     {
         $baseOptions = [
             'payment_methods' => [
-                ['value' => 'cash', 'label' => 'Efectivo'],
-                ['value' => 'card', 'label' => 'Tarjeta']
+                ['value' => 'cash', 'label' => 'Cash'],
+                ['value' => 'card', 'label' => 'Card']
             ],
             'users' => DB::table('users')->select('id', 'name as label', 'id as value')->get()->toArray(),
             'categories' => DB::table('categories')->select('id', 'name as label', 'id as value')->get()->toArray(),
+            'unit_measures' => DB::table('unit_measures')->select('id', 'name as label', 'id as value')->get()->toArray(),
             'group_by_options' => [
-                ['value' => 'hour', 'label' => 'Por hora'],
-                ['value' => 'day', 'label' => 'Por día'],
-                ['value' => 'month', 'label' => 'Por mes']
+                ['value' => 'hour', 'label' => 'By hour'],
+                ['value' => 'day', 'label' => 'By day'],
+                ['value' => 'month', 'label' => 'By month']
             ],
         ];
 
-        // Campos específicos según el tipo de widget
+        // Specific fields by widget type
         $baseOptions['available_fields'] = $this->getAvailableFieldsForWidget($widgetType);
 
         return $baseOptions;
     }
 
     /**
-     * Obtener campos disponibles según el tipo de widget
+     * Get available fields by widget type
      */
     private function getAvailableFieldsForWidget(string $widgetType = null): array
     {
@@ -822,84 +853,89 @@ class DashboardWidgetService
             case 'sales_stats':
             case 'monthly_revenue':
                 return [
-                    // Campos de Invoice
-                    ['field' => 'total_amount', 'label' => 'Total de Factura', 'type' => 'number'],
-                    ['field' => 'payment_method', 'label' => 'Método de Pago', 'type' => 'string'],
-                    ['field' => 'date', 'label' => 'Fecha de Factura', 'type' => 'date'],
-                    ['field' => 'status', 'label' => 'Estado de Factura', 'type' => 'string'],
-                    ['field' => 'notes', 'label' => 'Notas de Factura', 'type' => 'string'],
+                    // Invoice fields
+                    ['field' => 'total_amount', 'label' => 'Invoice Total', 'type' => 'number'],
+                    ['field' => 'payment_method', 'label' => 'Payment Method', 'type' => 'string'],
+                    ['field' => 'date', 'label' => 'Invoice Date', 'type' => 'date'],
+                    ['field' => 'status', 'label' => 'Invoice Status', 'type' => 'string'],
+                    ['field' => 'notes', 'label' => 'Invoice Notes', 'type' => 'string'],
 
-                    // Campos de User
-                    ['field' => 'user_id', 'label' => 'Usuario', 'type' => 'number'],
+                    // User fields
+                    ['field' => 'user_id', 'label' => 'User', 'type' => 'number'],
 
-                    // Campos de Customer
-                    ['field' => 'customer_id', 'label' => 'Cliente', 'type' => 'number'],
+                    // Customer fields
+                    ['field' => 'customer_id', 'label' => 'Customer', 'type' => 'number'],
                 ];
 
             case 'top_products':
                 return [
-                    // Campos de Product
-                    ['field' => 'products.name', 'label' => 'Nombre de Producto', 'type' => 'string'],
-                    ['field' => 'products.sku', 'label' => 'SKU de Producto', 'type' => 'string'],
-                    ['field' => 'products.price', 'label' => 'Precio de Producto', 'type' => 'number'],
-                    ['field' => 'products.stock', 'label' => 'Stock de Producto', 'type' => 'number'],
-                    ['field' => 'products.is_active', 'label' => 'Producto Activo', 'type' => 'boolean'],
+                    // Product fields
+                    ['field' => 'products.name', 'label' => 'Product Name', 'type' => 'string'],
+                    ['field' => 'products.sku', 'label' => 'Product SKU', 'type' => 'string'],
+                    ['field' => 'products.price', 'label' => 'Product Price', 'type' => 'number'],
+                    ['field' => 'products.stock', 'label' => 'Product Stock', 'type' => 'number'],
+                    ['field' => 'products.is_active', 'label' => 'Product Active', 'type' => 'boolean'],
 
-                    // Campos de Category
-                    ['field' => 'categories.name', 'label' => 'Categoría', 'type' => 'string'],
+                    // Category fields
+                    ['field' => 'categories.name', 'label' => 'Category', 'type' => 'string'],
 
-                    // Campos de Invoice (para fechas de venta)
-                    ['field' => 'invoices.date', 'label' => 'Fecha de Venta', 'type' => 'date'],
-                    ['field' => 'invoices.total_amount', 'label' => 'Total de Venta', 'type' => 'number'],
+                    // Invoice fields (for sale dates)
+                    ['field' => 'invoices.date', 'label' => 'Sale Date', 'type' => 'date'],
+                    ['field' => 'invoices.total_amount', 'label' => 'Sale Total', 'type' => 'number'],
+
+                    ['field' => 'unit_measures.code', 'label' => 'Unit Code', 'type' => 'string'],
                 ];
 
             case 'low_stock':
                 return [
-                    // Campos de Product
-                    ['field' => 'products.name', 'label' => 'Nombre de Producto', 'type' => 'string'],
-                    ['field' => 'products.sku', 'label' => 'SKU de Producto', 'type' => 'string'],
-                    ['field' => 'products.price', 'label' => 'Precio de Producto', 'type' => 'number'],
-                    ['field' => 'products.stock', 'label' => 'Stock de Producto', 'type' => 'number'],
-                    ['field' => 'products.is_active', 'label' => 'Producto Activo', 'type' => 'boolean'],
+                    // Product fields
+                    ['field' => 'products.name', 'label' => 'Product Name', 'type' => 'string'],
+                    ['field' => 'products.sku', 'label' => 'Product SKU', 'type' => 'string'],
+                    ['field' => 'products.price', 'label' => 'Product Price', 'type' => 'number'],
+                    ['field' => 'products.stock', 'label' => 'Product Stock', 'type' => 'number'],
+                    ['field' => 'products.is_active', 'label' => 'Product Active', 'type' => 'boolean'],
 
-                    // Campos de Category (relación)
-                    ['field' => 'categories.name', 'label' => 'Nombre de Categoría', 'type' => 'string'],
-                    ['field' => 'products.category_id', 'label' => 'ID de Categoría', 'type' => 'number'],
+                    // Category fields (relation)
+                    ['field' => 'categories.name', 'label' => 'Category Name', 'type' => 'string'],
+                    ['field' => 'products.category_id', 'label' => 'Category ID', 'type' => 'number'],
+
+                    ['field' => 'products.unit_measure_id', 'label' => 'Unit Measure ID', 'type' => 'number'],
+                    ['field' => 'unit_measures.code', 'label' => 'Unit Code', 'type' => 'string'],
                 ];
 
             case 'recent_sales':
                 return [
-                    // Campos de Invoice
-                    ['field' => 'total_amount', 'label' => 'Total de Factura', 'type' => 'number'],
-                    ['field' => 'payment_method', 'label' => 'Método de Pago', 'type' => 'string'],
-                    ['field' => 'date', 'label' => 'Fecha de Factura', 'type' => 'date'],
-                    ['field' => 'status', 'label' => 'Estado de Factura', 'type' => 'string'],
+                    // Invoice fields
+                    ['field' => 'total_amount', 'label' => 'Invoice Total', 'type' => 'number'],
+                    ['field' => 'payment_method', 'label' => 'Payment Method', 'type' => 'string'],
+                    ['field' => 'date', 'label' => 'Invoice Date', 'type' => 'date'],
+                    ['field' => 'status', 'label' => 'Invoice Status', 'type' => 'string'],
 
-                    // Campos de Customer
-                    ['field' => 'customer_id', 'label' => 'Cliente', 'type' => 'number'],
+                    // Customer fields
+                    ['field' => 'customer_id', 'label' => 'Customer', 'type' => 'number'],
 
-                    // Campos de User
-                    ['field' => 'user_id', 'label' => 'Usuario', 'type' => 'number'],
+                    // User fields
+                    ['field' => 'user_id', 'label' => 'User', 'type' => 'number'],
                 ];
 
             case 'payment_methods':
                 return [
-                    // Campos de Invoice
-                    ['field' => 'total_amount', 'label' => 'Total de Factura', 'type' => 'number'],
-                    ['field' => 'payment_method', 'label' => 'Método de Pago', 'type' => 'string'],
-                    ['field' => 'date', 'label' => 'Fecha de Factura', 'type' => 'date'],
-                    ['field' => 'status', 'label' => 'Estado de Factura', 'type' => 'string'],
+                    // Invoice fields
+                    ['field' => 'total_amount', 'label' => 'Invoice Total', 'type' => 'number'],
+                    ['field' => 'payment_method', 'label' => 'Payment Method', 'type' => 'string'],
+                    ['field' => 'date', 'label' => 'Invoice Date', 'type' => 'date'],
+                    ['field' => 'status', 'label' => 'Invoice Status', 'type' => 'string'],
                 ];
 
             case 'customer_stats':
                 return [
-                    // Campos de Customer
-                    ['field' => 'first_name', 'label' => 'Nombre de Cliente', 'type' => 'string'],
-                    ['field' => 'last_name', 'label' => 'Apellido de Cliente', 'type' => 'string'],
-                    ['field' => 'email', 'label' => 'Email de Cliente', 'type' => 'string'],
-                    ['field' => 'phone', 'label' => 'Teléfono de Cliente', 'type' => 'string'],
-                    ['field' => 'address', 'label' => 'Dirección de Cliente', 'type' => 'string'],
-                    ['field' => 'created_at', 'label' => 'Fecha de Registro', 'type' => 'date'],
+                    // Customer fields
+                    ['field' => 'first_name', 'label' => 'Customer First Name', 'type' => 'string'],
+                    ['field' => 'last_name', 'label' => 'Customer Last Name', 'type' => 'string'],
+                    ['field' => 'email', 'label' => 'Customer Email', 'type' => 'string'],
+                    ['field' => 'phone', 'label' => 'Customer Phone', 'type' => 'string'],
+                    ['field' => 'address', 'label' => 'Customer Address', 'type' => 'string'],
+                    ['field' => 'created_at', 'label' => 'Registration Date', 'type' => 'date'],
                 ];
 
             default:
@@ -908,43 +944,46 @@ class DashboardWidgetService
     }
 
     /**
-     * Obtener todos los campos disponibles
+     * Get all available fields
      */
     private function getAllAvailableFields(): array
     {
         return [
-            // Campos de Invoice
-            ['field' => 'invoices.total_amount', 'label' => 'Total de Factura', 'type' => 'number'],
-            ['field' => 'invoices.payment_method', 'label' => 'Método de Pago', 'type' => 'string'],
-            ['field' => 'invoices.date', 'label' => 'Fecha de Factura', 'type' => 'date'],
-            ['field' => 'invoices.status', 'label' => 'Estado de Factura', 'type' => 'string'],
-            ['field' => 'invoices.notes', 'label' => 'Notas de Factura', 'type' => 'string'],
+            // Invoice fields
+            ['field' => 'invoices.total_amount', 'label' => 'Invoice Total', 'type' => 'number'],
+            ['field' => 'invoices.payment_method', 'label' => 'Payment Method', 'type' => 'string'],
+            ['field' => 'invoices.date', 'label' => 'Invoice Date', 'type' => 'date'],
+            ['field' => 'invoices.status', 'label' => 'Invoice Status', 'type' => 'string'],
+            ['field' => 'invoices.notes', 'label' => 'Invoice Notes', 'type' => 'string'],
 
-            // Campos de Customer
-            ['field' => 'customers.first_name', 'label' => 'Nombre de Cliente', 'type' => 'string'],
-            ['field' => 'customers.last_name', 'label' => 'Apellido de Cliente', 'type' => 'string'],
-            ['field' => 'customers.email', 'label' => 'Email de Cliente', 'type' => 'string'],
-            ['field' => 'customers.phone', 'label' => 'Teléfono de Cliente', 'type' => 'string'],
-            ['field' => 'customers.address', 'label' => 'Dirección de Cliente', 'type' => 'string'],
+            // Customer fields
+            ['field' => 'customers.first_name', 'label' => 'Customer First Name', 'type' => 'string'],
+            ['field' => 'customers.last_name', 'label' => 'Customer Last Name', 'type' => 'string'],
+            ['field' => 'customers.email', 'label' => 'Customer Email', 'type' => 'string'],
+            ['field' => 'customers.phone', 'label' => 'Customer Phone', 'type' => 'string'],
+            ['field' => 'customers.address', 'label' => 'Customer Address', 'type' => 'string'],
 
-            // Campos de Product
-            ['field' => 'products.name', 'label' => 'Nombre de Producto', 'type' => 'string'],
-            ['field' => 'products.sku', 'label' => 'SKU de Producto', 'type' => 'string'],
-            ['field' => 'products.price', 'label' => 'Precio de Producto', 'type' => 'number'],
-            ['field' => 'products.stock', 'label' => 'Stock de Producto', 'type' => 'number'],
-            ['field' => 'products.is_active', 'label' => 'Producto Activo', 'type' => 'boolean'],
+            // Product fields
+            ['field' => 'products.name', 'label' => 'Product Name', 'type' => 'string'],
+            ['field' => 'products.sku', 'label' => 'Product SKU', 'type' => 'string'],
+            ['field' => 'products.price', 'label' => 'Product Price', 'type' => 'number'],
+            ['field' => 'products.stock', 'label' => 'Product Stock', 'type' => 'number'],
+            ['field' => 'products.is_active', 'label' => 'Product Active', 'type' => 'boolean'],
+            ['field' => 'products.categories.name', 'label' => 'Category', 'type' => 'number'],
+            ['field' => 'products.unit_measures.code', 'label' => 'Unit Code', 'type' => 'number'],
 
-            // Campos de User
-            ['field' => 'users.name', 'label' => 'Nombre de Usuario', 'type' => 'string'],
-            ['field' => 'users.email', 'label' => 'Email de Usuario', 'type' => 'string'],
 
-            // Campos de Category
-            ['field' => 'categories.name', 'label' => 'Nombre de Categoría', 'type' => 'string'],
+            // User fields
+            ['field' => 'users.name', 'label' => 'User Name', 'type' => 'string'],
+            ['field' => 'users.email', 'label' => 'User Email', 'type' => 'string'],
+
+            // Category fields
+            ['field' => 'categories.name', 'label' => 'Category Name', 'type' => 'string'],
         ];
     }
 
     /**
-     * Aplicar filtros avanzados a una query
+     * Apply advanced filters to a query
      */
     private function applyAdvancedFilters($query, array $advancedFilters)
     {
@@ -952,7 +991,7 @@ class DashboardWidgetService
             return $query;
         }
 
-        // Debug temporal
+        // Temporary debug
         Log::info('ApplyAdvancedFilters called with:', [
             'advanced_filters' => $advancedFilters,
             'is_empty' => empty($advancedFilters),
@@ -970,10 +1009,10 @@ class DashboardWidgetService
                     $value = $filter['value'];
                     $type = $filter['type'];
 
-                    // Detectar si es Query Builder o Eloquent
+                    // Detect if Query Builder or Eloquent
                     $isQueryBuilder = str_contains(get_class($query), 'Builder') && !str_contains(get_class($query), 'Eloquent');
 
-                    // Para Eloquent, limpiar prefijos de tabla si el campo pertenece a la tabla principal
+                    // For Eloquent, remove table prefixes if field belongs to main table
                     if (!$isQueryBuilder && str_contains($field, 'products.')) {
                         $field = str_replace('products.', '', $field);
                     }
@@ -1058,4 +1097,225 @@ class DashboardWidgetService
 
         return $query;
     }
+
+    /**
+     * Inventory value data
+     */
+    private function getInventoryValueData(array $filters, array $advancedFilters = []): array
+    {
+        $query = Product::select('categories.name as category', DB::raw('SUM(products.stock * products.price) as value'))
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->where('products.stock', '>', 0)
+            ->groupBy('categories.name');
+
+        $query = $this->applyAdvancedFilters($query, $advancedFilters);
+
+        return $query->get()->toArray();
+    }
+
+    /**
+     * Daily targets data
+     */
+    private function getDailyTargetsData(array $filters, array $advancedFilters = []): array
+    {
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->subDays(7)->format('Y-m-d');
+        $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
+
+        // Mock data for daily targets - replace with actual target tracking logic
+        $period = Carbon::parse($dateFrom);
+        $data = [];
+
+        while ($period->lte(Carbon::parse($dateTo))) {
+            $actualSales = Invoice::where('status', 'paid')
+                ->whereBetween('created_at', [
+                    $period->format('Y-m-d') . ' 00:00:00',
+                    $period->format('Y-m-d') . ' 23:59:59'
+                ])
+                ->sum('total_amount');
+
+            $data[] = [
+                'date' => $period->format('Y-m-d'),
+                'target' => 1000, // Replace with actual target value
+                'actual' => (float) $actualSales
+            ];
+
+            $period->addDay();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Hourly sales data
+     */
+    private function getHourlySalesData(array $filters, array $advancedFilters = []): array
+    {
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->format('Y-m-d');
+        $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
+
+        $query = Invoice::select(
+            DB::raw('HOUR(created_at) as hour'),
+            DB::raw('SUM(total_amount) as total')
+        )
+        ->where('status', 'paid')
+        ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        ->groupBy(DB::raw('HOUR(created_at)'))
+        ->orderBy('hour');
+
+        $query = $this->applyAdvancedFilters($query, $advancedFilters);
+
+        return $query->get()->toArray();
+    }
+
+    /**
+     * Category performance data
+     */
+    private function getCategoryPerformanceData(array $filters, array $advancedFilters = []): array
+    {
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->subDays(30)->format('Y-m-d');
+        $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
+
+        $query = InvoiceItem::select(
+            'categories.name as category',
+            DB::raw('SUM(invoice_items.quantity * invoice_items.price) as total_sales')
+        )
+        ->join('products', 'invoice_items.product_id', '=', 'products.id')
+        ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+        ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id')
+        ->where('invoices.status', 'paid')
+        ->whereBetween('invoices.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        ->groupBy('categories.name');
+
+        $query = $this->applyAdvancedFilters($query, $advancedFilters);
+
+        return $query->get()->toArray();
+    }
+
+    /**
+     * Profit margin data
+     */
+    private function getProfitMarginData(array $filters, array $advancedFilters = []): array
+    {
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->subDays(30)->format('Y-m-d');
+        $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
+        $groupBy = $filters['group_by'] ?? 'day';
+
+        $dateFormat = match ($groupBy) {
+            'hour' => '%Y-%m-%d %H:00:00',
+            'day' => '%Y-%m-%d',
+            'month' => '%Y-%m',
+            default => '%Y-%m-%d'
+        };
+
+        // Mock profit margin calculation - replace with actual cost tracking
+        $query = Invoice::select(
+            DB::raw("DATE_FORMAT(created_at, '$dateFormat') as period"),
+            DB::raw('SUM(total_amount) as revenue'),
+            DB::raw('SUM(total_amount * 0.6) as cost'), // Mock 60% cost ratio
+            DB::raw('ROUND(((SUM(total_amount) - SUM(total_amount * 0.6)) / SUM(total_amount)) * 100, 2) as margin_percentage')
+        )
+        ->where('status', 'paid')
+        ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        ->groupBy(DB::raw("DATE_FORMAT(created_at, '$dateFormat')"))
+        ->orderBy('period');
+
+        $query = $this->applyAdvancedFilters($query, $advancedFilters);
+
+        return $query->get()->toArray();
+    }
+
+    /**
+     * Expense tracking data
+     */
+    private function getExpenseTrackingData(array $filters, array $advancedFilters = []): array
+    {
+        // Mock expense data - replace with actual expense tracking system
+        return [
+            ['category' => 'Rent', 'amount' => 1500],
+            ['category' => 'Utilities', 'amount' => 300],
+            ['category' => 'Supplies', 'amount' => 800],
+            ['category' => 'Marketing', 'amount' => 500],
+            ['category' => 'Other', 'amount' => 200]
+        ];
+    }
+
+    /**
+     * Top customers data
+     */
+    private function getTopCustomersData(array $filters, array $advancedFilters = []): array
+    {
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->subDays(30)->format('Y-m-d');
+        $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
+        $limit = $filters['limit'] ?? 10;
+
+        $query = Customer::select(
+            'customers.id',
+            'customers.first_name',
+            'customers.last_name',
+            DB::raw('SUM(invoices.total_amount) as total_spent'),
+            DB::raw('COUNT(invoices.id) as order_count'),
+            DB::raw('MAX(invoices.created_at) as last_purchase'),
+            DB::raw("'active' as status") // Mock status
+        )
+        ->join('invoices', 'customers.id', '=', 'invoices.customer_id')
+        ->where('invoices.status', 'paid')
+        ->whereBetween('invoices.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        ->groupBy('customers.id', 'customers.first_name', 'customers.last_name')
+        ->orderBy('total_spent', 'desc')
+        ->limit($limit);
+
+        $query = $this->applyAdvancedFilters($query, $advancedFilters);
+
+        return $query->get()->map(function ($customer) {
+            return [
+                'id' => $customer->id,
+                'first_name' => $customer->first_name,
+                'last_name' => $customer->last_name,
+                'name' => trim($customer->first_name . ' ' . $customer->last_name),
+                'total_spent' => (float) $customer->total_spent,
+                'order_count' => (int) $customer->order_count,
+                'last_purchase' => $customer->last_purchase,
+                'status' => $customer->status
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Sales forecast data
+     */
+    private function getSalesForecastData(array $filters, array $advancedFilters = []): array
+    {
+        $dateFrom = $filters['date_from'] ?? Carbon::now()->subDays(30)->format('Y-m-d');
+        $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
+
+        // Get historical data
+        $historical = Invoice::select(
+            DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+            DB::raw('SUM(total_amount) as value'),
+            DB::raw('false as is_forecast')
+        )
+        ->where('status', 'paid')
+        ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d')"))
+        ->orderBy('period')
+        ->get()
+        ->toArray();
+
+        // Simple forecast calculation - replace with actual forecasting algorithm
+        $avgDaily = collect($historical)->avg('value');
+        $forecast = [];
+        $period = Carbon::parse($dateTo)->addDay();
+
+        for ($i = 0; $i < 7; $i++) {
+            $forecast[] = [
+                'period' => $period->format('Y-m-d'),
+                'value' => $avgDaily * (1 + (rand(-10, 10) / 100)), // Add some variation
+                'is_forecast' => true
+            ];
+            $period->addDay();
+        }
+
+        return array_merge($historical, $forecast);
+    }
 }
+

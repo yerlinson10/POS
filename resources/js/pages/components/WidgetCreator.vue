@@ -25,7 +25,14 @@ import {
     CheckCircle,
     Settings,
     Filter,
-    Palette
+    Palette,
+    Target,
+    Clock,
+    BarChart3,
+    DollarSign,
+    Archive,
+    UserCheck,
+    LineChart
 } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import type { Widget, FilterOptions } from '../types/dashboard';
@@ -90,11 +97,11 @@ const isFormValid = computed(() => {
 const stepTitle = computed(() => {
     switch (currentStep.value) {
         case 1:
-            return 'Seleccionar Tipo de Widget';
+            return 'Select Widget Type';
         case 2:
-            return 'Configurar Widget';
+            return 'Configure Widget';
         case 3:
-            return 'Configurar Filtros';
+            return 'Configure Filters';
         default:
             return '';
     }
@@ -117,29 +124,38 @@ const getWidgetIcon = (widgetType: string) => {
         'recent_sales': Calendar,
         'payment_methods': CreditCard,
         'monthly_revenue': PieChart,
-        'customer_stats': Users
+        'customer_stats': Users,
+        // New widget icons
+        'inventory_value': Archive,
+        'daily_targets': Target,
+        'hourly_sales': Clock,
+        'category_performance': BarChart3,
+        'profit_margin': DollarSign,
+        'expense_tracking': TrendingUp,
+        'top_customers': UserCheck,
+        'sales_forecast': LineChart
     };
     return iconMap[widgetType] || ChartBar;
 };
 
 const getChartTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-        'line': 'Línea',
-        'bar': 'Barras',
-        'pie': 'Circular',
-        'doughnut': 'Dona',
-        'candlestick': 'Velas'
+        'line': 'Line',
+        'bar': 'Bar',
+        'pie': 'Pie',
+        'doughnut': 'Doughnut',
+        'candlestick': 'Candlestick'
     };
     return labels[type] || type;
 };
 
 const getChartTypeDescription = (type: string) => {
     const descriptions: Record<string, string> = {
-        'line': 'Tendencias en el tiempo',
-        'bar': 'Comparación entre categorías',
-        'pie': 'Distribución porcentual',
-        'doughnut': 'Distribución con espacio central',
-        'candlestick': 'Análisis de precios'
+        'line': 'Trends over time',
+        'bar': 'Comparison between categories',
+        'pie': 'Percentage distribution',
+        'doughnut': 'Distribution with central space',
+        'candlestick': 'Price analysis'
     };
     return descriptions[type] || '';
 };
@@ -172,7 +188,7 @@ const handleWidgetTypeChange = (type: string) => {
 
 const createWidget = async () => {
     if (!isFormValid.value) {
-        toast.error('Por favor completa todos los campos requeridos');
+        toast.error('Please complete all required fields');
         return;
     }
 
@@ -186,7 +202,7 @@ const createWidget = async () => {
         };
 
 
-        const response = await fetch('/dashboard/widgets', {
+        const response = await fetch('/dynamic-dashboard/widgets', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -196,7 +212,7 @@ const createWidget = async () => {
         });
 
         if (!response.ok) {
-            throw new Error('Error al crear widget');
+            throw new Error('Error creating widget');
         }
 
         const newWidget = await response.json();
@@ -204,7 +220,7 @@ const createWidget = async () => {
         emit('created', newWidget);
     } catch (error) {
         console.error('Error creating widget:', error);
-        toast.error('Error al crear widget');
+        toast.error('Error creating widget');
     } finally {
         isLoading.value = false;
     }
@@ -239,7 +255,7 @@ const handleClose = () => {
             <DialogHeader class="flex-shrink-0 pb-4">
                 <DialogTitle class="flex items-center gap-2 text-xl">
                     <Settings class="h-6 w-6" />
-                    Crear Nuevo Widget
+                    Create New Widget
                 </DialogTitle>
                 <DialogDescription class="text-base">
                     {{ stepTitle }} ({{ currentStep }}/{{ totalSteps }})
@@ -275,8 +291,8 @@ const handleClose = () => {
                 <!-- Step 1: Widget Type Selection -->
                 <div v-if="currentStep === 1" class="space-y-6 p-2">
                     <div class="text-center space-y-2">
-                        <h3 class="text-lg sm:text-xl font-semibold">¿Qué tipo de widget deseas crear?</h3>
-                        <p class="text-sm sm:text-base text-muted-foreground">Selecciona el tipo de widget que mejor se adapte a tus necesidades</p>
+                        <h3 class="text-lg sm:text-xl font-semibold">What type of widget do you want to create?</h3>
+                        <p class="text-sm sm:text-base text-muted-foreground">Select the widget type that best fits your needs</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -310,7 +326,7 @@ const handleClose = () => {
                                             variant="default"
                                             class="text-xs mt-1"
                                         >
-                                            ✓ Seleccionado
+                                            ✓ Selected
                                         </Badge>
                                     </div>
                                 </div>
@@ -323,7 +339,7 @@ const handleClose = () => {
                                     <span class="truncate">{{ def.defaultSize.w }}×{{ def.defaultSize.h }}</span>
                                     <div class="flex items-center gap-1 flex-shrink-0">
                                         <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                        <span class="hidden sm:inline">Disponible</span>
+                                        <span class="hidden sm:inline">Available</span>
                                     </div>
                                 </div>
                             </CardContent>
@@ -334,8 +350,8 @@ const handleClose = () => {
                 <!-- Step 2: Basic Configuration -->
                 <div v-else-if="currentStep === 2" class="space-y-6 p-2">
                     <div class="text-center space-y-2">
-                        <h3 class="text-lg sm:text-xl font-semibold">Configurar tu widget</h3>
-                        <p class="text-sm sm:text-base text-muted-foreground">Personaliza el título y las opciones básicas</p>
+                        <h3 class="text-lg sm:text-xl font-semibold">Configure your widget</h3>
+                        <p class="text-sm sm:text-base text-muted-foreground">Customize the title and basic options</p>
                     </div>
 
                     <div v-if="selectedWidgetDef" class="space-y-6">
@@ -357,15 +373,15 @@ const handleClose = () => {
                         <!-- Basic Configuration -->
                         <div class="grid gap-6">
                             <div class="space-y-3">
-                                <Label for="title" class="text-base font-medium">Título del Widget</Label>
+                                <Label for="title" class="text-base font-medium">Widget Title</Label>
                                 <Input
                                     id="title"
                                     v-model="form.title"
-                                    placeholder="Ej: Ventas de este mes"
+                                    placeholder="E.g.: Sales of this month"
                                     class="text-sm sm:text-base"
                                 />
                                 <p class="text-xs sm:text-sm text-muted-foreground">
-                                    Este será el título que aparecerá en tu widget
+                                    This will be the title displayed on your widget
                                 </p>
                             </div>
 
@@ -373,7 +389,7 @@ const handleClose = () => {
                             <div v-if="hasChartConfig" class="space-y-4">
                                 <Label class="text-base font-medium flex items-center gap-2">
                                     <Palette class="h-4 w-4" />
-                                    Tipo de Gráfico
+                                    Chart Type
                                 </Label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     <Card
@@ -399,11 +415,11 @@ const handleClose = () => {
                             <div class="space-y-4">
                                 <Label class="text-base font-medium flex items-center gap-2">
                                     <Filter class="h-4 w-4" />
-                                    Filtros Básicos
+                                    Basic Filters
                                 </Label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div class="space-y-2">
-                                        <Label for="date_from" class="text-sm">Fecha desde</Label>
+                                        <Label for="date_from" class="text-sm">Date from</Label>
                                         <Input
                                             id="date_from"
                                             type="date"
@@ -412,7 +428,7 @@ const handleClose = () => {
                                         />
                                     </div>
                                     <div class="space-y-2">
-                                        <Label for="date_to" class="text-sm">Fecha hasta</Label>
+                                        <Label for="date_to" class="text-sm">Date to</Label>
                                         <Input
                                             id="date_to"
                                             type="date"
@@ -429,8 +445,8 @@ const handleClose = () => {
                 <!-- Step 3: Advanced Filters -->
                 <div v-else-if="currentStep === 3" class="space-y-6 p-2">
                     <div class="text-center space-y-2">
-                        <h3 class="text-lg sm:text-xl font-semibold">Filtros Avanzados (Opcional)</h3>
-                        <p class="text-sm sm:text-base text-muted-foreground">Crea filtros complejos para datos más específicos</p>
+                        <h3 class="text-lg sm:text-xl font-semibold">Advanced Filters (Optional)</h3>
+                        <p class="text-sm sm:text-base text-muted-foreground">Create complex filters for more specific data</p>
                     </div>
 
                     <AdvancedFilters
@@ -451,7 +467,7 @@ const handleClose = () => {
                     :disabled="isLoading"
                     class="order-2 sm:order-1"
                 >
-                    {{ currentStep === 1 ? 'Cancelar' : 'Anterior' }}
+                    {{ currentStep === 1 ? 'Cancel' : 'Previous' }}
                 </Button>
 
                 <div class="flex flex-col sm:flex-row gap-2 order-1 sm:order-2">
@@ -461,7 +477,7 @@ const handleClose = () => {
                         :disabled="!canProceedToStep || isLoading"
                         class="min-w-[100px]"
                     >
-                        Siguiente
+                        Next
                     </Button>
                     <Button
                         v-else
@@ -470,7 +486,7 @@ const handleClose = () => {
                         class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 min-w-[140px]"
                     >
                         <CheckCircle class="h-4 w-4 mr-2" />
-                        {{ isLoading ? 'Creando...' : 'Crear Widget' }}
+                        {{ isLoading ? 'Creating...' : 'Create Widget' }}
                     </Button>
                 </div>
             </div>

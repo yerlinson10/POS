@@ -39,9 +39,17 @@ const widgetComponent = computed(() => {
         case 'payment_methods':
         case 'monthly_revenue':
         case 'top_products':
+        case 'inventory_value':
+        case 'daily_targets':
+        case 'hourly_sales':
+        case 'category_performance':
+        case 'profit_margin':
+        case 'expense_tracking':
+        case 'sales_forecast':
             return ChartWidget;
         case 'low_stock':
         case 'recent_sales':
+        case 'top_customers':
             return TableWidget;
         case 'sales_stats':
         case 'customer_stats':
@@ -86,8 +94,8 @@ const formatCurrency = (amount: number) => {
 </script>
 
 <template>
-    <Card class="h-full flex flex-col">
-        <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card class="widget-container h-full flex flex-col">
+        <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2 flex-shrink-0">
             <div>
                 <CardTitle class="text-sm font-medium">{{ widget.title }}</CardTitle>
                 <CardDescription class="text-xs">
@@ -118,7 +126,7 @@ const formatCurrency = (amount: number) => {
             </DropdownMenu>
         </CardHeader>
 
-        <CardContent class="flex-1 p-4">
+        <CardContent class="card-content flex-1 p-4 overflow-auto min-h-0">
             <component
                 :is="widgetComponent"
                 :widget="widget"
@@ -126,7 +134,7 @@ const formatCurrency = (amount: number) => {
             />
         </CardContent>
 
-        <!-- Modal de configuración -->
+        <!-- Configuration Modal -->
         <WidgetSettings
             v-if="showSettings"
             :widget="widget"

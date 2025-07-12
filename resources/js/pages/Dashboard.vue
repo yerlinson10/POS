@@ -98,7 +98,7 @@ const getPaymentMethodText = (method: string) => {
             <!-- Dashboard Options -->
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold">Dashboard Estático</h2>
-                <Link :href="route('dashboard.dynamic')" class="inline-flex items-center">
+                <Link :href="route('dynamic-dashboard.dynamic')" class="inline-flex items-center">
                     <Button variant="outline">
                         <Icon name="grid-3x3" class="h-4 w-4 mr-2" />
                         Dashboard Dinámico

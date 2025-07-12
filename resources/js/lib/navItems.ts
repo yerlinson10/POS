@@ -8,8 +8,8 @@ export const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Dashboard Dinámico',
-        href: '/dashboard/dynamic',
+        title: 'Dynamic Dashboard',
+        href: '/dynamic-dashboard',
         icon: Grid3x3,
     },
     {

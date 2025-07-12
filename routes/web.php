@@ -21,8 +21,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Dynamic Dashboard routes
-    Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::get('/dynamic', [DashboardWidgetController::class, 'index'])->name('dynamic');
+    Route::prefix('dynamic-dashboard')->name('dynamic-dashboard.')->group(function () {
+        Route::get('/', [DashboardWidgetController::class, 'index'])->name('dynamic');
         Route::get('/widgets', [DashboardWidgetController::class, 'getWidgets'])->name('widgets.index');
         Route::post('/widgets', [DashboardWidgetController::class, 'store'])->name('widgets.store');
         Route::put('/widgets/{id}', [DashboardWidgetController::class, 'update'])->name('widgets.update');

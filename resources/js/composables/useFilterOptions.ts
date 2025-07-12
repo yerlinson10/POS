@@ -16,7 +16,7 @@ export function useFilterOptions() {
 
         try {
             // Construir la URL con el parámetro widget_type si existe
-            const url = new URL(route('dashboard.filter-options'), window.location.origin);
+            const url = new URL(route('dynamic-dashboard.filter-options'), window.location.origin);
             if (widgetType) {
                 url.searchParams.set('widget_type', widgetType);
             }

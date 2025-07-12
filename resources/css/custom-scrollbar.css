@@ -1,0 +1,174 @@
+/* Custom Scrollbar Styles for POS Dashboard */
+
+/* Main scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: hsl(var(--muted-foreground) / 0.7);
+}
+
+::-webkit-scrollbar-corner {
+    background: hsl(var(--muted) / 0.3);
+}
+
+/* Firefox scrollbar styling */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted) / 0.3);
+}
+
+/* Thin scrollbar for widget content */
+.widget-content::-webkit-scrollbar,
+.table-container::-webkit-scrollbar,
+.chart-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.widget-content::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track,
+.chart-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.widget-content::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb,
+.chart-container::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 3px;
+}
+
+.widget-content::-webkit-scrollbar-thumb:hover,
+.table-container::-webkit-scrollbar-thumb:hover,
+.chart-container::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* Card scrollbar - very subtle */
+.card-content::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.card-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.card-content::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.15);
+    border-radius: 2px;
+}
+
+.card-content::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.3);
+}
+
+/* Dropdown menu scrollbar */
+.dropdown-menu-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.dropdown-menu-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dropdown-menu-content::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 2px;
+}
+
+/* Modal scrollbar */
+.modal-content::-webkit-scrollbar,
+.dialog-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+.dialog-content::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.2);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+.dialog-content::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.dialog-content::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Smooth scrolling for all elements */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for mobile devices */
+@media (max-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .widget-content::-webkit-scrollbar,
+    .table-container::-webkit-scrollbar,
+    .chart-container::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    .card-content::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+    }
+}
+
+/* Hide scrollbar for elements that don't need it visually but keep functionality */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Subtle scrollbar for tables */
+.table-wrapper::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.1);
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+}

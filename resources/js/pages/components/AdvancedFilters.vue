@@ -167,10 +167,10 @@ if (filterGroups.value.length === 0) {
 <template>
     <div class="space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <Label class="text-base font-semibold">Filtros Avanzados</Label>
+            <Label class="text-base font-semibold">Advanced Filters</Label>
             <Button @click="addFilterGroup" size="sm" variant="outline" class="self-start">
                 <Plus class="h-4 w-4 mr-2" />
-                Agregar Grupo
+                Add Group
             </Button>
         </div>
 
@@ -179,7 +179,7 @@ if (filterGroups.value.length === 0) {
                 <CardHeader class="pb-3">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <CardTitle class="text-sm flex flex-col sm:flex-row sm:items-center gap-2">
-                            <span>Grupo {{ groupIndex + 1 }}</span>
+                            <span>Group {{ groupIndex + 1 }}</span>
                             <Select
                                 :model-value="group.operator"
                                 @update:model-value="(value) => updateGroupOperator(groupIndex, value as 'AND' | 'OR')"
@@ -188,17 +188,17 @@ if (filterGroups.value.length === 0) {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent class="z-50">
-                                    <SelectItem value="AND">Y</SelectItem>
-                                    <SelectItem value="OR">O</SelectItem>
+                                    <SelectItem value="AND">AND</SelectItem>
+                                    <SelectItem value="OR">OR</SelectItem>
                                 </SelectContent>
                             </Select>
                         </CardTitle>
 
                         <div class="flex gap-1 self-start sm:self-auto">
-                            <Button @click="duplicateGroup(groupIndex)" size="sm" variant="ghost" title="Duplicar grupo">
+                            <Button @click="duplicateGroup(groupIndex)" size="sm" variant="ghost" title="Duplicate group">
                                 <Copy class="h-4 w-4" />
                             </Button>
-                            <Button @click="removeFilterGroup(groupIndex)" size="sm" variant="ghost" title="Eliminar grupo">
+                            <Button @click="removeFilterGroup(groupIndex)" size="sm" variant="ghost" title="Remove group">
                                 <Trash2 class="h-4 w-4" />
                             </Button>
                         </div>
@@ -209,15 +209,15 @@ if (filterGroups.value.length === 0) {
                     <div v-for="(filter, filterIndex) in group.filters" :key="filterIndex"
                          class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-end">
 
-                        <!-- Campo -->
+                        <!-- Field -->
                         <div class="lg:col-span-3">
-                            <Label class="text-xs">Campo</Label>
+                            <Label class="text-xs">Field</Label>
                             <Select
                                 :model-value="filter.field"
                                 @update:model-value="(value) => updateFilter(groupIndex, filterIndex, 'field', value)"
                             >
                                 <SelectTrigger class="h-8 w-full">
-                                    <SelectValue placeholder="Seleccionar campo" />
+                                    <SelectValue placeholder="Select field" />
                                 </SelectTrigger>
                                 <SelectContent class="z-50">
                                     <SelectItem
@@ -231,16 +231,16 @@ if (filterGroups.value.length === 0) {
                             </Select>
                         </div>
 
-                        <!-- Operador -->
+                        <!-- Operator -->
                         <div class="lg:col-span-3">
-                            <Label class="text-xs">Operador</Label>
+                            <Label class="text-xs">Operator</Label>
                             <Select
                                 :model-value="filter.operator"
                                 @update:model-value="(value) => updateFilter(groupIndex, filterIndex, 'operator', value)"
                                 :disabled="!filter.field"
                             >
                                 <SelectTrigger class="h-8 w-full">
-                                    <SelectValue placeholder="Operador" />
+                                    <SelectValue placeholder="Operator" />
                                 </SelectTrigger>
                                 <SelectContent class="z-50">
                                     <SelectItem
@@ -254,9 +254,9 @@ if (filterGroups.value.length === 0) {
                             </Select>
                         </div>
 
-                        <!-- Valor -->
+                        <!-- Value -->
                         <div class="lg:col-span-5" v-if="needsValue(filter.operator)">
-                            <Label class="text-xs">Valor</Label>
+                            <Label class="text-xs">Value</Label>
                             <div v-if="isBetweenOperator(filter.operator)" class="flex flex-col sm:flex-row gap-1">
                                 <Input
                                     :type="getFieldType(filter.field) === 'date' ? 'date' :
@@ -266,7 +266,7 @@ if (filterGroups.value.length === 0) {
                                         const currentValue = Array.isArray(filter.value) ? filter.value : ['', ''];
                                         updateFilter(groupIndex, filterIndex, 'value', [value, currentValue[1]]);
                                     }"
-                                    placeholder="Desde"
+                                    placeholder="From"
                                     class="h-8 text-xs"
                                 />
                                 <Input
@@ -277,7 +277,7 @@ if (filterGroups.value.length === 0) {
                                         const currentValue = Array.isArray(filter.value) ? filter.value : ['', ''];
                                         updateFilter(groupIndex, filterIndex, 'value', [currentValue[0], value]);
                                     }"
-                                    placeholder="Hasta"
+                                    placeholder="To"
                                     class="h-8 text-xs"
                                 />
                             </div>
@@ -287,12 +287,12 @@ if (filterGroups.value.length === 0) {
                                        getFieldType(filter.field) === 'number' ? 'number' : 'text'"
                                 :model-value="filter.value"
                                 @update:model-value="(value) => updateFilter(groupIndex, filterIndex, 'value', value)"
-                                placeholder="Valor"
+                                placeholder="Value"
                                 class="h-8 text-xs"
                             />
                         </div>
 
-                        <!-- Acciones -->
+                        <!-- Actions -->
                         <div class="lg:col-span-1 flex justify-end">
                             <div class="flex gap-1">
                                 <Button @click="addFilter(groupIndex)" size="sm" variant="ghost" class="h-8 w-8 p-0 flex-shrink-0">
@@ -315,10 +315,10 @@ if (filterGroups.value.length === 0) {
         </div>
 
         <div v-if="filterGroups.length === 0" class="text-center py-4 text-muted-foreground">
-            <p>No hay filtros configurados</p>
+            <p>No filters configured</p>
             <Button @click="addFilterGroup" size="sm" variant="outline" class="mt-2">
                 <Plus class="h-4 w-4 mr-2" />
-                Agregar Primer Filtro
+                Add First Filter
             </Button>
         </div>
     </div>

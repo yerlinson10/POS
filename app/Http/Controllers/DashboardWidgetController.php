@@ -16,7 +16,7 @@ class DashboardWidgetController extends Controller
     ) {}
 
     /**
-     * Mostrar el dashboard dinámico
+     * Show the dynamic dashboard
      */
     public function index(): Response
     {
@@ -30,7 +30,7 @@ class DashboardWidgetController extends Controller
     }
 
     /**
-     * Obtener widgets del usuario
+     * Get user widgets
      */
     public function getWidgets(): JsonResponse
     {
@@ -39,7 +39,7 @@ class DashboardWidgetController extends Controller
     }
 
     /**
-     * Crear un nuevo widget
+     * Create a new widget
      */
     public function store(Request $request): JsonResponse
     {
@@ -62,7 +62,7 @@ class DashboardWidgetController extends Controller
 
         $widget = $this->widgetService->createWidget($request->all());
 
-        // Obtener el widget con datos
+        // Get the widget with data
         $widgets = $this->widgetService->getUserWidgets();
         $widgetWithData = collect($widgets)->first(function ($w) use ($widget) {
             return $w['id'] === $widget->id;
@@ -72,7 +72,7 @@ class DashboardWidgetController extends Controller
     }
 
     /**
-     * Actualizar un widget
+     * Update a widget
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -95,7 +95,7 @@ class DashboardWidgetController extends Controller
 
         $widget = $this->widgetService->updateWidget($id, $request->all());
 
-        // Obtener el widget actualizado con datos
+        // Get the updated widget with data
         $widgets = $this->widgetService->getUserWidgets();
         $widgetWithData = collect($widgets)->first(function ($w) use ($widget) {
             return $w['id'] === $widget->id;
@@ -105,7 +105,7 @@ class DashboardWidgetController extends Controller
     }
 
     /**
-     * Actualizar posiciones de múltiples widgets
+     * Update positions of multiple widgets
      */
     public function updatePositions(Request $request): JsonResponse
     {
@@ -120,20 +120,20 @@ class DashboardWidgetController extends Controller
 
         $this->widgetService->updateWidgetPositions($request->widgets);
 
-        return response()->json(['message' => 'Posiciones actualizadas correctamente']);
+        return response()->json(['message' => 'Positions updated successfully']);
     }
 
     /**
-     * Eliminar un widget
+     * Delete a widget
      */
     public function destroy(int $id): JsonResponse
     {
         $this->widgetService->deleteWidget($id);
-        return response()->json(['message' => 'Widget eliminado correctamente']);
+        return response()->json(['message' => 'Widget deleted successfully']);
     }
 
     /**
-     * Obtener datos actualizados de un widget
+     * Get updated data for a widget
      */
     public function refreshWidget(int $id): JsonResponse
     {
@@ -143,14 +143,14 @@ class DashboardWidgetController extends Controller
         });
 
         if (!$widget) {
-            return response()->json(['error' => 'Widget no encontrado'], 404);
+            return response()->json(['error' => 'Widget not found'], 404);
         }
 
         return response()->json($widget);
     }
 
     /**
-     * Obtener opciones de filtros
+     * Get filter options
      */
     public function getFilterOptions(Request $request): JsonResponse
     {
@@ -159,3 +159,4 @@ class DashboardWidgetController extends Controller
         return response()->json($options);
     }
 }
+

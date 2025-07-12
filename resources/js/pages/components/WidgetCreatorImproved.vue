@@ -179,7 +179,7 @@ const createWidget = async () => {
     isLoading.value = true;
 
     try {
-        const response = await fetch('/dashboard/widgets', {
+        const response = await fetch('/dynamic-dashboard/widgets', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const handleClose = () => {
             <DialogHeader class="flex-shrink-0">
                 <DialogTitle class="flex items-center gap-2">
                     <Settings class="h-5 w-5" />
-                    Crear Nuevo Widget
+                    Create New Widget
                 </DialogTitle>
                 <DialogDescription>
                     {{ stepTitle }} ({{ currentStep }}/{{ totalSteps }})
@@ -250,8 +250,8 @@ const handleClose = () => {
                 <!-- Step 1: Widget Type Selection -->
                 <div v-if="currentStep === 1" class="space-y-6">
                     <div class="text-center space-y-2">
-                        <h3 class="text-lg font-semibold">¿Qué tipo de widget deseas crear?</h3>
-                        <p class="text-muted-foreground">Selecciona el tipo de widget que mejor se adapte a tus necesidades</p>
+                        <h3 class="text-lg font-semibold">What type of widget do you want to create?</h3>
+                        <p class="text-muted-foreground">Select the widget type that best fits your needs</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -285,7 +285,7 @@ const handleClose = () => {
                                             variant="default"
                                             class="text-xs mt-1"
                                         >
-                                            ✓ Seleccionado
+                                            ✓ Selected
                                         </Badge>
                                     </div>
                                 </div>
@@ -295,10 +295,10 @@ const handleClose = () => {
                                     {{ def.description }}
                                 </CardDescription>
                                 <div class="flex items-center justify-between text-xs text-muted-foreground">
-                                    <span>Tamaño: {{ def.defaultSize.w }}×{{ def.defaultSize.h }}</span>
+                                    <span>Size: {{ def.defaultSize.w }}×{{ def.defaultSize.h }}</span>
                                     <div class="flex items-center gap-1">
                                         <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                        <span>Disponible</span>
+                                        <span>Available</span>
                                     </div>
                                 </div>
                             </CardContent>
@@ -309,8 +309,8 @@ const handleClose = () => {
                 <!-- Step 2: Basic Configuration -->
                 <div v-else-if="currentStep === 2" class="space-y-6">
                     <div class="text-center space-y-2">
-                        <h3 class="text-lg font-semibold">Configurar tu widget</h3>
-                        <p class="text-muted-foreground">Personaliza el título y las opciones básicas</p>
+                        <h3 class="text-lg font-semibold">Configure your widget</h3>
+                        <p class="text-muted-foreground">Customize the title and basic options</p>
                     </div>
 
                     <div v-if="selectedWidgetDef" class="space-y-6">
@@ -332,15 +332,15 @@ const handleClose = () => {
                         <!-- Basic Configuration -->
                         <div class="grid gap-6">
                             <div class="space-y-2">
-                                <Label for="title" class="text-base font-medium">Título del Widget</Label>
+                                <Label for="title" class="text-base font-medium">Widget Title</Label>
                                 <Input
                                     id="title"
                                     v-model="form.title"
-                                    placeholder="Ej: Ventas de este mes"
+                                    placeholder="E.g.: Sales of this month"
                                     class="text-base"
                                 />
                                 <p class="text-sm text-muted-foreground">
-                                    Este será el título que aparecerá en tu widget
+                                    This will be the title shown on your widget
                                 </p>
                             </div>
 
@@ -348,7 +348,7 @@ const handleClose = () => {
                             <div v-if="hasChartConfig" class="space-y-4">
                                 <Label class="text-base font-medium flex items-center gap-2">
                                     <Palette class="h-4 w-4" />
-                                    Tipo de Gráfico
+                                    Chart Type
                                 </Label>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                     <Card
@@ -374,11 +374,11 @@ const handleClose = () => {
                             <div class="space-y-4">
                                 <Label class="text-base font-medium flex items-center gap-2">
                                     <Filter class="h-4 w-4" />
-                                    Filtros Básicos
+                                    Basic Filters
                                 </Label>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="space-y-2">
-                                        <Label for="date_from">Fecha desde</Label>
+                                        <Label for="date_from">Date from</Label>
                                         <Input
                                             id="date_from"
                                             type="date"
@@ -386,7 +386,7 @@ const handleClose = () => {
                                         />
                                     </div>
                                     <div class="space-y-2">
-                                        <Label for="date_to">Fecha hasta</Label>
+                                        <Label for="date_to">Date to</Label>
                                         <Input
                                             id="date_to"
                                             type="date"
@@ -402,8 +402,8 @@ const handleClose = () => {
                 <!-- Step 3: Advanced Filters -->
                 <div v-else-if="currentStep === 3" class="space-y-6">
                     <div class="text-center space-y-2">
-                        <h3 class="text-lg font-semibold">Filtros Avanzados (Opcional)</h3>
-                        <p class="text-muted-foreground">Crea filtros complejos para datos más específicos</p>
+                        <h3 class="text-lg font-semibold">Advanced Filters (Optional)</h3>
+                        <p class="text-muted-foreground">Create complex filters for more specific data</p>
                     </div>
 
                     <AdvancedFilters
@@ -422,7 +422,7 @@ const handleClose = () => {
                     @click="currentStep === 1 ? handleClose() : prevStep()"
                     :disabled="isLoading"
                 >
-                    {{ currentStep === 1 ? 'Cancelar' : 'Anterior' }}
+                    {{ currentStep === 1 ? 'Cancel' : 'Previous' }}
                 </Button>
 
                 <div class="flex gap-2">
@@ -432,7 +432,7 @@ const handleClose = () => {
                         :disabled="!canProceedToStep || isLoading"
                         class="min-w-[100px]"
                     >
-                        Siguiente
+                        Next
                     </Button>
                     <Button
                         v-else
@@ -441,7 +441,7 @@ const handleClose = () => {
                         class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 min-w-[140px]"
                     >
                         <CheckCircle class="h-4 w-4 mr-2" />
-                        {{ isLoading ? 'Creando...' : 'Crear Widget' }}
+                        {{ isLoading ? 'Creating...' : 'Create Widget' }}
                     </Button>
                 </div>
             </div>

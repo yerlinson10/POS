@@ -89,7 +89,7 @@ const updateWidget = async () => {
 
     try {
 
-        const response = await fetch(`/dashboard/widgets/${props.widget.id}`, {
+        const response = await fetch(`/dynamic-dashboard/widgets/${props.widget.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

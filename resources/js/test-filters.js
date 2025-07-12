@@ -4,15 +4,15 @@ const testEndpoint = async () => {
         // URL base del proyecto
         const baseUrl = 'http://pos.test'; // Cambiar según tu configuración
 
-        let response = await fetch(`${baseUrl}/dashboard/filter-options`);
+        let response = await fetch(`${baseUrl}/dynamic-dashboard/filter-options`);
         await response.json();
 
-        response = await fetch(`${baseUrl}/dashboard/filter-options?widget_type=sales_chart`);
+        response = await fetch(`${baseUrl}/dynamic-dashboard/filter-options?widget_type=sales_chart`);
         await response.json();
-        response = await fetch(`${baseUrl}/dashboard/filter-options?widget_type=top_products`);
+        response = await fetch(`${baseUrl}/dynamic-dashboard/filter-options?widget_type=top_products`);
         await response.json();
 
-        response = await fetch(`${baseUrl}/dashboard/filter-options?widget_type=low_stock`);
+        response = await fetch(`${baseUrl}/dynamic-dashboard/filter-options?widget_type=low_stock`);
         await response.json();
 
     } catch (error) {

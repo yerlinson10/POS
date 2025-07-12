@@ -18,7 +18,11 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const tableData = computed(() => {
+interface TableRow {
+    [key: string]: any;
+}
+
+const tableData = computed<{ headers: string[]; rows: TableRow[] }>(() => {
     if (!props.widget.data || !Array.isArray(props.widget.data)) {
         return {
             headers: [],
@@ -31,7 +35,7 @@ const tableData = computed(() => {
     switch (props.widget.type) {
         case 'top_products':
             return {
-                headers: ['Producto', 'SKU', 'Vendidos', 'Ingresos'],
+                headers: ['Product', 'SKU', 'Sold', 'Revenue'],
                 rows: data.map((item: any) => ({
                     name: item.name,
                     sku: item.sku,
@@ -42,7 +46,7 @@ const tableData = computed(() => {
 
         case 'low_stock':
             return {
-                headers: ['Producto', 'SKU', 'Stock', 'Categoría'],
+                headers: ['Product', 'SKU', 'Stock', 'Category'],
                 rows: data.map((item: any) => ({
                     name: item.name,
                     sku: item.sku,
@@ -53,13 +57,25 @@ const tableData = computed(() => {
 
         case 'recent_sales':
             return {
-                headers: ['Cliente', 'Total', 'Método', 'Fecha', 'Usuario'],
+                headers: ['Customer', 'Total', 'Method', 'Date', 'User'],
                 rows: data.map((item: any) => ({
                     customer_name: item.customer_name,
                     total_amount: props.formatCurrency(item.total_amount),
                     payment_method: item.payment_method,
-                    date: new Date(item.date).toLocaleDateString('es-CO'),
+                    date: new Date(item.date).toLocaleDateString('en-US'),
                     user_name: item.user_name
+                }))
+            };
+
+        case 'top_customers':
+            return {
+                headers: ['Customer', 'Total Spent', 'Orders', 'Last Purchase', 'Status'],
+                rows: data.map((item: any) => ({
+                    customer_name: item.name,
+                    total_spent: props.formatCurrency(item.total_spent),
+                    order_count: item.order_count,
+                    last_purchase: new Date(item.last_purchase).toLocaleDateString('en-US'),
+                    status: item.status
                 }))
             };
 
@@ -82,7 +98,7 @@ const getPaymentMethodBadge = (method: string) => {
 };
 
 const getPaymentMethodText = (method: string) => {
-    return method === 'cash' ? 'Efectivo' : 'Tarjeta';
+    return method === 'cash' ? 'Cash' : 'Card';
 };
 
 const hasData = computed(() => {
@@ -93,7 +109,7 @@ const hasData = computed(() => {
 <template>
     <div class="h-full overflow-auto">
         <div v-if="!hasData" class="flex items-center justify-center h-full">
-            <p class="text-muted-foreground">No hay datos disponibles</p>
+            <p class="text-muted-foreground">No data available</p>
         </div>
 
         <Table v-else>
@@ -138,6 +154,18 @@ const hasData = computed(() => {
                         </TableCell>
                         <TableCell class="text-xs text-muted-foreground">{{ row.date }}</TableCell>
                         <TableCell class="text-xs">{{ row.user_name }}</TableCell>
+                    </template>
+
+                    <template v-else-if="widget.type === 'top_customers'">
+                        <TableCell class="font-medium text-xs">{{ row.customer_name }}</TableCell>
+                        <TableCell class="text-xs font-medium">{{ row.total_spent }}</TableCell>
+                        <TableCell class="text-xs">{{ row.order_count }}</TableCell>
+                        <TableCell class="text-xs text-muted-foreground">{{ row.last_purchase }}</TableCell>
+                        <TableCell class="text-xs">
+                            <Badge :variant="row.status === 'active' ? 'default' : 'secondary'">
+                                {{ row.status }}
+                            </Badge>
+                        </TableCell>
                     </template>
                 </TableRow>
             </TableBody>

@@ -21,30 +21,30 @@ const statsData = computed(() => {
         case 'sales_stats':
             return [
                 {
-                    title: 'Total Ventas',
+                    title: 'Total Sales',
                     value: props.formatCurrency(data.total_sales || 0),
-                    description: `${data.total_count || 0} transacciones`,
+                    description: `${data.total_count || 0} transactions`,
                     icon: DollarSign,
                     change: null
                 },
                 {
-                    title: 'Venta Promedio',
+                    title: 'Average Sale',
                     value: props.formatCurrency(data.average_sale || 0),
-                    description: 'Por transacción',
+                    description: 'Per transaction',
                     icon: TrendingUp,
                     change: null
                 },
                 {
-                    title: 'Ventas en Efectivo',
+                    title: 'Cash Sales',
                     value: props.formatCurrency(data.cash_sales || 0),
-                    description: 'Efectivo',
+                    description: 'Cash',
                     icon: DollarSign,
                     change: null
                 },
                 {
-                    title: 'Ventas con Tarjeta',
+                    title: 'Card Sales',
                     value: props.formatCurrency(data.card_sales || 0),
-                    description: 'Tarjeta',
+                    description: 'Card',
                     icon: ShoppingCart,
                     change: null
                 }
@@ -53,23 +53,23 @@ const statsData = computed(() => {
         case 'customer_stats':
             return [
                 {
-                    title: 'Total Clientes',
+                    title: 'Total Customers',
                     value: data.total_customers || 0,
-                    description: 'Clientes registrados',
+                    description: 'Registered customers',
                     icon: Users,
                     change: null
                 },
                 {
-                    title: 'Nuevos Clientes',
+                    title: 'New Customers',
                     value: data.new_customers || 0,
-                    description: 'En el período',
+                    description: 'In the period',
                     icon: TrendingUp,
                     change: null
                 },
                 {
-                    title: 'Clientes Activos',
+                    title: 'Active Customers',
                     value: data.customers_with_purchases || 0,
-                    description: 'Con compras',
+                    description: 'With purchases',
                     icon: ShoppingCart,
                     change: null
                 }
@@ -95,11 +95,11 @@ const hasData = computed(() => {
 <template>
     <div class="h-full overflow-auto">
         <div v-if="!hasData" class="flex items-center justify-center h-full">
-            <p class="text-muted-foreground">No hay datos disponibles</p>
+            <p class="text-muted-foreground">No data available</p>
         </div>
 
         <div v-else class="space-y-4">
-            <!-- Métricas principales -->
+            <!-- Main metrics -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div
                     v-for="stat in statsData"
@@ -117,9 +117,9 @@ const hasData = computed(() => {
                 </div>
             </div>
 
-            <!-- Top clientes para customer_stats -->
+            <!-- Top customers for customer_stats -->
             <div v-if="widget.type === 'customer_stats' && topCustomers.length > 0" class="space-y-2">
-                <h4 class="text-xs font-semibold">Top Clientes</h4>
+                <h4 class="text-xs font-semibold">Top Customers</h4>
                 <div class="space-y-2">
                     <div
                         v-for="customer in topCustomers.slice(0, 3)"
@@ -127,8 +127,10 @@ const hasData = computed(() => {
                         class="flex items-center justify-between p-2 bg-muted/30 rounded text-xs"
                     >
                         <div>
-                            <p class="font-medium">{{ customer.name }}</p>
-                            <p class="text-muted-foreground">{{ customer.purchase_count }} compras</p>
+                            <p class="font-medium">
+                                {{ customer.name || `${customer.first_name || ''} ${customer.last_name || ''}`.trim() }}
+                            </p>
+                            <p class="text-muted-foreground">{{ customer.purchase_count || customer.order_count }} purchases</p>
                         </div>
                         <div class="text-right">
                             <p class="font-medium">{{ formatCurrency(customer.total_spent) }}</p>

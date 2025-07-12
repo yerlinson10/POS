@@ -64,7 +64,7 @@ const chartData = computed<ChartData<any>>(() => {
             return {
                 labels: data.map((item: any) => item.period),
                 datasets: [{
-                    label: 'Ventas',
+                    label: 'Sales',
                     data: data.map((item: any) => item.total),
                     backgroundColor: props.widget.config.chartType === 'line'
                         ? 'rgba(59, 130, 246, 0.1)'
@@ -79,7 +79,7 @@ const chartData = computed<ChartData<any>>(() => {
             return {
                 labels: data.map((item: any) => item.label),
                 datasets: [{
-                    label: 'Ventas por Método',
+                    label: 'Sales by Method',
                     data: data.map((item: any) => item.total),
                     backgroundColor: [
                         '#3b82f6',
@@ -95,7 +95,7 @@ const chartData = computed<ChartData<any>>(() => {
             return {
                 labels: data.map((item: any) => item.month),
                 datasets: [{
-                    label: 'Ingresos Mensuales',
+                    label: 'Monthly Revenue',
                     data: data.map((item: any) => item.revenue),
                     backgroundColor: props.widget.config.chartType === 'line'
                         ? 'rgba(16, 185, 129, 0.1)'
@@ -110,13 +110,128 @@ const chartData = computed<ChartData<any>>(() => {
             return {
                 labels: data.map((item: any) => item.name),
                 datasets: [{
-                    label: 'Cantidad Vendida',
+                    label: 'Units Sold',
                     data: data.map((item: any) => item.total_sold),
                     backgroundColor: props.widget.config.colors || [
-                        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
-                        '#f97316', '#06b6d4', '#84cc16', '#a855f7', '#ec4899'
+                        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'
                     ]
                 }]
+            };
+
+        // New widget data mappings
+        case 'inventory_value':
+            return {
+                labels: data.map((item: any) => item.category),
+                datasets: [{
+                    label: 'Inventory Value',
+                    data: data.map((item: any) => item.value),
+                    backgroundColor: [
+                        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+                        '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+                    ]
+                }]
+            };
+
+        case 'daily_targets':
+            return {
+                labels: data.map((item: any) => item.date),
+                datasets: [
+                    {
+                        label: 'Target',
+                        data: data.map((item: any) => item.target),
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderColor: '#ef4444',
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        label: 'Actual',
+                        data: data.map((item: any) => item.actual),
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderColor: '#10b981',
+                        borderWidth: 2,
+                        fill: false
+                    }
+                ]
+            };
+
+        case 'hourly_sales':
+            return {
+                labels: data.map((item: any) => `${item.hour}:00`),
+                datasets: [{
+                    label: 'Sales by Hour',
+                    data: data.map((item: any) => item.total),
+                    backgroundColor: props.widget.config.chartType === 'line'
+                        ? 'rgba(59, 130, 246, 0.1)'
+                        : props.widget.config.colors?.[0] || '#3b82f6',
+                    borderColor: props.widget.config.colors?.[0] || '#3b82f6',
+                    borderWidth: 2,
+                    fill: props.widget.config.chartType === 'line'
+                }]
+            };
+
+        case 'category_performance':
+            return {
+                labels: data.map((item: any) => item.category),
+                datasets: [{
+                    label: 'Sales by Category',
+                    data: data.map((item: any) => item.total_sales),
+                    backgroundColor: [
+                        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+                        '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
+                    ]
+                }]
+            };
+
+        case 'profit_margin':
+            return {
+                labels: data.map((item: any) => item.period),
+                datasets: [{
+                    label: 'Profit Margin %',
+                    data: data.map((item: any) => item.margin_percentage),
+                    backgroundColor: props.widget.config.chartType === 'line'
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : props.widget.config.colors?.[0] || '#10b981',
+                    borderColor: props.widget.config.colors?.[0] || '#10b981',
+                    borderWidth: 2,
+                    fill: props.widget.config.chartType === 'line'
+                }]
+            };
+
+        case 'expense_tracking':
+            return {
+                labels: data.map((item: any) => item.category),
+                datasets: [{
+                    label: 'Expenses',
+                    data: data.map((item: any) => item.amount),
+                    backgroundColor: [
+                        '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'
+                    ]
+                }]
+            };
+
+        case 'sales_forecast':
+            return {
+                labels: data.map((item: any) => item.period),
+                datasets: [
+                    {
+                        label: 'Historical',
+                        data: data.filter((item: any) => !item.is_forecast).map((item: any) => item.value),
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        fill: false
+                    },
+                    {
+                        label: 'Forecast',
+                        data: data.filter((item: any) => item.is_forecast).map((item: any) => item.value),
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderColor: '#ef4444',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false
+                    }
+                ]
             };
 
         default:
@@ -155,7 +270,7 @@ const chartOptions = computed<ChartOptions<any>>(() => {
         scales: {}
     };
 
-    // Configurar escalas para gráficos que no sean circulares
+    // Configure scales for non-circular charts
     if (props.widget.config.chartType !== 'pie' && props.widget.config.chartType !== 'doughnut') {
         baseOptions.scales = {
             x: {
@@ -192,7 +307,7 @@ const hasData = computed(() => {
 <template>
     <div class="h-full flex items-center justify-center">
         <div v-if="!hasData" class="text-center text-muted-foreground">
-            <p>No hay datos disponibles</p>
+            <p>No data available</p>
         </div>
 
         <div v-else class="w-full h-full" style="min-height: 200px;">
