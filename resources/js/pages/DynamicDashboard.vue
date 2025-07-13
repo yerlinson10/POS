@@ -250,7 +250,7 @@ const refreshGridLayout = () => {
     </AppLayout>
 </template>
 
-<style>
+<style scoped>
 /* Custom Scrollbar Styles */
 ::-webkit-scrollbar {
     width: 8px;
