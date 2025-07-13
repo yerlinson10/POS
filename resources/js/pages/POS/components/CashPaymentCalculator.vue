@@ -20,8 +20,8 @@
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">RD$</span>
                         <Input ref="cashInput" v-model="cashReceived" type="number" step="0.01" min="0"
                             class="pl-12 text-lg font-medium" :class="{
-                                'border-red-500 focus:border-red-500': parseFloat(cashReceived) > 0 && (parseFloat(cashReceived) - totalAmount) < -0.01,
-                                'border-green-500 focus:border-green-500': parseFloat(cashReceived) > 0 && Math.abs(parseFloat(cashReceived) - totalAmount) < 0.01 || (parseFloat(cashReceived) - totalAmount) > 0.01
+                                'border-red-500 focus:border-red-500': toCents(cashReceived) > 0 && toCents(cashReceived) < toCents(totalAmount),
+                                'border-green-500 focus:border-green-500': toCents(cashReceived) > 0 && toCents(cashReceived) >= toCents(totalAmount)
                             }" placeholder="0.00" @keyup.enter="$emit('confirm')" @blur="onCashInputBlur" />
                     </div>
                 </div>
@@ -93,8 +93,19 @@ function formatCurrency(value: number | string): string {
     return baseFormatCurrency(Number(Number(value).toFixed(2)))
 }
 
+// Función para convertir a centavos (evita problemas de decimales)
+function toCents(value: number | string): number {
+    return Math.round(Number(value) * 100)
+}
+
+// Función para convertir de centavos a pesos
+function fromCents(cents: number): number {
+    return cents / 100
+}
+
 interface Props {
     totalAmount: number
+    canConfirm?: boolean
 }
 
 interface Emits {
@@ -122,11 +133,11 @@ const quickAmounts = computed(() => {
 })
 
 const changeAmount = computed(() => {
-    const received = parseFloat(cashReceived.value) || 0
-    let diff = received - props.totalAmount
-    // Si la diferencia es muy pequeña, tratar como cero
-    if (Math.abs(diff) < 0.01) diff = 0
-    return received > 0 ? diff : null
+    const receivedCents = toCents(cashReceived.value)
+    const totalCents = toCents(props.totalAmount)
+    const diffCents = receivedCents - totalCents
+
+    return receivedCents > 0 ? fromCents(diffCents) : null
 })
 
 // Change breakdown in common Dominican peso denominations
@@ -149,19 +160,23 @@ const changeBreakdown = computed(() => {
 })
 
 const statusMessage = computed(() => {
-    const received = parseFloat(cashReceived.value) || 0
-    const diff = received - props.totalAmount
-    if (received === 0) return ''
-    if (diff < -0.01) return 'Insufficient amount - please add more cash'
-    if (Math.abs(diff) < 0.01) return 'Exact amount - no change required'
+    const receivedCents = toCents(cashReceived.value)
+    const totalCents = toCents(props.totalAmount)
+    const diffCents = receivedCents - totalCents
+
+    if (receivedCents === 0) return ''
+    if (diffCents < 0) return 'Insufficient amount - please add more cash'
+    if (diffCents === 0) return 'Exact amount - no change required'
     return 'Payment accepted - change calculated above'
 })
 
 const statusType = computed(() => {
-    const received = parseFloat(cashReceived.value) || 0
-    const diff = received - props.totalAmount
-    if (received === 0) return 'info'
-    if (diff < -0.01) return 'error'
+    const receivedCents = toCents(cashReceived.value)
+    const totalCents = toCents(props.totalAmount)
+    const diffCents = receivedCents - totalCents
+
+    if (receivedCents === 0) return 'info'
+    if (diffCents < 0) return 'error'
     return 'success'
 })
 
@@ -186,7 +201,7 @@ const focusInput = () => {
 
 // Emit changes to parent
 watch(cashReceived, (newValue) => {
-    const amount = parseFloat(newValue) || 0
+    const amount = Number(newValue) || 0
     emit('cash-received-change', amount)
 })
 

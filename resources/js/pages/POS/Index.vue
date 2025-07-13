@@ -942,9 +942,13 @@ const getCheckoutButtonShort = computed(() => {
     }
 })
 
-// Cash payment validation
+// Cash payment validation usando el mismo enfoque de centavos
 const isCashAmountSufficient = computed(() => {
-    return paymentMethod.value !== 'cash' || cashReceived.value >= total.value
+    if (paymentMethod.value !== 'cash') return true
+    
+    const receivedCents = Math.round(cashReceived.value * 100)
+    const totalCents = Math.round(total.value * 100)
+    return receivedCents >= totalCents
 })
 
 // Format currency helper
@@ -1223,19 +1227,30 @@ const handleCashReceivedChange = (amount: number) => {
 
 const executeCheckout = async () => {
     try {
-        // If cash payment, validate amount
-        if (paymentMethod.value === 'cash' && cashReceived.value < total.value) {
-            toast.error('Cash amount is insufficient')
-            return
+        // If cash payment, validate amount usando centavos
+        if (paymentMethod.value === 'cash') {
+            const receivedCents = Math.round(cashReceived.value * 100)
+            const totalCents = Math.round(total.value * 100)
+            if (receivedCents < totalCents) {
+                toast.error('Cash amount is insufficient')
+                return
+            }
         }
 
         await posStore.processSale()
         showSaleSuccessDialog.value = true
 
         // Show success message with change if cash payment
-        if (paymentMethod.value === 'cash' && cashReceived.value > total.value) {
-            const change = cashReceived.value - total.value
-            toast.success(`Sale processed! Change: RD$${formatCurrency(change)}`, { duration: 5000 })
+        if (paymentMethod.value === 'cash') {
+            const receivedCents = Math.round(cashReceived.value * 100)
+            const totalCents = Math.round(total.value * 100)
+            if (receivedCents > totalCents) {
+                const changeCents = receivedCents - totalCents
+                const change = changeCents / 100
+                toast.success(`Sale processed! Change: RD$${formatCurrency(change)}`, { duration: 5000 })
+            } else {
+                toast.success('Sale processed successfully!')
+            }
         } else {
             toast.success('Sale processed successfully!')
         }
