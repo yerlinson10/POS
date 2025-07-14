@@ -17,7 +17,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'vue-sonner';
 import { WIDGET_DEFINITIONS, CHART_TYPES } from '../types/dashboard';
@@ -185,22 +184,6 @@ if (form.config.showGrid === undefined) {
                 <TabsContent value="appearance" class="space-y-4">
                     <div class="space-y-4">
                         <div v-if="availableChartTypes.length > 0" class="space-y-4">
-                            <div class="flex items-center space-x-2">
-                                <Switch
-                                    id="showLegend"
-                                    v-model:checked="form.config.showLegend"
-                                />
-                                <Label for="showLegend">Show legend</Label>
-                            </div>
-
-                            <div v-if="form.config.chartType !== 'pie' && form.config.chartType !== 'doughnut'" class="flex items-center space-x-2">
-                                <Switch
-                                    id="showGrid"
-                                    v-model:checked="form.config.showGrid"
-                                />
-                                <Label for="showGrid">Show grid</Label>
-                            </div>
-
                             <!-- Main colors -->
                             <div class="space-y-2">
                                 <Label>Colors</Label>
