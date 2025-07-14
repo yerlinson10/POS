@@ -5,6 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal, RefreshCw, X, Settings } from 'lucide-vue-next';
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -32,6 +42,7 @@ const emit = defineEmits<Emits>();
 
 const showSettings = ref(false);
 const isRefreshing = ref(false);
+const showDeleteDialog = ref(false);
 
 const widgetComponent = computed(() => {
     switch (props.widget.type) {
@@ -75,9 +86,8 @@ const handleWidgetUpdate = (updatedWidget: Widget) => {
 };
 
 const handleRemove = () => {
-    if (confirm('Are you sure you want to delete this widget?')) {
-        emit('remove', props.widget.id);
-    }
+    showDeleteDialog.value = false;
+    emit('remove', props.widget.id);
 };
 
 const handleSettingsClose = () => {
@@ -118,7 +128,7 @@ const formatCurrency = (amount: number) => {
                         <Settings class="h-4 w-4 mr-2" />
                         Configure
                     </DropdownMenuItem>
-                    <DropdownMenuItem @click="handleRemove" class="text-destructive">
+                    <DropdownMenuItem @click="showDeleteDialog = true">
                         <X class="h-4 w-4 mr-2" />
                         Delete
                     </DropdownMenuItem>
@@ -127,20 +137,31 @@ const formatCurrency = (amount: number) => {
         </CardHeader>
 
         <CardContent class="card-content flex-1 p-4 overflow-auto min-h-0">
-            <component
-                :is="widgetComponent"
-                :widget="widget"
-                :format-currency="formatCurrency"
-            />
+            <component :is="widgetComponent" :widget="widget" :format-currency="formatCurrency" />
         </CardContent>
 
         <!-- Configuration Modal -->
-        <WidgetSettings
-            v-if="showSettings"
-            :widget="widget"
-            :filter-options="filterOptions"
-            @close="handleSettingsClose"
-            @updated="handleWidgetUpdate"
-        />
+        <WidgetSettings v-if="showSettings" :widget="widget" :filter-options="filterOptions"
+            @close="handleSettingsClose" @updated="handleWidgetUpdate" />
+
+        <!-- Delete Confirmation Dialog -->
+        <AlertDialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. It will permanently delete this
+                        widget and remove your data.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel @click="showDeleteDialog = false">Cancel</AlertDialogCancel>
+                    <AlertDialogAction @click="handleRemove"
+                        class="cursor-pointer text-white bg-red-500 hover:bg-red-400 focus:shadow-red-700 inline-flex h-[35px] items-center justify-center rounded-md px-[15px] font-semibold leading-none outline-none focus:shadow-[0_0_0_2px]">
+                        Continue
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </Card>
 </template>
