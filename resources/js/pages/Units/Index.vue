@@ -126,7 +126,7 @@
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        his action cannot be undone. It will permanently delete this
+                                                        this action cannot be undone. It will permanently delete this
                                                         record and
                                                         remove your data from our servers.
                                                     </AlertDialogDescription>
