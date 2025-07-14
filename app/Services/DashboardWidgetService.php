@@ -353,162 +353,26 @@ class DashboardWidgetService
 
         // Apply advanced filters (note: needs adaptation for query builder)
         if (!empty($advancedFilters)) {
-            foreach ($advancedFilters as $group) {
-                $groupOperator = $group['operator'] ?? 'AND';
-
-                $query->where(function ($subQuery) use ($group, $groupOperator) {
-                    foreach ($group['filters'] as $index => $filter) {
-                        $field = $filter['field'];
-                        $operator = $filter['operator'];
-                        $value = $filter['value'];
-
-                        // Fields already have correct prefix (products.name, categories.name, etc.)
-                        // Only map if no prefix
-                        if (!str_contains($field, '.')) {
-                            $field = 'products.' . $field;
-                        }
-
-                        $method = $index === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
-
-                        switch ($operator) {
-                            case 'is':
-                            case 'equals':
-                                $subQuery->$method($field, '=', $value);
-                                break;
-                            case 'is_not':
-                            case 'not_equals':
-                                $subQuery->$method($field, '!=', $value);
-                                break;
-                            case 'contains':
-                                $subQuery->$method($field, 'LIKE', "%{$value}%");
-                                break;
-                            case 'not_contains':
-                                $subQuery->$method($field, 'NOT LIKE', "%{$value}%");
-                                break;
-                            case 'starts_with':
-                                $subQuery->$method($field, 'LIKE', "{$value}%");
-                                break;
-                            case 'ends_with':
-                                $subQuery->$method($field, 'LIKE', "%{$value}");
-                                break;
-                            case 'greater_than':
-                                $subQuery->$method($field, '>', $value);
-                                break;
-                            case 'less_than':
-                                $subQuery->$method($field, '<', $value);
-                                break;
-                            case 'greater_equal':
-                                $subQuery->$method($field, '>=', $value);
-                                break;
-                            case 'less_equal':
-                                $subQuery->$method($field, '<=', $value);
-                                break;
-                            case 'between':
-                                if (is_array($value) && count($value) === 2) {
-                                    $subQuery->$method($field, '>=', $value[0])
-                                            ->where($field, '<=', $value[1]);
-                                }
-                                break;
-                            case 'is_empty':
-                                $subQuery->$method(function ($q) use ($field) {
-                                    $q->whereNull($field)->orWhere($field, '=', '');
-                                });
-                                break;
-                            case 'is_not_empty':
-                                $subQuery->$method($field, '!=', '')
-                                        ->whereNotNull($field);
-                                break;
-                            case 'is_null':
-                                $subQuery->whereNull($field);
-                                break;
-                            case 'is_not_null':
-                                $subQuery->whereNotNull($field);
-                                break;
-                            case 'is_true':
-                                $subQuery->$method($field, true);
-                                break;
-                            case 'is_false':
-                                $subQuery->$method($field, false);
-                                break;
-                        }
-                    }
-                });
-            }
-        }
-
-        if (isset($filters['category_id']) && $filters['category_id'] !== 'all') {
-            $query->where('products.category_id', $filters['category_id']);
-        }
-
-        return $query->select(
-            'products.id',
-            'products.name',
-            'products.sku',
-            'categories.name as category_name',
-            DB::raw('SUM(invoice_items.quantity) as total_sold'),
-            DB::raw('SUM(invoice_items.line_total) as total_revenue')
-        )
-        ->groupBy('products.id', 'products.name', 'products.sku', 'categories.name')
-        ->orderBy('total_sold', 'desc')
-        ->limit($limit)
-        ->get()
-        ->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->name,
-                'sku' => $item->sku,
-                'category' => $item->category_name,
-                'total_sold' => (int) $item->total_sold,
-                'total_revenue' => (float) $item->total_revenue,
-            ];
-        })
-        ->toArray();
-    }
-
-    /**
-     * Products with low stock
-     */
-    private function getLowStockProducts(array $filters, array $advancedFilters = []): array
-    {
-        $threshold = $filters['stock_threshold'] ?? 10;
-        $limit = $filters['limit'] ?? 10;
-
-        // Check if advanced filters require joins
-        $needsJoins = false;
-        if (!empty($advancedFilters)) {
-            foreach ($advancedFilters as $group) {
-                foreach ($group['filters'] as $filter) {
-                    if (str_contains($filter['field'], 'categories.')) {
-                        $needsJoins = true;
-                        break 2;
-                    }
-                }
-            }
-        }
-
-        if ($needsJoins) {
-            // Use query builder with joins when relation filters are needed
-            $query = DB::table('products')
-                ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
-                ->leftJoin('unit_measures', 'products.unit_measure_id', '=', 'unit_measures.id')
-                ->where('products.stock', '<=', $threshold);
-
-            // Apply advanced filters (query builder version)
-            if (!empty($advancedFilters)) {
-                foreach ($advancedFilters as $group) {
+            $query->where(function ($mainQuery) use ($advancedFilters) {
+                foreach ($advancedFilters as $groupIndex => $group) {
                     $groupOperator = $group['operator'] ?? 'AND';
 
-                    $query->where(function ($subQuery) use ($group, $groupOperator) {
+                    // Determine the method for connecting this group with the previous ones
+                    $groupMethod = $groupIndex === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
+
+                    $mainQuery->$groupMethod(function ($subQuery) use ($group, $groupOperator, $groupIndex) {
                         foreach ($group['filters'] as $index => $filter) {
                             $field = $filter['field'];
                             $operator = $filter['operator'];
                             $value = $filter['value'];
 
-                            // Ensure fields have correct prefix
+                            // Fields already have correct prefix (products.name, categories.name, etc.)
+                            // Only map if no prefix
                             if (!str_contains($field, '.')) {
                                 $field = 'products.' . $field;
                             }
 
+                            // Within the group, use the group's operator for connecting filters
                             $method = $index === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
 
                             switch ($operator) {
@@ -575,6 +439,154 @@ class DashboardWidgetService
                         }
                     });
                 }
+            });
+        }
+
+        if (isset($filters['category_id']) && $filters['category_id'] !== 'all') {
+            $query->where('products.category_id', $filters['category_id']);
+        }
+
+        return $query->select(
+            'products.id',
+            'products.name',
+            'products.sku',
+            'categories.name as category_name',
+            DB::raw('SUM(invoice_items.quantity) as total_sold'),
+            DB::raw('SUM(invoice_items.line_total) as total_revenue')
+        )
+        ->groupBy('products.id', 'products.name', 'products.sku', 'categories.name')
+        ->orderBy('total_sold', 'desc')
+        ->limit($limit)
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'sku' => $item->sku,
+                'category' => $item->category_name,
+                'total_sold' => (int) $item->total_sold,
+                'total_revenue' => (float) $item->total_revenue,
+            ];
+        })
+        ->toArray();
+    }
+
+    /**
+     * Products with low stock
+     */
+    private function getLowStockProducts(array $filters, array $advancedFilters = []): array
+    {
+        $threshold = $filters['stock_threshold'] ?? 10;
+        $limit = $filters['limit'] ?? 10;
+
+        // Check if advanced filters require joins
+        $needsJoins = false;
+        if (!empty($advancedFilters)) {
+            foreach ($advancedFilters as $group) {
+                foreach ($group['filters'] as $filter) {
+                    if (str_contains($filter['field'], 'categories.')) {
+                        $needsJoins = true;
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        if ($needsJoins) {
+            // Use query builder with joins when relation filters are needed
+            $query = DB::table('products')
+                ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+                ->leftJoin('unit_measures', 'products.unit_measure_id', '=', 'unit_measures.id')
+                ->where('products.stock', '<=', $threshold);
+
+            // Apply advanced filters (query builder version)
+            if (!empty($advancedFilters)) {
+                $query->where(function ($mainQuery) use ($advancedFilters) {
+                    foreach ($advancedFilters as $groupIndex => $group) {
+                        $groupOperator = $group['operator'] ?? 'AND';
+
+                        // Determine the method for connecting this group with the previous ones
+                        $groupMethod = $groupIndex === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
+
+                        $mainQuery->$groupMethod(function ($subQuery) use ($group, $groupOperator, $groupIndex) {
+                            foreach ($group['filters'] as $index => $filter) {
+                                $field = $filter['field'];
+                                $operator = $filter['operator'];
+                                $value = $filter['value'];
+
+                                // Ensure fields have correct prefix
+                                if (!str_contains($field, '.')) {
+                                    $field = 'products.' . $field;
+                                }
+
+                                // Within the group, use the group's operator for connecting filters
+                                $method = $index === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
+
+                                switch ($operator) {
+                                    case 'is':
+                                    case 'equals':
+                                        $subQuery->$method($field, '=', $value);
+                                        break;
+                                    case 'is_not':
+                                    case 'not_equals':
+                                        $subQuery->$method($field, '!=', $value);
+                                        break;
+                                    case 'contains':
+                                        $subQuery->$method($field, 'LIKE', "%{$value}%");
+                                        break;
+                                    case 'not_contains':
+                                        $subQuery->$method($field, 'NOT LIKE', "%{$value}%");
+                                        break;
+                                    case 'starts_with':
+                                        $subQuery->$method($field, 'LIKE', "{$value}%");
+                                        break;
+                                    case 'ends_with':
+                                        $subQuery->$method($field, 'LIKE', "%{$value}");
+                                        break;
+                                    case 'greater_than':
+                                        $subQuery->$method($field, '>', $value);
+                                        break;
+                                    case 'less_than':
+                                        $subQuery->$method($field, '<', $value);
+                                        break;
+                                    case 'greater_equal':
+                                        $subQuery->$method($field, '>=', $value);
+                                        break;
+                                    case 'less_equal':
+                                        $subQuery->$method($field, '<=', $value);
+                                        break;
+                                    case 'between':
+                                        if (is_array($value) && count($value) === 2) {
+                                            $subQuery->$method($field, '>=', $value[0])
+                                                    ->where($field, '<=', $value[1]);
+                                        }
+                                        break;
+                                    case 'is_empty':
+                                        $subQuery->$method(function ($q) use ($field) {
+                                            $q->whereNull($field)->orWhere($field, '=', '');
+                                        });
+                                        break;
+                                    case 'is_not_empty':
+                                        $subQuery->$method($field, '!=', '')
+                                                ->whereNotNull($field);
+                                        break;
+                                    case 'is_null':
+                                        $subQuery->whereNull($field);
+                                        break;
+                                    case 'is_not_null':
+                                        $subQuery->whereNotNull($field);
+                                        break;
+                                    case 'is_true':
+                                        $subQuery->$method($field, true);
+                                        break;
+                                    case 'is_false':
+                                        $subQuery->$method($field, false);
+                                        break;
+                                }
+                            }
+                        });
+                    }
+                });
             }
 
             if (isset($filters['category_id']) && $filters['category_id'] !== 'all') {
@@ -999,101 +1011,115 @@ class DashboardWidgetService
             'query_type' => get_class($query)
         ]);
 
-        foreach ($advancedFilters as $group) {
-            $groupOperator = $group['operator'] ?? 'AND';
+        // Apply all groups within a single where clause to handle inter-group logic properly
+        $query->where(function ($mainQuery) use ($advancedFilters) {
+            foreach ($advancedFilters as $groupIndex => $group) {
+                $groupOperator = $group['operator'] ?? 'AND';
 
-            $query->where(function ($subQuery) use ($group, $groupOperator, $query) {
-                foreach ($group['filters'] as $index => $filter) {
-                    $field = $filter['field'];
-                    $operator = $filter['operator'];
-                    $value = $filter['value'];
-                    $type = $filter['type'];
+                // Determine the method for connecting this group with the previous ones
+                // First group always uses 'where', subsequent groups use the operator from the CURRENT group
+                // to determine how it connects with the PREVIOUS groups
+                $groupMethod = $groupIndex === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
 
-                    // Detect if Query Builder or Eloquent
-                    $isQueryBuilder = str_contains(get_class($query), 'Builder') && !str_contains(get_class($query), 'Eloquent');
+                $mainQuery->$groupMethod(function ($subQuery) use ($group, $groupOperator, $groupIndex) {
+                    foreach ($group['filters'] as $index => $filter) {
+                        $field = $filter['field'];
+                        $operator = $filter['operator'];
+                        $value = $filter['value'];
+                        $type = $filter['type'];
 
-                    // For Eloquent, remove table prefixes if field belongs to main table
-                    if (!$isQueryBuilder && str_contains($field, 'products.')) {
-                        $field = str_replace('products.', '', $field);
+                        // Detect if Query Builder or Eloquent
+                        $isQueryBuilder = str_contains(get_class($subQuery), 'Builder') && !str_contains(get_class($subQuery), 'Eloquent');
+
+                        // For Eloquent, remove table prefixes if field belongs to main table
+                        if (!$isQueryBuilder && str_contains($field, 'products.')) {
+                            $field = str_replace('products.', '', $field);
+                        }
+
+                        // Within the group, use the group's operator for connecting filters
+                        $method = $index === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
+
+                        Log::info('Applying filter:', [
+                            'group_index' => $groupIndex,
+                            'filter_index' => $index,
+                            'field' => $field,
+                            'original_field' => $filter['field'],
+                            'operator' => $operator,
+                            'value' => $value,
+                            'group_operator' => $groupOperator,
+                            'group_method' => $groupIndex === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where'),
+                            'filter_method' => $method,
+                            'query_type' => get_class($subQuery),
+                            'is_query_builder' => $isQueryBuilder
+                        ]);
+
+                        switch ($operator) {
+                            case 'is':
+                            case 'equals':
+                                $subQuery->$method($field, '=', $value);
+                                break;
+                            case 'is_not':
+                            case 'not_equals':
+                                $subQuery->$method($field, '!=', $value);
+                                break;
+                            case 'contains':
+                                $subQuery->$method($field, 'LIKE', "%{$value}%");
+                                break;
+                            case 'not_contains':
+                                $subQuery->$method($field, 'NOT LIKE', "%{$value}%");
+                                break;
+                            case 'starts_with':
+                                $subQuery->$method($field, 'LIKE', "{$value}%");
+                                break;
+                            case 'ends_with':
+                                $subQuery->$method($field, 'LIKE', "%{$value}");
+                                break;
+                            case 'greater_than':
+                            case 'after':
+                                $subQuery->$method($field, '>', $value);
+                                break;
+                            case 'less_than':
+                            case 'before':
+                                $subQuery->$method($field, '<', $value);
+                                break;
+                            case 'greater_equal':
+                                $subQuery->$method($field, '>=', $value);
+                                break;
+                            case 'less_equal':
+                                $subQuery->$method($field, '<=', $value);
+                                break;
+                            case 'between':
+                                if (is_array($value) && count($value) === 2) {
+                                    $subQuery->$method($field, '>=', $value[0])
+                                            ->where($field, '<=', $value[1]);
+                                }
+                                break;
+                            case 'is_empty':
+                                $subQuery->$method(function ($q) use ($field) {
+                                    $q->whereNull($field)->orWhere($field, '=', '');
+                                });
+                                break;
+                            case 'is_not_empty':
+                                $subQuery->$method($field, '!=', '')
+                                        ->whereNotNull($field);
+                                break;
+                            case 'is_null':
+                                $subQuery->whereNull($field);
+                                break;
+                            case 'is_not_null':
+                                $subQuery->whereNotNull($field);
+                                break;
+                            case 'is_true':
+                                $subQuery->$method($field, true);
+                                break;
+                            case 'is_false':
+                                $subQuery->$method($field, false);
+                                break;
+                        }
                     }
-
-                    $method = $index === 0 ? 'where' : (strtolower($groupOperator) === 'or' ? 'orWhere' : 'where');
-
-                    Log::info('Applying filter:', [
-                        'field' => $field,
-                        'original_field' => $filter['field'],
-                        'operator' => $operator,
-                        'value' => $value,
-                        'query_type' => get_class($query),
-                        'is_query_builder' => $isQueryBuilder
-                    ]);
-
-                    switch ($operator) {
-                        case 'is':
-                        case 'equals':
-                            $subQuery->$method($field, '=', $value);
-                            break;
-                        case 'is_not':
-                        case 'not_equals':
-                            $subQuery->$method($field, '!=', $value);
-                            break;
-                        case 'contains':
-                            $subQuery->$method($field, 'LIKE', "%{$value}%");
-                            break;
-                        case 'not_contains':
-                            $subQuery->$method($field, 'NOT LIKE', "%{$value}%");
-                            break;
-                        case 'starts_with':
-                            $subQuery->$method($field, 'LIKE', "{$value}%");
-                            break;
-                        case 'ends_with':
-                            $subQuery->$method($field, 'LIKE', "%{$value}");
-                            break;
-                        case 'greater_than':
-                        case 'after':
-                            $subQuery->$method($field, '>', $value);
-                            break;
-                        case 'less_than':
-                        case 'before':
-                            $subQuery->$method($field, '<', $value);
-                            break;
-                        case 'greater_equal':
-                            $subQuery->$method($field, '>=', $value);
-                            break;
-                        case 'less_equal':
-                            $subQuery->$method($field, '<=', $value);
-                            break;
-                        case 'between':
-                            if (is_array($value) && count($value) === 2) {
-                                $subQuery->$method($field, '>=', $value[0])
-                                        ->where($field, '<=', $value[1]);
-                            }
-                            break;
-                        case 'is_empty':
-                            $subQuery->$method(function ($q) use ($field) {
-                                $q->whereNull($field)->orWhere($field, '=', '');
-                            });
-                            break;
-                        case 'is_not_empty':
-                            $subQuery->$method($field, '!=', '')
-                                    ->whereNotNull($field);
-                            break;
-                        case 'is_null':
-                            $subQuery->$method($field, null);
-                            break;
-                        case 'is_not_null':
-                            $subQuery->whereNotNull($field);
-                            break;
-                        case 'is_true':
-                            $subQuery->$method($field, true);
-                            break;
-                        case 'is_false':
-                            $subQuery->$method($field, false);
-                            break;
-                    }
-                }
-            });
-        }
+                });
+            }
+        });
 
         return $query;
     }
