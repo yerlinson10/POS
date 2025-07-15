@@ -1203,7 +1203,7 @@ class DashboardWidgetService
 
         $query = InvoiceItem::select(
             'categories.name as category',
-            DB::raw('SUM(invoice_items.quantity * invoice_items.price) as total_sales')
+            DB::raw('SUM(invoice_items.line_total) as total_sales')
         )
         ->join('products', 'invoice_items.product_id', '=', 'products.id')
         ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
