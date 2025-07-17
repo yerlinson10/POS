@@ -450,8 +450,8 @@
                             <Label class="text-sm font-medium">Quick Add Products</Label>
                             <div class="relative">
                                 <Input v-model="quickSearchTerm" placeholder="Type product name or SKU..."
-                                    class="flex-1 text-sm pr-10" @input="performQuickSearch"
-                                    @keyup.enter="addFirstSearchResult" @keyup.down="navigateQuickSearch('down')"
+                                    class="flex-1 text-sm pr-10" @input="performQuickSearchManual"
+                                    @keyup.enter="addFirstSearchResult(addToCart)" @keyup.down="navigateQuickSearch('down')"
                                     @keyup.up="navigateQuickSearch('up')" @keyup.escape="clearQuickSearch" />
                                 <Button v-if="quickSearchTerm" @click="clearQuickSearch" variant="ghost" size="sm"
                                     class="absolute right-0 top-0 h-full px-2">
@@ -796,10 +796,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, shallowRef } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePOSStore } from '../../stores/pos'
 import { useProductStore } from '../../stores/products'
+import { usePOSOptimizations } from '../../composables/usePOSOptimizations'
+import { useOptimizedSearch } from '../../composables/useOptimizedForms'
 import type { Product, Customer } from '../../types/pos'
 import AppLayout from '../../layouts/AppLayout.vue'
 import { route } from 'ziggy-js'
@@ -830,10 +832,27 @@ import PaymentMethodSelector from './components/PaymentMethodSelector.vue'
 import { toast } from 'vue-sonner'
 import SessionStatus from './components/SessionStatus.vue'
 import CashPaymentCalculator from './components/CashPaymentCalculator.vue'
+import { useBusinessLogic } from '../../composables/useBusinessLogic' // <-- Add this import
 
 // Stores
 const posStore = usePOSStore()
 const productStore = useProductStore()
+
+// POS Optimizations
+const posOptimizations = usePOSOptimizations()
+
+// Use optimized search for product quick search
+const productSearch = useOptimizedSearch<Product>(
+    async (term: string) => {
+        await productStore.searchProducts(term)
+        return productStore.products.slice(0, 5)
+    },
+    {
+        debounceTime: 300,
+        minLength: 2,
+        maxResults: 5
+    }
+)
 
 // Store refs
 const {
@@ -852,22 +871,30 @@ const {
     lastSale
 } = storeToRefs(posStore)
 
-// Local state
+// Local state - Use optimized refs from posOptimizations
 const showProductModal = ref(false)
 const showNewCustomerDialog = ref(false)
 const showDiscountDialogRef = ref(false)
 const discountDialogType = ref<'percentage' | 'fixed'>('percentage')
 const showSaleSuccessDialog = ref(false)
-const quickSearchTerm = ref('')
-const quickSearchResults = ref<Product[]>([])
 const showPaymentConfirmDialog = ref(false)
 const showRemoveItemDialog = ref(false)
 const itemToRemove = ref<{ id: number, name: string } | null>(null)
 const isPrintingInvoice = ref(false)
 const cashReceived = ref(0)
 const cashCalculatorRef = ref<{ focus: () => void, resetToTotalAmount: () => void } | null>(null)
-const selectedQuickSearchIndex = ref(-1)
-const quickSearchItemRefs = ref<HTMLElement[]>([])
+const quickSearchItemRefs = shallowRef<HTMLElement[]>([]) // Optimized with shallowRef
+
+// Use optimized quick search from posOptimizations
+const {
+    quickSearchResults,
+    selectedQuickSearchIndex,
+    quickSearchTerm,
+    navigateQuickSearch,
+    clearQuickSearch,
+    addFirstSearchResult,
+    formatCurrency
+} = posOptimizations
 
 // Reference for product search input in the modal
 const productSearchInputRef = ref<HTMLInputElement | null>(null)
@@ -880,33 +907,17 @@ const isCartNavigationActive = ref(false)
 
 // Auto-refresh interval for stock updates
 let stockUpdateInterval: number | null = null
-let searchTimeout: number | null = null
 
-// Computed properties for checkout button
+// Business logic integration - Now properly integrated
+const businessLogic = useBusinessLogic()
+
+// Computed properties for checkout button - Use optimized versions
 const getCheckoutIcon = computed(() => {
-    switch (invoiceStatus.value) {
-        case 'paid':
-            return 'CreditCard'
-        case 'quotation':
-            return 'Clock'
-        default:
-            return 'CreditCard'
-    }
+    return posOptimizations.getCheckoutIcon.value(invoiceStatus.value)
 })
 
 const getPaymentMethodIcon = (method: string) => {
-    switch (method) {
-        case 'cash':
-            return 'Banknote'
-        case 'card':
-            return 'CreditCard'
-        case 'transfer':
-            return 'ArrowRightLeft'
-        case 'other':
-            return 'MoreHorizontal'
-        default:
-            return 'CreditCard'
-    }
+    return posOptimizations.getPaymentMethodIcon.value(method)
 }
 
 const getCheckoutText = computed(() => {
@@ -945,19 +956,12 @@ const getCheckoutButtonShort = computed(() => {
 // Cash payment validation usando el mismo enfoque de centavos
 const isCashAmountSufficient = computed(() => {
     if (paymentMethod.value !== 'cash') return true
-    
+
     const receivedCents = Math.round(cashReceived.value * 100)
     const totalCents = Math.round(total.value * 100)
     return receivedCents >= totalCents
 })
 
-// Format currency helper
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-DO', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(amount)
-}
 
 // Methods
 const handleCustomerSelected = (customer: Customer | null) => {
@@ -972,6 +976,12 @@ const handleCustomerCreated = (customer: Customer) => {
 const addToCart = (product: Product, quantity: number = 1) => {
     try {
         posStore.addToCart(product, quantity)
+
+        // Update business logic cart manager
+        businessLogic.cartManager.addItem(product, quantity)
+
+        // Update inventory in business logic
+        businessLogic.updateStock(product.id, product.stock - quantity)
 
         // Enhanced success feedback with product info
         toast.success(`✅ ${product.name} added to cart`, {
@@ -995,6 +1005,9 @@ const updateQuantity = (productId: number, quantity: number) => {
 
         posStore.updateCartItemQuantity(productId, quantity)
 
+        // Update business logic cart manager
+        businessLogic.updateCartQuantity(productId, quantity)
+
         if (item) {
             const difference = quantity - oldQuantity
             const action = difference > 0 ? 'increased' : 'decreased'
@@ -1012,6 +1025,9 @@ const removeFromCart = (productId: number) => {
     const item = cart.value.find(item => item.product_id === productId)
     posStore.removeFromCart(productId)
 
+    // Update business logic cart manager
+    businessLogic.removeFromCart(productId)
+
     if (item) {
         toast.success(`${item.product_name} removed from cart`, {
             description: 'Item has been successfully removed',
@@ -1022,6 +1038,10 @@ const removeFromCart = (productId: number) => {
 
 const clearCart = () => {
     posStore.clearCart()
+
+    // Clear business logic cart
+    businessLogic.clearCart()
+
     toast.success('Cart cleared')
 }
 
@@ -1042,11 +1062,19 @@ const showDiscountDialog = (type: 'percentage' | 'fixed') => {
 
 const handleDiscountApplied = (type: 'percentage' | 'fixed', value: number) => {
     posStore.setDiscount(type, value)
+
+    // Update business logic discount
+    businessLogic.applyDiscount(type, value)
+
     toast.success('Discount applied')
 }
 
 const clearDiscount = () => {
     posStore.clearDiscount()
+
+    // Clear business logic discount
+    businessLogic.clearDiscount()
+
     toast.success('Discount removed')
 }
 
@@ -1207,6 +1235,25 @@ const cancelRemoveItem = () => {
 }
 
 const processCheckout = async () => {
+    // Use Pinia's validation instead of business logic for checkout
+    if (!canProcessSale.value) {
+        const errors = []
+        if (cart.value.length === 0) errors.push('Cart is empty')
+        if (!selectedCustomer.value) errors.push('Customer is required')
+        if (total.value <= 0) errors.push('Total amount must be greater than zero')
+
+        toast.error(`Cannot process sale: ${errors.join(', ')}`)
+        return
+    }
+
+    // Log sync status for debugging
+    console.log('Processing checkout:', {
+        piniaCartItems: cart.value.length,
+        businessLogicItems: businessLogic.itemCount.value,
+        piniaCanProcessSale: canProcessSale.value,
+        businessLogicValidation: businessLogic.validateCart()
+    })
+
     // Reset cash received to total amount when opening dialog
     cashReceived.value = total.value
     showPaymentConfirmDialog.value = true
@@ -1227,6 +1274,17 @@ const handleCashReceivedChange = (amount: number) => {
 
 const executeCheckout = async () => {
     try {
+        // Use Pinia's validation for final checkout
+        if (!canProcessSale.value) {
+            const errors = []
+            if (cart.value.length === 0) errors.push('Cart is empty')
+            if (!selectedCustomer.value) errors.push('Customer is required')
+            if (total.value <= 0) errors.push('Total amount must be greater than zero')
+
+            toast.error(`Validation failed: ${errors.join(', ')}`)
+            return
+        }
+
         // If cash payment, validate amount usando centavos
         if (paymentMethod.value === 'cash') {
             const receivedCents = Math.round(cashReceived.value * 100)
@@ -1264,59 +1322,32 @@ const confirmPayment = async () => {
     await executeCheckout()
 }
 
-const performQuickSearch = async () => {
-    // Clear previous timeout
-    if (searchTimeout) {
-        clearTimeout(searchTimeout)
-    }
-
-    if (!quickSearchTerm.value.trim()) {
+// Keep the old function for manual calls - Now using optimized search
+const performQuickSearchManual = async () => {
+    const newValue = quickSearchTerm.value
+    if (!newValue.trim()) {
         quickSearchResults.value = []
         selectedQuickSearchIndex.value = -1
         return
     }
 
-    if (quickSearchTerm.value.length < 2) {
+    if (newValue.length < 2) {
         return
     }
 
-    // Debounce the search
-    searchTimeout = setTimeout(async () => {
-        try {
-            await productStore.searchProducts(quickSearchTerm.value)
-            quickSearchResults.value = productStore.products.slice(0, 5) // Show top 5 results
-            selectedQuickSearchIndex.value = quickSearchResults.value.length > 0 ? 0 : -1
-        } catch {
-            toast.error('Error searching products')
-        }
-    }, 300) // 300ms debounce
-}
+    // Use optimized search from productSearch
+    productSearch.searchTerm.value = newValue
 
-const navigateQuickSearch = (direction: 'up' | 'down') => {
-    if (quickSearchResults.value.length === 0) return
+    // Wait for search to complete and update results
+    await new Promise(resolve => setTimeout(resolve, 50))
 
-    if (direction === 'down') {
-        selectedQuickSearchIndex.value = Math.min(
-            selectedQuickSearchIndex.value + 1,
-            quickSearchResults.value.length - 1
-        )
+    if (productSearch.results.value.length > 0) {
+        quickSearchResults.value = productSearch.results.value as Product[]
+        selectedQuickSearchIndex.value = 0
     } else {
-        selectedQuickSearchIndex.value = Math.max(selectedQuickSearchIndex.value - 1, 0)
+        quickSearchResults.value = []
+        selectedQuickSearchIndex.value = -1
     }
-}
-
-const addFirstSearchResult = () => {
-    if (quickSearchResults.value.length > 0) {
-        const product = quickSearchResults.value[selectedQuickSearchIndex.value] || quickSearchResults.value[0]
-        addToCart(product)
-        clearQuickSearch()
-    }
-}
-
-const clearQuickSearch = () => {
-    quickSearchTerm.value = ''
-    quickSearchResults.value = []
-    selectedQuickSearchIndex.value = -1
 }
 
 const setQuickSearchItemRef = (el: any, index: number) => {
@@ -1325,7 +1356,35 @@ const setQuickSearchItemRef = (el: any, index: number) => {
     }
 }
 
-const updateStockPrices = async () => {
+// Business logic helper functions
+const getBusinessLogicStats = () => {
+    return {
+        cacheStats: businessLogic.getCacheStats(),
+        cartSummary: businessLogic.getCartSummary(),
+        stockSummary: businessLogic.getStockSummary(),
+        validation: businessLogic.validateCart()
+    }
+}
+
+// Debug function to log business logic stats
+const logBusinessLogicStats = () => {
+    const stats = getBusinessLogicStats()
+    console.log('Business Logic Stats:', stats)
+    console.log('Cart Sync Status:', {
+        piniaCartItems: cart.value.length,
+        businessLogicItems: businessLogic.itemCount.value,
+        validation: businessLogic.validateCart(),
+        piniaCanProcessSale: canProcessSale.value
+    })
+
+    toast.info('Business Logic Stats logged to console', {
+        description: `Cache: ${stats.cacheStats.priceCalculatorCacheSize} items`,
+        duration: 3000
+    })
+}
+
+// Manual stock update function
+const updateStockPricesManual = async () => {
     if (cart.value.length === 0) return
 
     try {
@@ -1347,10 +1406,53 @@ const updateStockPrices = async () => {
     }
 }
 
+// Sync cart with business logic
+const syncCartWithBusinessLogic = () => {
+    try {
+        // Clear business logic cart first
+        businessLogic.clearCart()
+
+        // Sync each cart item with business logic
+        cart.value.forEach((item: any) => {
+            const product: Product = {
+                id: item.product_id,
+                name: item.product_name,
+                sku: item.product_sku,
+                price: item.unit_price,
+                stock: item.stock || 0,
+                category: item.category || 'General',
+                unit_measure: item.unit_measure || 'unit'
+            }
+
+            businessLogic.addToCart(product, item.quantity)
+        })
+
+        // Sync discount if exists
+        if (discountType.value && discountValue.value > 0) {
+            businessLogic.applyDiscount(discountType.value, discountValue.value)
+        }
+
+        console.log('Cart synchronized with business logic:', {
+            cartItems: cart.value.length,
+            businessLogicItems: businessLogic.itemCount.value,
+            validation: businessLogic.validateCart()
+        })
+    } catch (error) {
+        console.error('Error syncing cart with business logic:', error)
+    }
+}
+
 // Lifecycle
 onMounted(() => {
+    // Setup POS optimizations
+    posOptimizations.setupQuickSearch(productStore)
+    posOptimizations.setupStockUpdates(productStore, posStore, cart)
+
+    // Sync existing cart with business logic
+    syncCartWithBusinessLogic()
+
     // Set up periodic stock updates every 30 seconds
-    stockUpdateInterval = setInterval(updateStockPrices, 30000)
+    stockUpdateInterval = setInterval(updateStockPricesManual, 30000)
 
     // Global keyboard shortcuts
     const handleKeyDown = async (e: KeyboardEvent) => {
@@ -1589,6 +1691,12 @@ onMounted(() => {
             toast.success(`Payment method: ${methods[nextIndex].charAt(0).toUpperCase() + methods[nextIndex].slice(1)} (Alt+P)`)
         }
 
+        // Ctrl+D: Show business logic debug stats
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault()
+            logBusinessLogicStats()
+        }
+
         // Handle Delete/Backspace in confirmation dialogs
         if (e.key === 'Delete' || e.key === 'Backspace') {
             // If the clear cart dialog is open
@@ -1664,9 +1772,7 @@ onMounted(() => {
         if (stockUpdateInterval) {
             clearInterval(stockUpdateInterval)
         }
-        if (searchTimeout) {
-            clearTimeout(searchTimeout)
-        }
+        // Cleanup optimized watchers is handled automatically
         window.removeEventListener('keydown', handleKeyDown)
         document.removeEventListener('keydown', handleDialogKeyDown, true)
     })
@@ -1676,6 +1782,34 @@ onMounted(() => {
 watch(quickSearchTerm, (newValue) => {
     if (!newValue.trim()) {
         quickSearchResults.value = []
+        selectedQuickSearchIndex.value = -1
+    }
+})
+
+// Sync productSearch results with quickSearchResults
+watch(() => productSearch.results.value, (newResults) => {
+    quickSearchResults.value = newResults as Product[]
+    selectedQuickSearchIndex.value = newResults.length > 0 ? 0 : -1
+})
+
+// Sync productSearch error with toast
+watch(() => productSearch.error.value, (error) => {
+    if (error) {
+        toast.error(`Search error: ${error}`)
+    }
+})
+
+// Keep cart synchronized with business logic
+watch(cart, () => {
+    syncCartWithBusinessLogic()
+}, { deep: true })
+
+// Keep discount synchronized with business logic
+watch([discountType, discountValue], () => {
+    if (discountType.value && discountValue.value > 0) {
+        businessLogic.applyDiscount(discountType.value, discountValue.value)
+    } else {
+        businessLogic.clearDiscount()
     }
 })
 
