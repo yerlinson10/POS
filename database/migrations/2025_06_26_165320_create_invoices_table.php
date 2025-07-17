@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('total_amount', 12, 2);
             $table->string('payment_method', 20)->default('cash');
             $table->string('status', 20)->default('paid')->comment('quotation, paid, canceled');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

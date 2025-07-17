@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text('closing_notes')->nullable();
             $table->enum('status', ['open', 'closed'])->default('open');
             $table->json('cash_breakdown')->nullable(); // Para desglose de billetes/monedas
+            $table->softDeletes();
             $table->timestamps();
 
             // Índices para optimización

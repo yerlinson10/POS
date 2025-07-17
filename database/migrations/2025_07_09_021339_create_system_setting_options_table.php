@@ -18,6 +18,7 @@ return new class extends Migration
             $table->boolean('default')->default(false);
             $table->string('label')->nullable();
             $table->string('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

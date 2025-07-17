@@ -23,6 +23,7 @@ return new class extends Migration
             $table->json('config')->nullable(); // Configuración del widget (tipo de gráfico, colores, etc.)
             $table->json('filters')->nullable(); // Filtros aplicados al widget
             $table->boolean('is_active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

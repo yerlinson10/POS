@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class InvoiceItem extends Model
 {
     /** @use HasFactory<\Database\Factories\InvoiceItemFactory> */
-    use HasFactory;
+    use HasFactory,SoftDeletes;
     protected $fillable = ['invoice_id', 'product_id', 'quantity', 'unit_price', 'line_total'];
 
     public function invoice()

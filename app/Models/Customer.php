@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\Traits\HasAdvancedFilters;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Customer extends Model
 {
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
-    use HasFactory, HasAdvancedFilters;
+    use HasFactory, HasAdvancedFilters, SoftDeletes;
 
     protected $fillable = ['first_name', 'last_name', 'email', 'phone', 'address'];
 

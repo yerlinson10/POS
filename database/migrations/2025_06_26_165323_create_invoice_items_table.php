@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('quantity', 10, 2);
             $table->decimal('unit_price', 12, 2);
             $table->decimal('line_total', 14, 2);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

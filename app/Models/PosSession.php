@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Traits\HasAdvancedFilters;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Carbon\Carbon;
 
 class PosSession extends Model
 {
     /** @use HasFactory<\Database\Factories\PosSessionFactory> */
-    use HasFactory, HasAdvancedFilters;
+    use HasFactory, HasAdvancedFilters, SoftDeletes;
 
     protected $fillable = [
         'user_id',

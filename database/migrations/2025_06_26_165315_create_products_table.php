@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('unit_measure_id')->constrained()->cascadeOnDelete();
             $table->decimal('price', 12, 2);
             $table->integer('stock');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
