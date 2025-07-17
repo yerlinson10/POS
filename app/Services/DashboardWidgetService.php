@@ -252,16 +252,16 @@ class DashboardWidgetService
         switch ($groupBy) {
             case 'hour':
                 return $query->select(
-                    DB::raw('HOUR(date) as period'),
+                    DB::raw('EXTRACT(HOUR FROM date) as period'),
                     DB::raw('SUM(total_amount) as total'),
                     DB::raw('COUNT(*) as count')
                 )
-                ->groupBy(DB::raw('HOUR(date)'))
+                ->groupBy(DB::raw('EXTRACT(HOUR FROM date)'))
                 ->orderBy('period')
                 ->get()
                 ->map(function ($item) {
                     return [
-                        'period' => $item->period . ':00',
+                        'period' => str_pad($item->period, 2, '0', STR_PAD_LEFT) . ':00',
                         'total' => (float) $item->total,
                         'count' => (int) $item->count
                     ];
@@ -1180,12 +1180,12 @@ class DashboardWidgetService
         $dateTo = $filters['date_to'] ?? Carbon::now()->format('Y-m-d');
 
         $query = Invoice::select(
-            DB::raw('HOUR(created_at) as hour'),
+            DB::raw('EXTRACT(HOUR FROM created_at) as hour'),
             DB::raw('SUM(total_amount) as total')
         )
         ->where('status', 'paid')
         ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-        ->groupBy(DB::raw('HOUR(created_at)'))
+        ->groupBy(DB::raw('EXTRACT(HOUR FROM created_at)'))
         ->orderBy('hour');
 
         $query = $this->applyAdvancedFilters($query, $advancedFilters);
