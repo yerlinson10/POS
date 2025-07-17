@@ -1246,13 +1246,7 @@ const processCheckout = async () => {
         return
     }
 
-    // Log sync status for debugging
-    console.log('Processing checkout:', {
-        piniaCartItems: cart.value.length,
-        businessLogicItems: businessLogic.itemCount.value,
-        piniaCanProcessSale: canProcessSale.value,
-        businessLogicValidation: businessLogic.validateCart()
-    })
+
 
     // Reset cash received to total amount when opening dialog
     cashReceived.value = total.value
@@ -1369,13 +1363,6 @@ const getBusinessLogicStats = () => {
 // Debug function to log business logic stats
 const logBusinessLogicStats = () => {
     const stats = getBusinessLogicStats()
-    console.log('Business Logic Stats:', stats)
-    console.log('Cart Sync Status:', {
-        piniaCartItems: cart.value.length,
-        businessLogicItems: businessLogic.itemCount.value,
-        validation: businessLogic.validateCart(),
-        piniaCanProcessSale: canProcessSale.value
-    })
 
     toast.info('Business Logic Stats logged to console', {
         description: `Cache: ${stats.cacheStats.priceCalculatorCacheSize} items`,
@@ -1432,11 +1419,6 @@ const syncCartWithBusinessLogic = () => {
             businessLogic.applyDiscount(discountType.value, discountValue.value)
         }
 
-        console.log('Cart synchronized with business logic:', {
-            cartItems: cart.value.length,
-            businessLogicItems: businessLogic.itemCount.value,
-            validation: businessLogic.validateCart()
-        })
     } catch (error) {
         console.error('Error syncing cart with business logic:', error)
     }
