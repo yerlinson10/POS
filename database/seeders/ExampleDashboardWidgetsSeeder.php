@@ -15,11 +15,11 @@ class ExampleDashboardWidgetsSeeder extends Seeder
     {
         // Verificar si existe al menos un usuario antes de insertar widgets
         $firstUser = DB::table('users')->first();
-
+        $userId = $firstUser ? $firstUser->id : 1;
         // Insert example widgets for the first available user
         $widgets = [
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'widget_type' => 'sales_chart',
                 'title' => 'Sales Last 7 Days',
                 'x' => 0,
@@ -40,7 +40,7 @@ class ExampleDashboardWidgetsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'widget_type' => 'sales_stats',
                 'title' => 'Statistics of the Month',
                 'x' => 6,
@@ -57,7 +57,7 @@ class ExampleDashboardWidgetsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'widget_type' => 'top_products',
                 'title' => 'Top 5 Products',
                 'x' => 0,
@@ -76,7 +76,7 @@ class ExampleDashboardWidgetsSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'user_id' => 1,
+                'user_id' => $userId,
                 'widget_type' => 'low_stock',
                 'title' => 'Low Stock Products',
                 'x' => 6,
