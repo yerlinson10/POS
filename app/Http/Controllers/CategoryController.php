@@ -24,21 +24,7 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
-        $perPage = (int) ($filters['per_page'] ?? 10);
-
-        $categoriesQuery = Category::when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('categories.name', 'like', "%{$search}%");
-                });
-            })
-            ->withAdvancedFilters($filters, [
-                'id',
-                'name'
-            ]);
-
-        $categories = $categoriesQuery
-            ->paginate($perPage)
-            ->appends($filters);
+        $categories = $this->service->filterAndPaginate($filters);
 
         return Inertia::render('Categories/Index', [
             'categories' => $categories->through(fn($p) => [
@@ -76,7 +62,6 @@ class CategoryController extends Controller
     public function store(StoreCategoryRequest $request)
     {
         try {
-
             $this->service->create($request->validated());
 
             return redirect()->route('categories.index')

@@ -126,8 +126,6 @@ class CustomerController extends Controller
                 'phone' => $p->phone,
                 'address' => $p->address
             ],
-            'categories' => \App\Models\Category::all(),
-            'unit_measures' => \App\Models\UnitMeasure::all(),
         ]);
     }
 
@@ -137,7 +135,6 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, string $id)
     {
         try {
-
             $this->service->update($id, $request->validated());
 
             return redirect()->route('customers.index')

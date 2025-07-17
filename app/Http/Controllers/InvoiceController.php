@@ -27,35 +27,7 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir', 'status']);
-        $perPage = (int) ($filters['per_page'] ?? 10);
-
-        $invoicesQuery = Invoice::with(['customer', 'items.product', 'user'])
-            ->when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('invoices.id', 'like', "%{$search}%")
-                        ->orWhereHas('customer', function ($q) use ($search) {
-                            $q->where('first_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->when($filters['status'] ?? null, function ($query, $status) {
-                $query->where('status', $status);
-            })
-            ->withAdvancedFilters($filters, [
-                'id',
-                'date',
-                'total_amount',
-                'status',
-                'created_at',
-                'customer.first_name',
-                'customer.last_name'
-            ]);
-
-        $invoices = $invoicesQuery
-            ->paginate($perPage)
-            ->appends($filters);
+        $invoices = $this->service->filterAndPaginate($filters);
 
         return Inertia::render('Invoices/Index', [
             'invoices' => $invoices->through(fn($invoice) => [

@@ -68,7 +68,6 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         try {
-
             $this->service->create($request->validated());
 
             return redirect()->route('products.index')
@@ -124,7 +123,6 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, string $id)
     {
         try {
-
             $this->service->update($id, $request->validated());
 
             return redirect()->route('products.index')

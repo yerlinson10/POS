@@ -9,6 +9,31 @@ use App\Models\Category;
 class CategoryService
 {
     /**
+     * Filtrar y paginar categorías.
+     *
+     * @param array $filters
+     * @return LengthAwarePaginator
+     */
+    public function filterAndPaginate(array $filters): LengthAwarePaginator
+    {
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        $categoriesQuery = Category::when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('categories.name', 'like', "%{$search}%");
+                });
+            })
+            ->withAdvancedFilters($filters, [
+                'id',
+                'name'
+            ]);
+
+        return $categoriesQuery
+            ->paginate($perPage)
+            ->appends($filters);
+    }
+
+    /**
      * Listar productos con paginación.
      *
      * @param int $perPage
@@ -16,8 +41,7 @@ class CategoryService
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        return Category::all()
-                    ->orderBy('created_at', 'desc')
+        return Category::orderBy('created_at', 'desc')
                     ->paginate($perPage);
     }
 
@@ -28,8 +52,7 @@ class CategoryService
      */
     public function all(): Collection
     {
-        return Category::all()
-                    ->orderBy('created_at', 'desc')
+        return Category::orderBy('created_at', 'desc')
                     ->get();
     }
 

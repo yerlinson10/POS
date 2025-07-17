@@ -6,10 +6,50 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Exception;
 
 class InvoiceService
 {
+    /**
+     * Filtrar y paginar facturas.
+     *
+     * @param array $filters
+     * @return LengthAwarePaginator
+     */
+    public function filterAndPaginate(array $filters)
+    {
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        $invoicesQuery = Invoice::with(['customer', 'items.product', 'user'])
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('invoices.id', 'like', "%{$search}%")
+                        ->orWhereHas('customer', function ($q) use ($search) {
+                            $q->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($filters['status'] ?? null, function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->withAdvancedFilters($filters, [
+                'id',
+                'date',
+                'total_amount',
+                'status',
+                'created_at',
+                'customer.first_name',
+                'customer.last_name'
+            ]);
+
+        return $invoicesQuery
+            ->paginate($perPage)
+            ->appends($filters);
+    }
+
     public function find(int $id): ?Invoice
     {
         return Invoice::with(['customer', 'items.product', 'user'])->find($id);

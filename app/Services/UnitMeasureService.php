@@ -9,6 +9,33 @@ use App\Models\UnitMeasure;
 class UnitMeasureService
 {
     /**
+     * Filtrar y paginar unidades de medida.
+     *
+     * @param array $filters
+     * @return LengthAwarePaginator
+     */
+    public function filterAndPaginate(array $filters): LengthAwarePaginator
+    {
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        $unitsQuery = UnitMeasure::when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('unit_measures.name', 'like', "%{$search}%")
+                        ->orWhere('unit_measures.code', 'like', "%{$search}%");
+                });
+            })
+            ->withAdvancedFilters($filters, [
+                'id',
+                'name',
+                'code',
+            ]);
+
+        return $unitsQuery
+            ->paginate($perPage)
+            ->appends($filters);
+    }
+
+    /**
      * Listar unidades de medida con paginación.
      *
      * @param int $perPage
@@ -16,8 +43,7 @@ class UnitMeasureService
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        return UnitMeasure::all()
-                    ->orderBy('created_at', 'desc')
+        return UnitMeasure::orderBy('created_at', 'desc')
                     ->paginate($perPage);
     }
 
@@ -28,8 +54,7 @@ class UnitMeasureService
      */
     public function all(): Collection
     {
-        return UnitMeasure::all()
-                    ->orderBy('created_at', 'desc')
+        return UnitMeasure::orderBy('created_at', 'desc')
                     ->get();
     }
 

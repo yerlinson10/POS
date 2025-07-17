@@ -24,23 +24,7 @@ class UnitMeasureController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
-        $perPage = (int) ($filters['per_page'] ?? 10);
-
-        $unitsQuery = UnitMeasure::when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('unit_measures.name', 'like', "%{$search}%")
-                        ->orWhere('unit_measures.code', 'like', "%{$search}%");
-                });
-            })
-            ->withAdvancedFilters($filters, [
-                'id',
-                'name',
-                'code',
-            ]);
-
-        $units = $unitsQuery
-            ->paginate($perPage)
-            ->appends($filters);
+        $units = $this->service->filterAndPaginate($filters);
 
         return Inertia::render('Units/Index', [
             'units' => $units->through(fn($p) => [
@@ -128,7 +112,6 @@ class UnitMeasureController extends Controller
     public function update(UpdateUnitMeasureRequest $request, string $id)
     {
         try {
-
             $this->service->update($id, $request->validated());
 
             return redirect()->route('unit-measures.index')
