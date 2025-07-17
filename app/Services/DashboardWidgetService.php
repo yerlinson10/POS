@@ -1235,14 +1235,14 @@ class DashboardWidgetService
 
         // Mock profit margin calculation - replace with actual cost tracking
         $query = Invoice::select(
-            DB::raw("DATE_FORMAT(created_at, '$dateFormat') as period"),
+            DB::raw("TO_CHAR(created_at, '$dateFormat') as period"),
             DB::raw('SUM(total_amount) as revenue'),
             DB::raw('SUM(total_amount * 0.6) as cost'), // Mock 60% cost ratio
             DB::raw('ROUND(((SUM(total_amount) - SUM(total_amount * 0.6)) / SUM(total_amount)) * 100, 2) as margin_percentage')
         )
         ->where('status', 'paid')
         ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-        ->groupBy(DB::raw("DATE_FORMAT(created_at, '$dateFormat')"))
+        ->groupBy(DB::raw("TO_CHAR(created_at, '$dateFormat')"))
         ->orderBy('period');
 
         $query = $this->applyAdvancedFilters($query, $advancedFilters);
