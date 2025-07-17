@@ -799,7 +799,7 @@ class DashboardWidgetService
                 'customers.id',
                 'customers.first_name',
                 'customers.last_name',
-                DB::raw('CONCAT(customers.first_name, " ", customers.last_name) as name'),
+                DB::raw("(customers.first_name || ' ' || customers.last_name) as name"),
                 DB::raw('SUM(invoices.total_amount) as total_spent'),
                 DB::raw('COUNT(invoices.id) as purchase_count')
             )

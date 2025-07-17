@@ -18,9 +18,9 @@ class DatabaseSeeder extends Seeder
             UnitMeasureSeeder::class,
             ProductSeeder::class,
             CustomerSeeder::class,
-            InvoiceSeeder::class,
-            InvoiceItemSeeder::class,
-            PosSessionSeeder::class,
+            // InvoiceSeeder::class,
+            // InvoiceItemSeeder::class,
+            // PosSessionSeeder::class,
             SystemSettingSeeder::class,
             ExampleDashboardWidgetsSeeder::class,
         ]);

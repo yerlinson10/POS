@@ -22,8 +22,8 @@ class StoreUnitMeasureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:10',
-            'code' => 'required|string|max:50|unique:unit_measures,code',
+            'name' => 'required|string|max:50',
+            'code' => 'required|string|max:10|unique:unit_measures,code',
         ];
     }
 }

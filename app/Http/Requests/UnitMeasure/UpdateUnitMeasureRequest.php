@@ -22,8 +22,8 @@ class UpdateUnitMeasureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string|max:100',
-            'code' => 'nullable|string|max:50|unique:unit_measures,code',
+            'name' => 'nullable|string|max:50',
+            'code' => 'nullable|string|max:10|unique:unit_measures,code',
         ];
     }
 }

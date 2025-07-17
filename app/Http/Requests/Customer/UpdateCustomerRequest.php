@@ -25,7 +25,11 @@ class UpdateCustomerRequest extends FormRequest
             'first_name' => 'nullable|string|max:100',
             'last_name' => 'nullable|string|max:100',
             'email' => 'nullable|string|email|max:100|unique:customers,email,' . $this->route('customer'),
-            'phone' => 'nullable|string|max:15',
+            'phone' => [
+                'nullable',
+                'max:15',
+                'regex:/^([0-9\s\-\+\(\)]*)$/'
+            ],
             'address' => 'nullable|string|max:255',
         ];
     }
