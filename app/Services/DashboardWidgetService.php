@@ -270,11 +270,11 @@ class DashboardWidgetService
 
             case 'month':
                 return $query->select(
-                    DB::raw('DATE_FORMAT(date, "%Y-%m") as period'),
+                    DB::raw("TO_CHAR(date, 'YYYY-MM') as period"),
                     DB::raw('SUM(total_amount) as total'),
                     DB::raw('COUNT(*) as count')
                 )
-                ->groupBy(DB::raw('DATE_FORMAT(date, "%Y-%m")'))
+                ->groupBy(DB::raw("TO_CHAR(date, 'YYYY-MM')"))
                 ->orderBy('period')
                 ->get()
                 ->map(function ($item) {
@@ -754,11 +754,11 @@ class DashboardWidgetService
         }
 
         return $query->select(
-            DB::raw('DATE_FORMAT(date, "%Y-%m") as month'),
+            DB::raw("TO_CHAR(date, 'YYYY-MM') as month"),
             DB::raw('SUM(total_amount) as revenue'),
             DB::raw('COUNT(*) as sales_count')
         )
-        ->groupBy(DB::raw('DATE_FORMAT(date, "%Y-%m")'))
+        ->groupBy(DB::raw("TO_CHAR(date, 'YYYY-MM')"))
         ->orderBy('month')
         ->get()
         ->map(function ($item) {
@@ -1316,13 +1316,13 @@ class DashboardWidgetService
 
         // Get historical data
         $historical = Invoice::select(
-            DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+            DB::raw("TO_CHAR(created_at, 'YYYY-MM-DD') as period"),
             DB::raw('SUM(total_amount) as value'),
             DB::raw('false as is_forecast')
         )
         ->where('status', 'paid')
         ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-        ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d')"))
+        ->groupBy(DB::raw("TO_CHAR(created_at, 'YYYY-MM-DD')"))
         ->orderBy('period')
         ->get()
         ->toArray();
