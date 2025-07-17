@@ -25,7 +25,11 @@ class StoreCustomerRequest extends FormRequest
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
             'email' => 'nullable|string|email|max:100|unique:customers,email',
-            'phone' => 'nullable|string|max:15',
+            'phone' => [
+                'nullable',
+                'max:15',
+                'regex:/^([0-9\s\-\+\(\)]*)$/'
+            ],
             'address' => 'nullable|string|max:255',
         ];
     }
