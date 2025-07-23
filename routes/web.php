@@ -12,6 +12,8 @@ use App\Http\Controllers\UnitMeasureController;
 use App\Http\Controllers\PosSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardWidgetController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -74,6 +76,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Customers routes
     Route::resource('customers', CustomerController::class);
     Route::get('api/customers', [CustomerController::class, 'index'])->name('api.customers.index');
+
+    // Users routes
+    Route::resource('users', UserController::class);
+
+    // Roles routes
+    Route::resource('roles', RoleController::class);
 
     // Products routes
     Route::resource('products', ProductController::class);

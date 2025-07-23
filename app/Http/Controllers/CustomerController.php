@@ -6,11 +6,14 @@ use Inertia\Inertia;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Services\CustomerService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
 
 class CustomerController extends Controller
 {
+    use AuthorizesRequests;
+
     protected CustomerService $service;
 
     public function __construct(CustomerService $service)
@@ -22,6 +25,8 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Customer::class);
+
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
         $customers = $this->service->filterAndPaginate($filters);
 
@@ -44,9 +49,13 @@ class CustomerController extends Controller
     public function show(string $id)
     {
         $customer = $this->service->find($id);
-        return $customer
-            ? response()->json($customer)
-            : response()->json(['message' => 'No encontrado'], 404);
+        if (!$customer) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        $this->authorize('view', $customer);
+
+        return response()->json($customer);
     }
 
     /**
@@ -54,6 +63,8 @@ class CustomerController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Customer::class);
+
         return Inertia::render('Customers/Form', [
             'customer' => null,
         ]);
@@ -64,6 +75,7 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
+        $this->authorize('create', Customer::class);
         try {
             $customer = $this->service->create($request->validated());
 
@@ -117,6 +129,8 @@ class CustomerController extends Controller
                 ]);
         }
 
+        $this->authorize('update', $p);
+
         return Inertia::render('Customers/Form', [
             'customer' => [
                 'id' => $p->id,
@@ -134,6 +148,17 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, string $id)
     {
+        $customer = $this->service->find($id);
+        if (!$customer) {
+            return redirect()->route('customers.index')
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Customer not found.'
+                ]);
+        }
+
+        $this->authorize('update', $customer);
+
         try {
             $this->service->update($id, $request->validated());
 
@@ -158,6 +183,17 @@ class CustomerController extends Controller
      */
     public function destroy(string $id)
     {
+        $customer = $this->service->find($id);
+        if (!$customer) {
+            return redirect()->route('customers.index')
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Customer not found.'
+                ]);
+        }
+
+        $this->authorize('delete', $customer);
+
         try {
             $this->service->delete($id);
             return redirect()->route('customers.index')

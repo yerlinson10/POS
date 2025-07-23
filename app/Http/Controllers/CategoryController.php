@@ -7,11 +7,14 @@ use App\Models\Category;
 use App\Models\UnitMeasure;
 use Illuminate\Http\Request;
 use App\Services\CategoryService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 
 class CategoryController extends Controller
 {
+    use AuthorizesRequests;
+
     protected CategoryService $service;
 
     public function __construct(CategoryService $service)
@@ -23,6 +26,8 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Category::class);
+
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
         $categories = $this->service->filterAndPaginate($filters);
 
@@ -41,9 +46,13 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         $category = $this->service->find($id);
-        return $category
-            ? response()->json($category)
-            : response()->json(['message' => 'No encontrado'], 404);
+        if (!$category) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        $this->authorize('view', $category);
+
+        return response()->json($category);
     }
 
     /**
@@ -51,6 +60,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Category::class);
+
         return Inertia::render('Categories/Form', [
             'category' => null,
         ]);
@@ -61,6 +72,8 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
+        $this->authorize('create', Category::class);
+
         try {
             $this->service->create($request->validated());
 
@@ -95,6 +108,8 @@ class CategoryController extends Controller
                 ]);
         }
 
+        $this->authorize('update', $p);
+
         return Inertia::render('Categories/Form', [
             'category' => [
                 'id' => $p->id,
@@ -109,8 +124,18 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, string $id)
     {
-        try {
+        $category = $this->service->find($id);
+        if (!$category) {
+            return redirect()->route('categories.index')
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Category not found.'
+                ]);
+        }
 
+        $this->authorize('update', $category);
+
+        try {
             $this->service->update($id, $request->validated());
 
             return redirect()->route('categories.index')
@@ -134,6 +159,17 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
+        $category = $this->service->find($id);
+        if (!$category) {
+            return redirect()->route('categories.index')
+                ->with('message', [
+                    'type' => 'error',
+                    'text' => 'Category not found.'
+                ]);
+        }
+
+        $this->authorize('delete', $category);
+
         try {
             $this->service->delete($id);
             return redirect()->route('categories.index')

@@ -10,10 +10,13 @@ use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Services\InvoiceService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\Invoice\UpdateInvoiceRequest;
 
 class InvoiceController extends Controller
 {
+    use AuthorizesRequests;
+
     protected InvoiceService $service;
 
     public function __construct(InvoiceService $service)
@@ -26,6 +29,8 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Invoice::class);
+
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir', 'status']);
         $invoices = $this->service->filterAndPaginate($filters);
 
@@ -59,6 +64,8 @@ class InvoiceController extends Controller
         if (!$invoice) {
             abort(404, 'Invoice not found');
         }
+
+        $this->authorize('view', $invoice);
 
         return Inertia::render('Invoices/Show', [
             'invoice' => [
@@ -111,6 +118,8 @@ class InvoiceController extends Controller
 
         try {
             $invoice = Invoice::findOrFail($id);
+
+            $this->authorize('update', $invoice);
 
             // Additional validation for status transitions
             $this->validateStatusTransition($invoice->status, $request->status);
@@ -220,6 +229,17 @@ class InvoiceController extends Controller
     public function edit(string $id)
     {
         try {
+            $invoice = $this->service->find($id);
+            if (!$invoice) {
+                return redirect()->route('invoices.index')
+                    ->with('message', [
+                        'type' => 'error',
+                        'text' => 'Invoice not found.'
+                    ]);
+            }
+
+            $this->authorize('update', $invoice);
+
             $data = $this->service->getQuotationForEdit((int) $id);
             return Inertia::render('Invoices/Edit', $data);
         } catch (\Exception $e) {
@@ -236,6 +256,13 @@ class InvoiceController extends Controller
      */
     public function update(UpdateInvoiceRequest $request, string $id)
     {
+        $invoice = $this->service->find($id);
+        if (!$invoice) {
+            return response()->json(['message' => 'Invoice not found'], 404);
+        }
+
+        $this->authorize('update', $invoice);
+
         try {
             $invoice = $this->service->updateQuotation((int) $id, $request->validated());
 

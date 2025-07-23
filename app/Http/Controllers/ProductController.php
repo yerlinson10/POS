@@ -6,11 +6,14 @@ use Inertia\Inertia;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\Products\StoreProductRequest;
 use App\Http\Requests\Products\UpdateProductRequest;
 
 class ProductController extends Controller
 {
+    use AuthorizesRequests;
+
     protected ProductService $service;
 
     public function __construct(ProductService $service)
@@ -22,6 +25,8 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('products:view');
+
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
         $products = $this->service->filterAndPaginate($filters);
 
@@ -44,6 +49,8 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
+        $this->authorize('products:show');
+
         $product = $this->service->find($id);
         return $product
             ? response()->json($product)
@@ -55,6 +62,8 @@ class ProductController extends Controller
      */
     public function create()
     {
+        $this->authorize('products:create');
+
         return Inertia::render('Products/Form', [
             'categories' => \App\Models\Category::all(),
             'unit_measures' => \App\Models\UnitMeasure::all(),
@@ -67,6 +76,8 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
+        $this->authorize('products:create');
+
         try {
             $this->service->create($request->validated());
 
@@ -92,6 +103,8 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
+        $this->authorize('products:edit');
+
         $p = $this->service->find($id);
         if (!$p) {
             return redirect()->route('products.index')
@@ -122,6 +135,8 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, string $id)
     {
+        $this->authorize('products:edit');
+
         try {
             $this->service->update($id, $request->validated());
 
@@ -146,6 +161,8 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('products:delete');
+
         try {
             $this->service->delete($id);
             return redirect()->route('products.index')
