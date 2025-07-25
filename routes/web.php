@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardWidgetController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\DebugController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -37,7 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/invoice/{id}', [PdfController::class, 'Invoice'])->name('invoice.pdf');
 
     // POS routes
-    Route::prefix('pos')->name('pos.')->group(function () {
+    Route::prefix('pos')->name('pos.')->middleware('permission:pos.access')->group(function () {
         Route::get('/', [POSController::class, 'index'])->name('index');
         Route::get('/products', [POSController::class, 'getProducts'])->name('products');
         Route::get('/customers', [POSController::class, 'getCustomers'])->name('customers');
@@ -48,15 +49,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // POS Sessions routes
-    Route::prefix('sessions')->name('sessions.')->group(function () {
+    Route::prefix('sessions')->name('sessions.')->middleware('permission:pos.sessions.view')->group(function () {
         Route::get('/', [PosSessionController::class, 'index'])->name('index');
-        Route::get('/create', [PosSessionController::class, 'create'])->name('create');
-        Route::post('/', [PosSessionController::class, 'store'])->name('store');
+        Route::get('/create', [PosSessionController::class, 'create'])->middleware('permission:pos.sessions.create')->name('create');
+        Route::post('/', [PosSessionController::class, 'store'])->middleware('permission:pos.sessions.create')->name('store');
         Route::get('/current', [PosSessionController::class, 'current'])->name('current');
         Route::get('/{posSession}', [PosSessionController::class, 'show'])->name('show');
-        Route::get('/{posSession}/edit', [PosSessionController::class, 'edit'])->name('edit');
-        Route::patch('/{posSession}', [PosSessionController::class, 'update'])->name('update');
-        Route::post('/{posSession}/force-close', [PosSessionController::class, 'forceClose'])->name('force-close');
+        Route::get('/{posSession}/edit', [PosSessionController::class, 'edit'])->middleware('permission:pos.sessions.edit')->name('edit');
+        Route::patch('/{posSession}', [PosSessionController::class, 'update'])->middleware('permission:pos.sessions.edit')->name('update');
+        Route::post('/{posSession}/force-close', [PosSessionController::class, 'forceClose'])->middleware('permission:pos.sessions.edit')->name('force-close');
 
         // API routes for POS sessions
         Route::get('/api/active', [PosSessionController::class, 'getActiveSession'])->name('api.active');
@@ -83,16 +84,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Roles routes
     Route::resource('roles', RoleController::class);
 
-    // Products routes
-    Route::resource('products', ProductController::class);
+    // Products routes (API endpoint)
     Route::get('api/products', [ProductController::class, 'index'])->name('api.products.index');
 
     // Invoices routes (only index and show - no edit/delete for legal compliance)
-    Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-    Route::get('invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
-    Route::put('invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
-    Route::patch('invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.update-status');
+    Route::prefix('invoices')->name('invoices.')->middleware('permission:invoices.view')->group(function () {
+        Route::get('/', [InvoiceController::class, 'index'])->name('index');
+        Route::get('/{invoice}', [InvoiceController::class, 'show'])->name('show');
+        Route::get('/{invoice}/edit', [InvoiceController::class, 'edit'])->middleware('permission:invoices.edit')->name('edit');
+        Route::put('/{invoice}', [InvoiceController::class, 'update'])->middleware('permission:invoices.edit')->name('update');
+        Route::patch('/{invoice}/status', [InvoiceController::class, 'updateStatus'])->middleware('permission:invoices.edit')->name('update-status');
+    });
 
 });
 

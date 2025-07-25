@@ -6,6 +6,12 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { Link } from '@inertiajs/vue3';
 import AppLogo from './AppLogo.vue';
 import { mainNavItems, footerNavItems } from '@/lib/navItems';
+import { usePermissions } from '@/composables/usePermissions';
+import { computed } from 'vue';
+
+const { filterNavItems } = usePermissions();
+
+const filteredMainNavItems = computed(() => filterNavItems(mainNavItems));
 </script>
 
 <template>
@@ -23,7 +29,7 @@ import { mainNavItems, footerNavItems } from '@/lib/navItems';
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="filteredMainNavItems" />
         </SidebarContent>
 
         <SidebarFooter>

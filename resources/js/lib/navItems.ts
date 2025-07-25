@@ -16,46 +16,55 @@ export const mainNavItems: NavItem[] = [
         title: 'Point of Sale',
         href: '/pos',
         icon: ShoppingCartIcon,
+        permission: 'pos:access',
     },
     {
         title: 'Sessions',
         href: '/sessions',
         icon: Monitor,
+        permission: 'pos-sessions:view',
     },
     {
         title: 'Invoices',
         href: '/invoices',
         icon: FileText,
+        permission: 'invoices:view',
     },
     {
         title: 'Categories',
         href: '/categories',
         icon: FolderOpenIcon,
+        permission: 'categories:view',
     },
     {
         title: 'Units Measure',
         href: '/unit-measures',
         icon: RulerIcon,
+        permission: 'unit-measures:view',
     },
     {
         title: 'Products',
         href: '/products',
         icon: PackageIcon,
+        permission: 'products:view',
     },
     {
         title: 'Customers',
         href: '/customers',
         icon: Users,
+        permission: 'customers:view',
     },
     {
         title: 'Users',
         href: '/users',
         icon: UserCog,
+        permission: 'users:view',
     },
     {
         title: 'Roles',
         href: '/roles',
         icon: Shield,
+        permission: 'roles:view',
     },
 ];
 

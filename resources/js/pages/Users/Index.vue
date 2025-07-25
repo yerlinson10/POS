@@ -52,7 +52,11 @@
                             </Select>
                         </div>
 
-                        <Button @click="$inertia.visit(route('users.create'))" class="w-full sm:w-auto cursor-pointer">
+                        <Button
+                            v-if="hasPermission('users:create')"
+                            @click="$inertia.visit(route('users.create'))"
+                            class="w-full sm:w-auto cursor-pointer"
+                        >
                             <Icon name="Plus" class="w-4 h-4 mr-2" />
                             Nuevo Usuario
                         </Button>
@@ -107,6 +111,7 @@
                                     <td class="p-3 md:p-4">
                                         <div class="flex items-center justify-center gap-1">
                                             <Button
+                                                v-if="hasPermission('users:view')"
                                                 @click="$inertia.visit(route('users.show', user.id))"
                                                 variant="ghost"
                                                 size="sm"
@@ -117,6 +122,7 @@
                                             </Button>
 
                                             <Button
+                                                v-if="hasPermission('users:edit')"
                                                 @click="$inertia.visit(route('users.edit', user.id))"
                                                 variant="ghost"
                                                 size="sm"
@@ -126,7 +132,7 @@
                                                 <Icon name="Edit" class="w-4 h-4" />
                                             </Button>
 
-                                            <AlertDialog>
+                                            <AlertDialog v-if="hasPermission('users:delete')">
                                                 <AlertDialogTrigger as-child>
                                                     <Button
                                                         variant="ghost"
@@ -168,7 +174,11 @@
                             <p class="text-sm text-muted-foreground mb-4">
                                 {{ searchTerm ? 'No se encontraron usuarios con ese criterio de búsqueda.' : 'Comienza creando tu primer usuario.' }}
                             </p>
-                            <Button v-if="!searchTerm" @click="$inertia.visit(route('users.create'))" class="cursor-pointer">
+                            <Button
+                                v-if="!searchTerm && hasPermission('users:create')"
+                                @click="$inertia.visit(route('users.create'))"
+                                class="cursor-pointer"
+                            >
                                 <Icon name="Plus" class="w-4 h-4 mr-2" />
                                 Crear Usuario
                             </Button>
@@ -242,6 +252,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import Icon from '@/components/Icon.vue'
 import { type BreadcrumbItem } from '@/types'
+import { usePermissions } from '@/composables/usePermissions'
+
+const { hasPermission } = usePermissions()
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Usuarios', href: '/users' },
