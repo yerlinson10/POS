@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             // PosSessionSeeder::class,
             SystemSettingSeeder::class,
             ExampleDashboardWidgetsSeeder::class,
+            RolesAndPermissionsSeeder::class,
+            ModulesSeeder::class,
         ]);
     }
 }

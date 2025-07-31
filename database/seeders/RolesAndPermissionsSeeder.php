@@ -72,6 +72,27 @@ class RolesAndPermissionsSeeder extends Seeder
             'pos-sessions:delete',
             'pos-sessions:force-close',
 
+            // Proveedores
+            'suppliers:view',
+            'suppliers:show',
+            'suppliers:create',
+            'suppliers:edit',
+            'suppliers:delete',
+            'suppliers:pay_debt',
+
+            // Deudas de clientes
+            'customer_debts:view',
+            'customer_debts:show',
+            'customer_debts:delete',
+            'customer_debts:add_payment',
+
+            // Pagos (ingresos y egresos)
+            'payments:view',
+            'payments:show',
+            'payments:create',
+            'payments:edit',
+            'payments:delete',
+
             // Reportes
             'reports:view',
             'reports:generate',
@@ -117,6 +138,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 'categories:view', 'categories:show', 'categories:create', 'categories:edit', 'categories:delete',
                 'unit-measures:view', 'unit-measures:show', 'unit-measures:create', 'unit-measures:edit', 'unit-measures:delete',
                 'customers:view', 'customers:show', 'customers:create', 'customers:edit', 'customers:delete',
+                'suppliers:view', 'suppliers:show', 'suppliers:create', 'suppliers:edit', 'suppliers:delete', 'suppliers:pay_debt',
+                'customer_debts:view', 'customer_debts:show', 'customer_debts:delete', 'customer_debts:add_payment',
+                'payments:view', 'payments:show', 'payments:create', 'payments:edit', 'payments:delete',
                 'invoices:view', 'invoices:show', 'invoices:create', 'invoices:edit', 'invoices:print',
                 'pos:access', 'pos:sell',
                 'pos-sessions:view', 'pos-sessions:show', 'pos-sessions:create', 'pos-sessions:edit', 'pos-sessions:force-close',
@@ -132,6 +156,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 'categories:view', 'categories:show', 'categories:create', 'categories:edit',
                 'unit-measures:view', 'unit-measures:show', 'unit-measures:create', 'unit-measures:edit',
                 'customers:view', 'customers:show', 'customers:create', 'customers:edit',
+                'suppliers:view', 'suppliers:show', 'suppliers:create', 'suppliers:edit', 'suppliers:pay_debt',
+                'customer_debts:view', 'customer_debts:show', 'customer_debts:add_payment',
+                'payments:view', 'payments:show', 'payments:create', 'payments:edit',
                 'invoices:view', 'invoices:show', 'invoices:create', 'invoices:edit', 'invoices:print',
                 'pos:access', 'pos:sell', 'pos:refund',
                 'pos-sessions:view', 'pos-sessions:show', 'pos-sessions:create', 'pos-sessions:edit',
@@ -142,6 +169,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'dashboard:view',
                 'products:view', 'products:show',
                 'customers:view', 'customers:show', 'customers:create',
+                'customer_debts:view', 'customer_debts:show', 'customer_debts:add_payment',
+                'payments:view', 'payments:show', 'payments:create',
                 'invoices:view', 'invoices:show', 'invoices:create', 'invoices:print',
                 'pos:access', 'pos:sell',
                 'pos-sessions:view', 'pos-sessions:show', 'pos-sessions:create',
@@ -151,6 +180,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'dashboard:view',
                 'products:view', 'products:show',
                 'customers:view', 'customers:show', 'customers:create', 'customers:edit',
+                'customer_debts:view', 'customer_debts:show', 'customer_debts:add_payment',
+                'payments:view', 'payments:show',
                 'invoices:view', 'invoices:show', 'invoices:create', 'invoices:print',
                 'pos:access', 'pos:sell',
             ],

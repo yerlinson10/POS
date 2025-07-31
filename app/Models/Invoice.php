@@ -17,7 +17,11 @@ class Invoice extends Model
         'pos_session_id',
         'date',
         'total_amount',
+        'paid_amount',
+        'debt_amount',
         'status',
+        'payment_status',
+        'due_date',
         'subtotal',
         'discount_type',
         'discount_value',
@@ -26,7 +30,10 @@ class Invoice extends Model
 
     protected $casts = [
         'date' => 'datetime',
+        'due_date' => 'date',
         'total_amount' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'debt_amount' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'discount_value' => 'decimal:2',
         'discount_amount' => 'decimal:2',
@@ -50,5 +57,49 @@ class Invoice extends Model
     public function items()
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function debt()
+    {
+        return $this->hasOne(CustomerDebt::class);
+    }
+
+    // Métodos de utilidad para manejo de deudas
+    public function createDebt($debtAmount, $dueDate = null)
+    {
+        if ($this->hasDebt()) {
+            throw new \Exception('Esta factura ya tiene una deuda asociada');
+        }
+
+        return $this->debt()->create([
+            'customer_id' => $this->customer_id,
+            'user_id' => auth()->id(),
+            'original_amount' => $debtAmount,
+            'remaining_amount' => $debtAmount,
+            'paid_amount' => 0,
+            'debt_date' => now()->toDateString(),
+            'due_date' => $dueDate,
+            'status' => 'pending',
+        ]);
+    }
+
+    public function hasDebt()
+    {
+        return $this->debt()->exists();
+    }
+
+    public function isFullyPaid()
+    {
+        return $this->payment_status === 'paid' || $this->paid_amount >= $this->total_amount;
+    }
+
+    public function isPartiallyPaid()
+    {
+        return $this->payment_status === 'partial' && $this->paid_amount > 0 && $this->paid_amount < $this->total_amount;
+    }
+
+    public function hasOutstandingDebt()
+    {
+        return $this->payment_status === 'debt' || $this->debt_amount > 0;
     }
 }

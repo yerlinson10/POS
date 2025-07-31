@@ -14,7 +14,7 @@ class Product extends Model
 
     protected $fillable = [
         'sku', 'name', 'description', 'category_id',
-        'unit_measure_id', 'price', 'stock'
+        'unit_measure_id', 'supplier_id', 'price', 'stock'
     ];
     protected $casts = [
         'price' => 'decimal:2',
@@ -29,6 +29,11 @@ class Product extends Model
     public function unitMeasure()
     {
         return $this->belongsTo(UnitMeasure::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function invoiceItems()

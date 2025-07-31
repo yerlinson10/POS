@@ -54,9 +54,7 @@ class CustomerService
      */
     public function all(): Collection
     {
-        return Customer::all()
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return Customer::orderBy('created_at', 'desc')->get();
     }
 
     /**

@@ -67,6 +67,7 @@ class ProductController extends Controller
         return Inertia::render('Products/Form', [
             'categories' => \App\Models\Category::all(),
             'unit_measures' => \App\Models\UnitMeasure::all(),
+            'suppliers' => \App\Models\Supplier::active()->get(),
             'product' => null,
         ]);
     }
@@ -122,11 +123,13 @@ class ProductController extends Controller
                 'description' => $p->description,
                 'category_id' => $p->category_id,
                 'unit_measure_id' => $p->unit_measure_id,
+                'supplier_id' => $p->supplier_id,
                 'price' => $p->price,
                 'stock' => $p->stock,
             ],
             'categories' => \App\Models\Category::all(),
             'unit_measures' => \App\Models\UnitMeasure::all(),
+            'suppliers' => \App\Models\Supplier::active()->get(),
         ]);
     }
 

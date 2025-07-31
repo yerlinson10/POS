@@ -9,10 +9,16 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Supplier;
+use App\Models\CustomerDebt;
+use App\Models\Payment;
 use App\Policies\ProductPolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\CustomerPolicy;
 use App\Policies\InvoicePolicy;
+use App\Policies\SupplierPolicy;
+use App\Policies\CustomerDebtPolicy;
+use App\Policies\PaymentPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -26,6 +32,9 @@ class AuthServiceProvider extends ServiceProvider
         Category::class => CategoryPolicy::class,
         Customer::class => CustomerPolicy::class,
         Invoice::class => InvoicePolicy::class,
+        Supplier::class => SupplierPolicy::class,
+        CustomerDebt::class => CustomerDebtPolicy::class,
+        Payment::class => PaymentPolicy::class,
     ];
 
     /**

@@ -583,17 +583,32 @@
                         </div>
                     </div>
 
-                    <!-- Checkout Button -->
-                    <Button @click="processCheckout"
-                        class="w-full h-12 md:h-14 cursor-pointer text-base md:text-lg font-semibold transition-all duration-200 hover:scale-[1.02] shadow-lg"
-                        size="lg" :disabled="!canProcessSale" :loading="isProcessingSale"
-                        :title="`${getCheckoutText} - Shortcut: F4`">
-                        <Icon :name="getCheckoutIcon" class="w-5 h-5 md:w-6 md:h-6 mr-2" />
-                        <span class="hidden sm:inline">{{ isProcessingSale ? getProcessingText : getCheckoutText
-                            }}</span>
-                        <span class="sm:hidden">{{ isProcessingSale ? 'Processing...' : getCheckoutButtonShort }}</span>
-                        <span v-if="!isProcessingSale" class="ml-2 text-sm opacity-90 hidden md:inline">(F4)</span>
-                    </Button>
+                    <!-- Checkout Buttons -->
+                    <div class="space-y-2">
+                        <!-- Main Checkout Button -->
+                        <Button @click="processCheckout"
+                            class="w-full h-12 md:h-14 cursor-pointer text-base md:text-lg font-semibold transition-all duration-200 hover:scale-[1.02] shadow-lg"
+                            size="lg" :disabled="!canProcessSale" :loading="isProcessingSale"
+                            :title="`${getCheckoutText} - Shortcut: F4`">
+                            <Icon :name="getCheckoutIcon" class="w-5 h-5 md:w-6 md:h-6 mr-2" />
+                            <span class="hidden sm:inline">{{ isProcessingSale ? getProcessingText : getCheckoutText
+                                }}</span>
+                            <span class="sm:hidden">{{ isProcessingSale ? 'Processing...' : getCheckoutButtonShort }}</span>
+                            <span v-if="!isProcessingSale" class="ml-2 text-sm opacity-90 hidden md:inline">(F4)</span>
+                        </Button>
+
+                        <!-- Create Debt Button -->
+                        <Button 
+                            v-if="invoiceStatus === 'paid' && selectedCustomer && cart.length > 0 && total > 0"
+                            @click="openCreateDebtDialog"
+                            variant="outline"
+                            class="w-full h-10 cursor-pointer text-sm font-medium border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:hover:bg-orange-900/20"
+                            :title="'Create Debt for Customer - Shortcut: F5'"
+                        >
+                            <Icon name="CreditCard" class="w-4 h-4 mr-2" />
+                            <span>Create Customer Debt (F5)</span>
+                        </Button>
+                    </div>
 
                     <!-- Additional Info and Status -->
                     <div v-if="cart.length > 0" class="mt-3 md:mt-1 space-y-2">
@@ -792,6 +807,14 @@
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        <!-- Create Debt Dialog -->
+        <CreateDebtDialog 
+            v-model:open="showCreateDebtDialog" 
+            :customer-name="selectedCustomer?.full_name"
+            :total-amount="total"
+            @debt-created="handleDebtCreated" 
+        />
     </AppLayout>
 </template>
 
@@ -829,6 +852,7 @@ import DiscountDialog from './components/DiscountDialog.vue'
 import SaleSuccessDialog from './components/SaleSuccessDialog.vue'
 import InvoiceStatusSelector from './components/InvoiceStatusSelector.vue'
 import PaymentMethodSelector from './components/PaymentMethodSelector.vue'
+import CreateDebtDialog from './components/CreateDebtDialog.vue'
 import { toast } from 'vue-sonner'
 import SessionStatus from './components/SessionStatus.vue'
 import CashPaymentCalculator from './components/CashPaymentCalculator.vue'
@@ -879,6 +903,7 @@ const discountDialogType = ref<'percentage' | 'fixed'>('percentage')
 const showSaleSuccessDialog = ref(false)
 const showPaymentConfirmDialog = ref(false)
 const showRemoveItemDialog = ref(false)
+const showCreateDebtDialog = ref(false)
 const itemToRemove = ref<{ id: number, name: string } | null>(null)
 const isPrintingInvoice = ref(false)
 const cashReceived = ref(0)
@@ -1234,6 +1259,30 @@ const cancelRemoveItem = () => {
     itemToRemove.value = null
 }
 
+// Create Debt Dialog Functions
+const openCreateDebtDialog = () => {
+    if (!selectedCustomer.value) {
+        toast.error('Please select a customer first')
+        return
+    }
+    if (total.value <= 0) {
+        toast.error('Cart total must be greater than zero')
+        return
+    }
+    showCreateDebtDialog.value = true
+}
+
+const handleDebtCreated = async (debtData: { paid_amount: number; due_date: string; description: string }) => {
+    try {
+        // Create the sale with debt information
+        await posStore.processSaleWithDebt(debtData)
+        showSaleSuccessDialog.value = true
+        toast.success('Sale completed with customer debt created')
+    } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Error creating sale with debt')
+    }
+}
+
 const processCheckout = async () => {
     // Use Pinia's validation instead of business logic for checkout
     if (!canProcessSale.value) {
@@ -1580,8 +1629,17 @@ onMounted(() => {
                 return
             }
         }
-        // F5: Focus customer search (CustomerSelector)
+        // F5: Create customer debt
         if (e.key === 'F5') {
+            e.preventDefault()
+            if (invoiceStatus.value === 'paid' && selectedCustomer.value && cart.value.length > 0 && total.value > 0) {
+                openCreateDebtDialog()
+            } else {
+                toast.error('Customer debt option not available. Ensure customer is selected and cart has items.')
+            }
+        }
+        // F6: Focus customer search (moved from F5)
+        if (e.key === 'F6') {
             e.preventDefault()
             // Search for the customer selector input
             setTimeout(() => {
@@ -1594,17 +1652,17 @@ onMounted(() => {
                 }
             }, 50)
         }
-        // F6: Open percentage discount dialog
-        if (e.key === 'F6') {
+        // F7: Open percentage discount dialog (moved from F6)
+        if (e.key === 'F7') {
             e.preventDefault()
             showDiscountDialog('percentage')
         }
-        // F7: Open fixed discount dialog
-        if (e.key === 'F7') {
+        // F8: Open fixed discount dialog (moved from F7)
+        if (e.key === 'F8') {
             e.preventDefault()
             showDiscountDialog('fixed')
         }
-        // F8: Toggle invoice status
+        // F9: Toggle invoice status (moved from F8)
         if (e.key === 'F8') {
             e.preventDefault()
             toggleInvoiceStatus()

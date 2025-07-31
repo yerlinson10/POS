@@ -1,5 +1,5 @@
 import { type NavItem } from '@/types';
-import { BookOpen, FolderOpenIcon, Folder, LayoutGrid, RulerIcon, PackageIcon, Users, ShoppingCartIcon, FileText, Monitor, Grid3x3, UserCog, Shield } from 'lucide-vue-next';
+import { BookOpen, FolderOpenIcon, Folder, LayoutGrid, RulerIcon, PackageIcon, Users, ShoppingCartIcon, FileText, Monitor, Grid3x3, UserCog, Shield, Truck, CreditCard, Banknote } from 'lucide-vue-next';
 
 export const mainNavItems: NavItem[] = [
     {
@@ -53,6 +53,24 @@ export const mainNavItems: NavItem[] = [
         href: '/customers',
         icon: Users,
         permission: 'customers:view',
+    },
+    {
+        title: 'Suppliers',
+        href: '/suppliers',
+        icon: Truck,
+        permission: 'suppliers:view',
+    },
+    {
+        title: 'Customer Debts',
+        href: '/customer-debts',
+        icon: CreditCard,
+        permission: 'customer-debts:view',
+    },
+    {
+        title: 'Payments',
+        href: '/payments',
+        icon: Banknote,
+        permission: 'payments:view',
     },
     {
         title: 'Users',

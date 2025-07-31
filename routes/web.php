@@ -15,6 +15,9 @@ use App\Http\Controllers\DashboardWidgetController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DebugController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CustomerDebtController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -77,6 +80,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Customers routes
     Route::resource('customers', CustomerController::class);
     Route::get('api/customers', [CustomerController::class, 'index'])->name('api.customers.index');
+
+    // Suppliers routes
+    Route::resource('suppliers', SupplierController::class);
+    Route::get('api/suppliers', [SupplierController::class, 'apiIndex'])->name('api.suppliers.index');
+    Route::post('suppliers/{supplier}/pay-debt', [SupplierController::class, 'payDebt'])->name('suppliers.pay-debt');
+
+    // Customer Debts routes
+    Route::resource('customer-debts', CustomerDebtController::class)->except(['create', 'store', 'edit', 'update']);
+    Route::post('customer-debts/{customerDebt}/add-payment', [CustomerDebtController::class, 'addPayment'])->name('customer-debts.add-payment');
+    Route::get('customer-debts/customer/{customer}/summary', [CustomerDebtController::class, 'customerSummary'])->name('customer-debts.customer-summary');
+    Route::get('api/customer-debts/customer/{customer}', [CustomerDebtController::class, 'apiByCustomer'])->name('api.customer-debts.by-customer');
+    Route::get('customer-debts-overdue', [CustomerDebtController::class, 'overdue'])->name('customer-debts.overdue');
+
+    // Payments routes
+    Route::resource('payments', PaymentController::class);
+    Route::get('payments-dashboard', [PaymentController::class, 'dashboard'])->name('payments.dashboard');
+    Route::post('payments/debt-payment', [PaymentController::class, 'recordDebtPayment'])->name('payments.debt-payment');
+    Route::post('payments/supplier-payment', [PaymentController::class, 'recordSupplierPayment'])->name('payments.supplier-payment');
 
     // Users routes
     Route::resource('users', UserController::class);
