@@ -64,7 +64,7 @@ export const mainNavItems: NavItem[] = [
         title: 'Customer Debts',
         href: '/customer-debts',
         icon: CreditCard,
-        permission: 'customer-debts:view',
+        permission: 'customer_debts:view',
     },
     {
         title: 'Payments',

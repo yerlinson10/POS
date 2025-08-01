@@ -160,6 +160,49 @@ export const usePOSStore = defineStore('pos', () => {
         }
     };
 
+    const processSaleWithDebt = async (debtData: { paid_amount: number; due_date: string; description: string }): Promise<Sale> => {
+        if (!canProcessSale.value) {
+            throw new Error('Cannot process sale. Please check cart and customer selection.');
+        }
+
+        isProcessingSale.value = true;
+        try {
+            const cartData = {
+                customer_id: selectedCustomer.value?.id,
+                total_amount: total.value,
+                subtotal: subtotal.value,
+                discount_type: discountType.value,
+                discount_value: discountValue.value,
+                payment_method: paymentMethod.value,
+                items: cart.value.map((item: CartItem) => ({
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    unit_price: item.unit_price,
+                    line_total: item.line_total,
+                }))
+            };
+
+            const response = await axios.post('/pos/sales-with-debt', {
+                ...debtData,
+                cart_data: cartData,
+            });
+
+            const sale = response.data;
+            lastSale.value = sale;
+
+            // Clear cart and reset state
+            clearCart();
+            setCustomer(null);
+            clearDiscount();
+            setInvoiceStatus('paid');
+            setPaymentMethod('cash');
+
+            return sale;
+        } finally {
+            isProcessingSale.value = false;
+        }
+    };
+
     const updateProductStock = (updates: Record<number, { stock: number; price: number }>) => {
         cart.value.forEach((item: CartItem) => {
             const update = updates[item.product_id];
@@ -200,6 +243,7 @@ export const usePOSStore = defineStore('pos', () => {
         setInvoiceStatus,
         setPaymentMethod,
         processSale,
+        processSaleWithDebt,
         updateProductStock,
     };
 });
