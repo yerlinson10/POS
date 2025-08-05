@@ -60,6 +60,27 @@
                         </span>
                     </div>
 
+                    <!-- Create Debt Option when insufficient payment -->
+                    <div v-if="changeAmount < 0" class="p-3 rounded border border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+                        <div class="flex flex-col gap-2">
+                            <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                                Customer can't pay the full amount?
+                            </p>
+                            <p class="text-xs text-blue-600 dark:text-blue-300">
+                                Create an invoice with partial payment and track the remaining amount as customer debt.
+                            </p>
+                            <Button
+                                @click="$emit('create-debt-sale')"
+                                variant="outline"
+                                size="sm"
+                                class="w-full text-blue-600 border-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800 cursor-pointer"
+                            >
+                                <Icon name="FileText" class="w-4 h-4 mr-2" />
+                                Create Sale with Debt (RD${{ formatCurrency(Math.abs(changeAmount)) }})
+                            </Button>
+                        </div>
+                    </div>
+
                     <!-- Change breakdown for large amounts -->
                     <div v-if="changeAmount > 0" class="text-xs text-muted-foreground">
                         <div class="grid grid-cols-2 gap-2">
@@ -111,6 +132,7 @@ interface Props {
 interface Emits {
     (e: 'confirm'): void
     (e: 'cash-received-change', amount: number): void
+    (e: 'create-debt-sale'): void
 }
 
 const props = defineProps<Props>()

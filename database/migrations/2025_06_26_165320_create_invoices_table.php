@@ -21,8 +21,12 @@ return new class extends Migration
             $table->string('discount_type')->nullable(); // 'percentage' or 'fixed'
             $table->decimal('discount_value', 10, 2)->nullable();
             $table->decimal('total_amount', 12, 2);
+            $table->decimal('paid_amount', 12, 2)->default(0);
+            $table->decimal('debt_amount', 12, 2)->default(0);
             $table->string('payment_method', 20)->default('cash');
-            $table->string('status', 20)->default('paid')->comment('quotation, paid, canceled');
+            $table->string('status', 20)->default('paid')->comment('quotation, unpaid, paid, canceled');
+            $table->enum('payment_status', ['paid', 'partial', 'debt', 'pending', 'unpaid'])->default('paid');
+            $table->date('due_date')->nullable(); // Para deudas
             $table->softDeletes();
             $table->timestamps();
         });

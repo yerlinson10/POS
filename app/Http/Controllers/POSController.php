@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Customer;
+use App\Models\CustomerDebt;
+use App\Models\InvoiceDebt;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
@@ -232,14 +235,15 @@ class POSController extends Controller
     public function processSaleWithDebt(Request $request)
     {
         $request->validate([
-            'paid_amount' => 'required|numeric|min:0',
-            'due_date' => 'required|date|after:today',
-            'description' => 'nullable|string|max:255',
-            'cart_data' => 'required|array',
-            'cart_data.customer_id' => 'required|exists:customers,id',
-            'cart_data.total_amount' => 'required|numeric|min:0',
-            'cart_data.subtotal' => 'required|numeric|min:0',
-            'cart_data.items' => 'required|array|min:1',
+            'customer_id' => 'required|exists:customers,id',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.total' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'payment_method' => 'required|string|in:cash,card,transfer,other',
+            'payment_amount' => 'required|numeric|min:0',
         ]);
 
         try {
@@ -252,24 +256,28 @@ class POSController extends Controller
                 ], 422);
             }
 
-            $cartData = $request->cart_data;
-            $paidAmount = $request->paid_amount;
-            $totalAmount = $cartData['total_amount'];
-            
-            // Validar que el monto pagado no sea mayor al total
-            if ($paidAmount > $totalAmount) {
+            // Calcular totales
+            $subtotal = collect($request->items)->sum('total');
+            $discount = $request->discount ?? 0;
+            $totalAmount = $subtotal - $discount;
+            $paidAmount = $request->payment_amount;
+
+            // Validar que el monto pagado sea menor al total (para crear deuda)
+            if ($paidAmount >= $totalAmount) {
                 return response()->json([
-                    'message' => 'Paid amount cannot be greater than total amount'
+                    'message' => 'Paid amount must be less than total amount to create debt'
                 ], 422);
             }
-            
+
+            $debtAmount = $totalAmount - $paidAmount;
+
             DB::beginTransaction();
 
             // Verificar stock para todos los productos
-            $productIds = collect($cartData['items'])->pluck('product_id')->unique();
+            $productIds = collect($request->items)->pluck('product_id')->unique();
             $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
-            foreach ($cartData['items'] as $item) {
+            foreach ($request->items as $item) {
                 $product = $products->get($item['product_id']);
                 if (!$product) {
                     throw new \Exception("Product not found: ID {$item['product_id']}");
@@ -281,26 +289,30 @@ class POSController extends Controller
 
             // Crear la factura
             $invoice = Invoice::create([
-                'customer_id' => $cartData['customer_id'],
+                'customer_id' => $request->customer_id,
                 'user_id' => Auth::id(),
                 'pos_session_id' => $activeSession->id,
                 'date' => now(),
                 'total_amount' => $totalAmount,
-                'status' => $paidAmount >= $totalAmount ? 'paid' : 'quotation',
-                'subtotal' => $cartData['subtotal'],
-                'discount_type' => $cartData['discount_type'] ?? null,
-                'discount_value' => $cartData['discount_value'] ?? 0,
-                'payment_method' => $paidAmount >= $totalAmount ? ($cartData['payment_method'] ?? 'cash') : 'mixed',
+                'paid_amount' => $paidAmount,
+                'debt_amount' => $debtAmount,
+                'status' => $paidAmount >= $totalAmount ? 'paid' : 'unpaid',
+                'payment_status' => $paidAmount <= 0 ? 'debt' : ($paidAmount >= $totalAmount ? 'paid' : 'partial'),
+                'subtotal' => $subtotal,
+                'discount_type' => $discount > 0 ? 'fixed' : null,
+                'discount_value' => $discount,
+                'payment_method' => $paidAmount >= $totalAmount ? $request->payment_method : 'mixed',
+                'due_date' => now()->addDays(15), // 15 días para pagar la deuda
             ]);
 
             // Crear los items de la factura
-            foreach ($cartData['items'] as $item) {
+            foreach ($request->items as $item) {
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
-                    'line_total' => $item['line_total'],
+                    'line_total' => $item['total'],
                 ]);
 
                 // Reducir stock solo si hay pago (aunque sea parcial)
@@ -311,45 +323,78 @@ class POSController extends Controller
             }
 
             // Crear la deuda del cliente si hay monto pendiente
-            $debtAmount = $totalAmount - $paidAmount;
-            
+            $debt = null;
             if ($debtAmount > 0) {
-                \App\Models\CustomerDebt::create([
-                    'customer_id' => $cartData['customer_id'],
+                $debt = \App\Models\CustomerDebt::create([
+                    'customer_id' => $request->customer_id,
                     'invoice_id' => $invoice->id,
                     'user_id' => Auth::id(),
-                    'original_amount' => $debtAmount,
-                    'remaining_amount' => $debtAmount,
-                    'paid_amount' => 0, // La deuda inicia sin pagos
+                    'original_amount' => $totalAmount, // Monto original de la factura completa
+                    'remaining_amount' => $debtAmount, // Monto que aún debe
+                    'paid_amount' => $paidAmount, // Monto ya pagado
                     'debt_date' => now()->toDateString(),
-                    'due_date' => $request->due_date,
                     'status' => 'pending',
-                    'notes' => $request->description ?? "Debt created from POS sale - Invoice #{$invoice->id}",
+                    'due_date' => now()->addDays(30)->toDateString(), // Default 30 days
+                    'notes' => "Debt from Invoice ID #{$invoice->id} - Partial payment sale",
+                ]);
+
+                // Crear la relación entre invoice y debt usando el pivot
+                \App\Models\InvoiceDebt::create([
+                    'invoice_id' => $invoice->id,
+                    'customer_debt_id' => $debt->id,
+                    'debt_amount' => $debtAmount, // Opcional: para referencia rápida
+                    'notes' => "Debt association for partial payment sale",
+                ]);
+            } else {
+                // Si se paga completo, crear una deuda con estado 'paid' para mantener historial
+                $debt = \App\Models\CustomerDebt::create([
+                    'customer_id' => $request->customer_id,
+                    'invoice_id' => $invoice->id,
+                    'user_id' => Auth::id(),
+                    'original_amount' => $totalAmount,
+                    'remaining_amount' => 0,
+                    'paid_amount' => $totalAmount,
+                    'debt_date' => now()->toDateString(),
+                    'status' => 'paid',
+                    'due_date' => now()->toDateString(),
+                    'notes' => "Full payment for Invoice ID #{$invoice->id}",
+                ]);
+
+                // Crear la relación entre invoice y debt usando el pivot
+                \App\Models\InvoiceDebt::create([
+                    'invoice_id' => $invoice->id,
+                    'customer_debt_id' => $debt->id,
+                    'debt_amount' => 0,
+                    'notes' => "Full payment association",
                 ]);
             }
 
-            // Registrar el pago parcial si hay uno
+            // Registrar el pago si hay uno (tanto si es pago completo como parcial)
             if ($paidAmount > 0) {
                 \App\Models\Payment::create([
-                    'payment_type' => 'income',
+                    'type' => 'income',
+                    'category' => $debtAmount > 0 ? 'debt_payment' : 'sales',
                     'amount' => $paidAmount,
-                    'payment_method' => $cartData['payment_method'] ?? 'cash',
-                    'category' => 'sales',
-                    'description' => "Payment for invoice #{$invoice->id}" . ($debtAmount > 0 ? " (Partial payment)" : ""),
-                    'customer_id' => $cartData['customer_id'],
-                    'invoice_id' => $invoice->id,
+                    'payment_method' => $request->payment_method,
+                    'payment_date' => now()->toDateString(),
+                    'description' => "Payment for invoice ID #{$invoice->id}" . ($debtAmount > 0 ? " (Partial payment)" : " (Full payment)"),
+                    'customer_id' => $request->customer_id,
+                    'customer_debt_id' => $debt->id, // Relacionar con la deuda (siempre existe ahora)
                     'user_id' => Auth::id(),
+                    'pos_session_id' => $activeSession->id,
+                    'reference_number' => "INV-{$invoice->id}-" . strtoupper(substr(md5(time()), 0, 6)),
                 ]);
             }
 
             DB::commit();
 
             return response()->json([
+                'success' => true,
                 'invoice' => $invoice->load(['customer', 'items.product']),
                 'debt_amount' => $debtAmount,
                 'paid_amount' => $paidAmount,
-                'message' => $debtAmount > 0 
-                    ? 'Sale processed with debt created successfully' 
+                'message' => $debtAmount > 0
+                    ? 'Sale processed with debt created successfully'
                     : 'Sale processed and payment completed successfully'
             ], 201);
 

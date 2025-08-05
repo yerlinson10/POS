@@ -163,31 +163,111 @@
                                     <h3 class="text-lg font-semibold">Status Actions</h3>
                                 </div>
                                 <div class="p-4 space-y-2">
-                                    <Button v-if="invoice.status === 'quotation'" :as="Link"
-                                        :href="route('invoices.edit', invoice.id)" variant="outline"
-                                        class="w-full text-blue-600 border-blue-600 hover:bg-blue-50 cursor-pointer">
-                                        <Icon name="Edit" class="w-4 h-4 mr-2" />
-                                        Edit Quotation
-                                    </Button>
-                                    <Button v-if="invoice.status === 'quotation'" @click="updateStatus('paid')"
-                                        variant="outline"
-                                        class="w-full text-green-600 border-green-600 hover:bg-green-50 cursor-pointer">
-                                        Mark as Paid
-                                    </Button>
-                                    <Button v-if="invoice.status === 'quotation'" @click="updateStatus('canceled')"
-                                        variant="outline"
-                                        class="w-full text-red-600 border-red-600 hover:bg-red-50 cursor-pointer">
-                                        Cancel Invoice
-                                    </Button>
-                                    <Button v-if="invoice.status === 'canceled'" @click="updateStatus('quotation')"
-                                        variant="outline"
-                                        class="w-full text-yellow-600 border-yellow-600 hover:bg-yellow-50 cursor-pointer">
-                                        Reactivate Invoice
-                                    </Button>
+                                    <!-- Quotation Actions -->
+                                    <template v-if="invoice.status === 'quotation'">
+                                        <Button :as="Link" :href="route('invoices.edit', invoice.id)" variant="outline"
+                                            class="w-full text-blue-600 border-blue-600 hover:bg-blue-50 cursor-pointer">
+                                            <Icon name="Edit" class="w-4 h-4 mr-2" />
+                                            Edit Quotation
+                                        </Button>
+                                        <Button @click="updateStatus('paid')" variant="outline"
+                                            class="w-full text-green-600 border-green-600 hover:bg-green-50 cursor-pointer">
+                                            Mark as Paid
+                                        </Button>
+                                        <Button @click="updateStatus('unpaid')" variant="outline"
+                                            class="w-full text-orange-600 border-orange-600 hover:bg-orange-50 cursor-pointer">
+                                            Mark as Unpaid
+                                        </Button>
+                                        <Button @click="updateStatus('canceled')" variant="outline"
+                                            class="w-full text-red-600 border-red-600 hover:bg-red-50 cursor-pointer">
+                                            Cancel Invoice
+                                        </Button>
+                                    </template>
+
+                                    <!-- Unpaid Actions -->
+                                    <template v-if="invoice.status === 'unpaid'">
+                                        <Button @click="updateStatus('paid')" variant="outline"
+                                            class="w-full text-green-600 border-green-600 hover:bg-green-50 cursor-pointer">
+                                            Mark as Paid
+                                        </Button>
+                                        <Button @click="updateStatus('canceled')" variant="outline"
+                                            class="w-full text-red-600 border-red-600 hover:bg-red-50 cursor-pointer">
+                                            Cancel Invoice
+                                        </Button>
+                                    </template>
+
+                                    <!-- Canceled Actions -->
+                                    <template v-if="invoice.status === 'canceled'">
+                                        <Button @click="updateStatus('quotation')" variant="outline"
+                                            class="w-full text-yellow-600 border-yellow-600 hover:bg-yellow-50 cursor-pointer">
+                                            Reactivate as Quotation
+                                        </Button>
+                                        <Button @click="updateStatus('unpaid')" variant="outline"
+                                            class="w-full text-orange-600 border-orange-600 hover:bg-orange-50 cursor-pointer">
+                                            Reactivate as Unpaid
+                                        </Button>
+                                    </template>
+
+                                    <!-- Paid Status -->
                                     <div v-if="invoice.status === 'paid'" class="text-center py-4">
                                         <p class="text-sm text-muted-foreground">
                                             Invoice has been paid and cannot be modified
                                         </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Debt Information -->
+                            <div v-if="invoice.debt" class="border rounded-lg">
+                                <div class="p-4 border-b bg-red-50">
+                                    <h3 class="text-lg font-semibold text-red-800">Debt Information</h3>
+                                </div>
+                                <div class="p-4 space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-muted-foreground">Original Amount</span>
+                                        <span class="text-sm font-medium">${{ invoice.debt.original_amount }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-muted-foreground">Paid Amount</span>
+                                        <span class="text-sm font-medium text-green-600">${{ invoice.debt.paid_amount }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-muted-foreground">Remaining Amount</span>
+                                        <span class="text-sm font-medium text-red-600">${{ invoice.debt.remaining_amount }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-muted-foreground">Due Date</span>
+                                        <span class="text-sm font-medium">{{ formatDate(invoice.debt.due_date) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-muted-foreground">Status</span>
+                                        <Badge :variant="getDebtStatusVariant(invoice.debt.status)" class="capitalize">
+                                            {{ invoice.debt.status }}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment History -->
+                            <div v-if="invoice.payments && invoice.payments.length > 0" class="border rounded-lg">
+                                <div class="p-4 border-b bg-green-50">
+                                    <h3 class="text-lg font-semibold text-green-800">Payment History</h3>
+                                </div>
+                                <div class="p-4">
+                                    <div class="space-y-3">
+                                        <div v-for="payment in invoice.payments" :key="payment.id" 
+                                             class="flex justify-between items-center py-2 border-b last:border-b-0">
+                                            <div>
+                                                <div class="text-sm font-medium">${{ payment.amount }}</div>
+                                                <div class="text-xs text-muted-foreground">
+                                                    {{ formatDate(payment.payment_date) }} • {{ payment.payment_method }}
+                                                </div>
+                                                <div v-if="payment.description" class="text-xs text-muted-foreground">
+                                                    {{ payment.description }}
+                                                </div>
+                                            </div>
+                                            <Badge variant="secondary">{{ payment.payment_method }}</Badge>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -247,9 +327,29 @@ interface Invoice {
     discount_type?: 'percentage' | 'fixed'
     discount_value: number
     total_amount: number
-    status: 'quotation' | 'paid' | 'canceled'
+    paid_amount?: number
+    debt_amount?: number
+    status: 'quotation' | 'paid' | 'unpaid' | 'canceled'
+    payment_status?: 'paid' | 'partial' | 'debt' | 'pending' | 'unpaid'
     payment_method: 'cash' | 'card' | 'transfer' | 'other'
+    due_date?: string
     items: InvoiceItem[]
+    debt?: {
+        id: number
+        original_amount: number
+        remaining_amount: number
+        paid_amount: number
+        status: string
+        debt_date: string
+        due_date: string
+    }
+    payments?: Array<{
+        id: number
+        amount: number
+        payment_method: string
+        payment_date: string
+        description?: string
+    }>
     created_at: string
 }
 
@@ -325,9 +425,26 @@ const getStatusVariant = (status: string) => {
     switch (status) {
         case 'paid':
             return 'success'
+        case 'unpaid':
+            return 'destructive'
         case 'quotation':
             return 'warning'
         case 'canceled':
+            return 'destructive'
+        default:
+            return 'default'
+    }
+}
+
+const getDebtStatusVariant = (status: string) => {
+    switch (status) {
+        case 'paid':
+            return 'success'
+        case 'partial':
+            return 'warning'
+        case 'pending':
+            return 'secondary'
+        case 'overdue':
             return 'destructive'
         default:
             return 'default'

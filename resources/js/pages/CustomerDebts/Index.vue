@@ -133,7 +133,12 @@
                                     <td class="px-4 py-4">
                                         <div class="flex flex-col gap-1">
                                             <div class="font-medium text-sm group-hover:text-primary transition-colors">
-                                                {{ debt.customer_name }}
+                                                <Link
+                                                    :href="route('customers.details', { customer: debt.customer_id })"
+                                                    class="hover:text-blue-600 hover:underline cursor-pointer"
+                                                >
+                                                    {{ debt.customer_name }}
+                                                </Link>
                                             </div>
                                             <div class="flex items-center gap-2 text-xs text-muted-foreground">
                                                 <Icon name="FileText" class="w-3 h-3" />
@@ -151,17 +156,17 @@
                                     <td class="px-4 py-4 text-center">
                                         <div class="flex flex-col gap-1">
                                             <div class="font-semibold text-lg">
-                                                ${{ Number(debt.total_amount).toFixed(2) }}
+                                                {{ formatCurrency(debt.original_amount) }}
                                             </div>
                                             <div v-if="debt.paid_amount > 0" class="text-xs text-green-600">
-                                                -${{ Number(debt.paid_amount).toFixed(2) }} paid
+                                                {{ formatCurrency(debt.paid_amount) }} paid ({{ getPaymentPercentage(debt) }}%)
                                             </div>
                                             <div v-if="debt.remaining_amount > 0" class="text-xs font-semibold"
                                                 :class="{
                                                     'text-red-600': debt.status === 'overdue',
                                                     'text-yellow-600': debt.status === 'pending' || debt.status === 'partial'
                                                 }">
-                                                ${{ Number(debt.remaining_amount).toFixed(2) }} remaining
+                                                {{ formatCurrency(debt.remaining_amount) }} remaining
                                             </div>
                                         </div>
                                     </td>
@@ -286,6 +291,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Link, Head } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -317,13 +323,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface CustomerDebt {
     id: number
+    customer_id: number
     customer_name: string
     invoice_id: number
-    total_amount: number
+    original_amount: number
     paid_amount: number
     remaining_amount: number
-    due_date: string
+    debt_date?: string
+    due_date?: string
     status: 'pending' | 'partial' | 'paid' | 'overdue'
+    days_overdue: number
+    user?: string
     description?: string
     created_at: string
 }
@@ -385,18 +395,34 @@ const handlePaymentProcessed = () => {
 }
 
 // Utility functions
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+const formatDate = (dateString: string | undefined) => {
+    return dateString ? new Date(dateString).toLocaleDateString() : 'N/A'
 }
 
-const isOverdue = (dueDateString: string) => {
+const formatCurrency = (amount: number | undefined) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(amount ?? 0)
+}
+
+const getPaymentPercentage = (debt: CustomerDebt) => {
+    if (!debt.original_amount || debt.original_amount === 0) return 0
+    return Math.round((debt.paid_amount / debt.original_amount) * 100)
+}
+
+const isOverdue = (dueDateString: string | undefined) => {
+    if (!dueDateString) return false
     const dueDate = new Date(dueDateString)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return dueDate < today
 }
 
-const isDueSoon = (dueDateString: string) => {
+const isDueSoon = (dueDateString: string | undefined) => {
+    if (!dueDateString) return false
     const dueDate = new Date(dueDateString)
     const today = new Date()
     const diffTime = dueDate.getTime() - today.getTime()
@@ -404,14 +430,16 @@ const isDueSoon = (dueDateString: string) => {
     return diffDays > 0 && diffDays <= 7
 }
 
-const getDaysOverdue = (dueDateString: string) => {
+const getDaysOverdue = (dueDateString: string | undefined) => {
+    if (!dueDateString) return 0
     const dueDate = new Date(dueDateString)
     const today = new Date()
     const diffTime = today.getTime() - dueDate.getTime()
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 }
 
-const getDaysUntilDue = (dueDateString: string) => {
+const getDaysUntilDue = (dueDateString: string | undefined) => {
+    if (!dueDateString) return 0
     const dueDate = new Date(dueDateString)
     const today = new Date()
     const diffTime = dueDate.getTime() - today.getTime()

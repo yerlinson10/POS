@@ -20,6 +20,13 @@
                         <span class="text-xs text-muted-foreground ml-2">(Invoice fully paid)</span>
                     </div>
                 </SelectItem>
+                <SelectItem value="unpaid">
+                    <div class="flex items-center gap-2">
+                        <Icon name="CreditCard" class="w-4 h-4 text-red-600" />
+                        <span>Unpaid</span>
+                        <span class="text-xs text-muted-foreground ml-2">(Invoice not paid yet)</span>
+                    </div>
+                </SelectItem>
                 <SelectItem value="quotation">
                     <div class="flex items-center gap-2">
                         <Icon name="Clock" class="w-4 h-4 text-yellow-600" />
@@ -58,6 +65,8 @@ const getStatusLabel = (status: InvoiceStatus) => {
     switch (status) {
         case 'paid':
             return 'Paid'
+        case 'unpaid':
+            return 'Unpaid'
         case 'quotation':
             return 'Quotation'
         default:
@@ -69,6 +78,8 @@ const statusIcon = computed(() => {
     switch (selectedStatus.value) {
         case 'paid':
             return 'CheckCircle'
+        case 'unpaid':
+            return 'CreditCard'
         case 'quotation':
             return 'Clock'
         default:
@@ -80,6 +91,8 @@ const statusIconClass = computed(() => {
     switch (selectedStatus.value) {
         case 'paid':
             return 'text-green-600'
+        case 'unpaid':
+            return 'text-red-600'
         case 'quotation':
             return 'text-yellow-600'
         default:

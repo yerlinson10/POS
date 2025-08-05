@@ -22,7 +22,7 @@
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-blue-800 dark:text-blue-200">Total Amount:</span>
                             <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                ${{ Number(debt.total_amount).toFixed(2) }}
+                                ${{ Number(debt.original_amount).toFixed(2) }}
                             </span>
                         </div>
                         <div v-if="debt.paid_amount > 0" class="flex items-center justify-between">
@@ -216,19 +216,32 @@ import { toast } from 'vue-sonner'
 
 interface CustomerDebt {
     id: number
+    customer_id: number
     customer_name: string
     invoice_id: number
-    total_amount: number
+    original_amount: number
     paid_amount: number
     remaining_amount: number
-    due_date: string
-    status: string
+    debt_date?: string
+    due_date?: string
+    status: 'pending' | 'partial' | 'paid' | 'overdue'
+    days_overdue: number
+    user?: string
+    description?: string
+    created_at: string
 }
 
 interface PaymentForm {
     amount: number
     payment_method: string
     notes: string
+    [key: string]: any
+}
+
+interface PaymentErrors {
+    amount?: string
+    payment_method?: string
+    notes?: string
 }
 
 const props = defineProps<{
@@ -247,7 +260,7 @@ const form = useForm<PaymentForm>({
     notes: '',
 })
 
-const errors = computed(() => form.errors)
+const errors = computed<PaymentErrors>(() => form.errors as PaymentErrors)
 
 const newRemainingAmount = computed(() => {
     if (!props.debt || !form.amount) return props.debt?.remaining_amount || 0

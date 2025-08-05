@@ -18,6 +18,7 @@ use App\Http\Controllers\DebugController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CustomerDebtController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CustomerDetailController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -50,6 +51,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/sales-with-debt', [POSController::class, 'processSaleWithDebt'])->name('sales.store-with-debt');
         Route::get('/product-updates', [POSController::class, 'getProductUpdates'])->name('product-updates');
         Route::get('/session-status', [POSController::class, 'getSessionStatus'])->name('session-status');
+    });
+
+    // API routes for POS (needed for frontend)
+    Route::prefix('api/pos')->name('api.pos.')->middleware('permission:pos:access')->group(function () {
+        Route::post('/process-sale-with-debt', [POSController::class, 'processSaleWithDebt'])->name('process-sale-with-debt');
     });
 
     // POS Sessions routes
@@ -108,6 +114,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Products routes (API endpoint)
     Route::get('api/products', [ProductController::class, 'index'])->name('api.products.index');
+
+    // Customer Details routes
+    Route::get('/customers/{customer}/details', [CustomerDetailController::class, 'show'])
+        ->name('customers.details')
+        ->middleware('permission:customers:view');
 
     // Invoices routes (only index and show - no edit/delete for legal compliance)
     Route::prefix('invoices')->name('invoices.')->middleware('permission:invoices:view')->group(function () {

@@ -12,13 +12,17 @@ export interface CustomerDebtFilters {
 
 export interface CustomerDebt {
     id: number
+    customer_id: number
     customer_name: string
     invoice_id: number
-    total_amount: number
+    original_amount: number
     paid_amount: number
     remaining_amount: number
-    due_date: string
+    debt_date?: string
+    due_date?: string
     status: 'pending' | 'partial' | 'paid' | 'overdue'
+    days_overdue: number
+    user?: string
     description?: string
     created_at: string
 }

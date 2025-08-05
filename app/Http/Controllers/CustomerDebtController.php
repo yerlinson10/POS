@@ -40,6 +40,8 @@ class CustomerDebtController extends Controller
         return Inertia::render('CustomerDebts/Index', [
             'debts' => $debts->through(fn($debt) => [
                 'id' => $debt->id,
+                'customer_id' => $debt->customer->id,
+                'customer_name' => $debt->customer->full_name,
                 'customer' => [
                     'id' => $debt->customer->id,
                     'full_name' => $debt->customer->full_name,
@@ -47,15 +49,15 @@ class CustomerDebtController extends Controller
                     'phone' => $debt->customer->phone,
                 ],
                 'invoice_id' => $debt->invoice_id,
-                'original_amount' => $debt->original_amount,
-                'remaining_amount' => $debt->remaining_amount,
-                'paid_amount' => $debt->paid_amount,
-                'debt_date' => $debt->debt_date->format('Y-m-d'),
-                'due_date' => $debt->due_date?->format('Y-m-d'),
+                'original_amount' => (float) $debt->original_amount,
+                'remaining_amount' => (float) $debt->remaining_amount,
+                'paid_amount' => (float) $debt->paid_amount,
+                'debt_date' => $debt->debt_date,
+                'due_date' => $debt->due_date,
                 'status' => $debt->status,
-                'days_overdue' => $debt->days_overdue,
+                'days_overdue' => $this->calculateDaysOverdue($debt),
                 'user' => $debt->user?->name,
-                'created_at' => $debt->created_at->format('Y-m-d H:i:s'),
+                'created_at' => $debt->created_at,
             ]),
             'filters' => $filters,
             'stats' => $this->service->getStats(),
@@ -101,8 +103,8 @@ class CustomerDebtController extends Controller
                 'original_amount' => $debt->original_amount,
                 'remaining_amount' => $debt->remaining_amount,
                 'paid_amount' => $debt->paid_amount,
-                'debt_date' => $debt->debt_date->format('Y-m-d'),
-                'due_date' => $debt->due_date?->format('Y-m-d'),
+                'debt_date' => $debt->debt_date,
+                'due_date' => $debt->due_date,
                 'status' => $debt->status,
                 'days_overdue' => $debt->days_overdue,
                 'notes' => $debt->notes,
@@ -191,7 +193,7 @@ class CustomerDebtController extends Controller
                 ],
                 'invoice_id' => $debt->invoice_id,
                 'remaining_amount' => $debt->remaining_amount,
-                'due_date' => $debt->due_date?->format('Y-m-d'),
+                'due_date' => $debt->due_date,
                 'days_overdue' => $debt->days_overdue,
                 'status' => $debt->status,
             ]),
@@ -235,8 +237,20 @@ class CustomerDebtController extends Controller
             'id' => $debt->id,
             'invoice_id' => $debt->invoice_id,
             'remaining_amount' => $debt->remaining_amount,
-            'due_date' => $debt->due_date?->format('Y-m-d'),
+            'due_date' => $debt->due_date,
             'status' => $debt->status,
         ]));
+    }
+
+    private function calculateDaysOverdue($debt)
+    {
+        if (!$debt->due_date || $debt->status === 'paid') {
+            return 0;
+        }
+        
+        $today = now();
+        $dueDate = is_string($debt->due_date) ? now()->parse($debt->due_date) : $debt->due_date;
+        
+        return $today->gt($dueDate) ? $today->diffInDays($dueDate) : 0;
     }
 }

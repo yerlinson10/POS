@@ -52,7 +52,7 @@ class InvoiceService
 
     public function find(int $id): ?Invoice
     {
-        return Invoice::with(['customer', 'items.product', 'user'])->find($id);
+        return Invoice::with(['customer', 'items.product', 'user', 'debt', 'payments'])->find($id);
     }
 
     public function updateStatus(int $id, string $status): Invoice

@@ -53,7 +53,7 @@
                         <div class="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                             <span class="text-sm font-medium">Original Amount:</span>
                             <span class="text-lg font-bold text-blue-600">
-                                ${{ Number(debt.total_amount).toFixed(2) }}
+                                ${{ Number(debt.original_amount).toFixed(2) }}
                             </span>
                         </div>
                         
@@ -171,13 +171,17 @@ import Icon from '@/components/Icon.vue'
 
 interface CustomerDebt {
     id: number
+    customer_id: number
     customer_name: string
     invoice_id: number
-    total_amount: number
+    original_amount: number
     paid_amount: number
     remaining_amount: number
-    due_date: string
-    status: string
+    debt_date?: string
+    due_date?: string
+    status: 'pending' | 'partial' | 'paid' | 'overdue'
+    days_overdue: number
+    user?: string
     description?: string
     created_at: string
 }
@@ -193,8 +197,8 @@ const emit = defineEmits<{
 }>()
 
 const paymentPercentage = computed(() => {
-    if (!props.debt || props.debt.total_amount === 0) return 0
-    return (props.debt.paid_amount / props.debt.total_amount) * 100
+    if (!props.debt || props.debt.original_amount === 0) return 0
+    return (props.debt.paid_amount / props.debt.original_amount) * 100
 })
 
 const closeDialog = () => {
@@ -207,18 +211,20 @@ const openPaymentDialog = () => {
 }
 
 // Utility functions
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+const formatDate = (dateString: string | undefined) => {
+    return dateString ? new Date(dateString).toLocaleDateString() : 'N/A'
 }
 
-const isOverdue = (dueDateString: string) => {
+const isOverdue = (dueDateString: string | undefined) => {
+    if (!dueDateString) return false
     const dueDate = new Date(dueDateString)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return dueDate < today
 }
 
-const isDueSoon = (dueDateString: string) => {
+const isDueSoon = (dueDateString: string | undefined) => {
+    if (!dueDateString) return false
     const dueDate = new Date(dueDateString)
     const today = new Date()
     const diffTime = dueDate.getTime() - today.getTime()
@@ -226,14 +232,16 @@ const isDueSoon = (dueDateString: string) => {
     return diffDays > 0 && diffDays <= 7
 }
 
-const getDaysOverdue = (dueDateString: string) => {
+const getDaysOverdue = (dueDateString: string | undefined) => {
+    if (!dueDateString) return 0
     const dueDate = new Date(dueDateString)
     const today = new Date()
     const diffTime = today.getTime() - dueDate.getTime()
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 }
 
-const getDaysUntilDue = (dueDateString: string) => {
+const getDaysUntilDue = (dueDateString: string | undefined) => {
+    if (!dueDateString) return 0
     const dueDate = new Date(dueDateString)
     const today = new Date()
     const diffTime = dueDate.getTime() - today.getTime()

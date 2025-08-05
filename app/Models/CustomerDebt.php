@@ -33,6 +33,20 @@ class CustomerDebt extends Model
         'due_date' => 'date',
     ];
 
+    // Atributos calculados
+    protected $appends = ['days_overdue'];
+
+    public function getDaysOverdueAttribute()
+    {
+        if (!$this->due_date || $this->isPaid()) {
+            return 0;
+        }
+        
+        // Simplemente retornamos 0 por ahora para evitar errores
+        // Se calculará en el controlador
+        return 0;
+    }
+
     // Relaciones
     public function customer()
     {

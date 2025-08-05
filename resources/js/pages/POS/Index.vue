@@ -598,7 +598,7 @@
                         </Button>
 
                         <!-- Create Debt Button -->
-                        <Button 
+                        <Button
                             v-if="invoiceStatus === 'paid' && selectedCustomer && cart.length > 0 && total > 0"
                             @click="openCreateDebtDialog"
                             variant="outline"
@@ -693,6 +693,7 @@
                     <!-- Cash Payment Calculator (only for cash payments) -->
                     <CashPaymentCalculator v-if="paymentMethod === 'cash'" :total-amount="total"
                         @confirm="confirmPayment" @cash-received-change="handleCashReceivedChange"
+                        @create-debt-sale="handleCreateDebtSale"
                         ref="cashCalculatorRef" />
 
                     <!-- Customer Info -->
@@ -809,11 +810,11 @@
         </AlertDialog>
 
         <!-- Create Debt Dialog -->
-        <CreateDebtDialog 
-            v-model:open="showCreateDebtDialog" 
+        <CreateDebtDialog
+            v-model:open="showCreateDebtDialog"
             :customer-name="selectedCustomer?.full_name"
             :total-amount="total"
-            @debt-created="handleDebtCreated" 
+            @debt-created="handleDebtCreated"
         />
     </AppLayout>
 </template>
@@ -1274,8 +1275,22 @@ const openCreateDebtDialog = () => {
 
 const handleDebtCreated = async (debtData: { paid_amount: number; due_date: string; description: string }) => {
     try {
-        // Create the sale with debt information
-        await posStore.processSaleWithDebt(debtData)
+        // Build the full sale data object required by processSaleWithDebt
+        const saleData = {
+            customer_id: selectedCustomer.value!.id,
+            items: cart.value.map(item => ({
+                product_id: item.product_id,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                total: item.line_total
+            })),
+            discount: discountAmount.value,
+            payment_method: paymentMethod.value,
+            payment_amount: debtData.paid_amount,
+            due_date: debtData.due_date,
+            description: debtData.description
+        }
+        await posStore.processSaleWithDebt(saleData)
         showSaleSuccessDialog.value = true
         toast.success('Sale completed with customer debt created')
     } catch (error) {
@@ -1313,6 +1328,65 @@ const processCheckout = async () => {
 
 const handleCashReceivedChange = (amount: number) => {
     cashReceived.value = amount
+}
+
+const handleCreateDebtSale = async () => {
+    try {
+        if (!canProcessSale.value) {
+            const errors = []
+            if (cart.value.length === 0) errors.push('Cart is empty')
+            if (!selectedCustomer.value) errors.push('Customer is required')
+            if (total.value <= 0) errors.push('Total amount must be greater than zero')
+
+            toast.error(`Validation failed: ${errors.join(', ')}`)
+            return
+        }
+
+        const amountPaid = cashReceived.value
+        if (amountPaid >= total.value) {
+            toast.error('Payment amount is sufficient. No need to create debt.')
+            return
+        }
+
+        // Confirm with user
+        const debtAmount = total.value - amountPaid
+        const confirmed = confirm(
+            `Create sale with debt?\n\n` +
+            `Total: RD$${total.value.toFixed(2)}\n` +
+            `Payment: RD$${amountPaid.toFixed(2)}\n` +
+            `Debt: RD$${debtAmount.toFixed(2)}\n\n` +
+            `This will create an invoice with partial payment and register the remaining amount as customer debt.`
+        )
+
+        if (!confirmed) return
+
+        // Use POS store loading state
+        const saleData = {
+            customer_id: selectedCustomer.value!.id,
+            items: cart.value.map(item => ({
+                product_id: item.product_id,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                total: item.line_total
+            })),
+            discount: discountAmount.value,
+            payment_method: 'cash',
+            payment_amount: amountPaid
+        }
+
+        // Use the processSaleWithDebt method from store
+        await posStore.processSaleWithDebt(saleData)
+
+        toast.success('Sale completed with debt!')
+
+        // Close any open dialogs
+        showPaymentConfirmDialog.value = false
+
+    } catch (error) {
+        console.error('Error creating debt sale:', error)
+        const message = error instanceof Error ? error.message : 'An unexpected error occurred'
+        toast.error(`Error creating debt sale: ${message}`)
+    }
 }
 
 const executeCheckout = async () => {

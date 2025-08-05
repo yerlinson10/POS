@@ -64,6 +64,29 @@ class Invoice extends Model
         return $this->hasOne(CustomerDebt::class);
     }
 
+    public function invoiceDebts()
+    {
+        return $this->hasMany(InvoiceDebt::class);
+    }
+
+    public function customerDebts()
+    {
+        return $this->hasManyThrough(CustomerDebt::class, InvoiceDebt::class, 'invoice_id', 'id', 'id', 'customer_debt_id');
+    }
+
+    public function payments()
+    {
+        // Los pagos están relacionados a través de las deudas
+        return $this->hasManyThrough(
+            Payment::class,
+            CustomerDebt::class,
+            'invoice_id', // Clave foránea en customer_debts
+            'customer_debt_id', // Clave foránea en payments
+            'id', // Clave local en invoices
+            'id' // Clave local en customer_debts
+        );
+    }
+
     // Métodos de utilidad para manejo de deudas
     public function createDebt($debtAmount, $dueDate = null)
     {
