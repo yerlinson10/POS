@@ -56,7 +56,7 @@
                                 ${{ Number(debt.original_amount).toFixed(2) }}
                             </span>
                         </div>
-                        
+
                         <div v-if="debt.paid_amount > 0" class="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                             <span class="text-sm font-medium">Amount Paid:</span>
                             <span class="text-lg font-bold text-green-600">
@@ -89,7 +89,7 @@
                             {{ getStatusLabel(debt.status) }}
                         </span>
                     </div>
-                    
+
                     <!-- Progress Bar -->
                     <div class="space-y-2">
                         <div class="flex justify-between text-xs text-muted-foreground">
@@ -97,7 +97,7 @@
                             <span>{{ Math.round(paymentPercentage) }}%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div 
+                            <div
                                 class="h-2 rounded-full transition-all duration-300"
                                 :class="{
                                     'bg-green-500': debt.status === 'paid',
@@ -121,16 +121,16 @@
 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-                    <Button 
-                        v-if="debt.status !== 'paid'" 
+                    <Button
+                        v-if="debt.status !== 'paid'"
                         @click="openPaymentDialog"
                         class="flex items-center gap-2 cursor-pointer"
                     >
                         <Icon name="DollarSign" class="w-4 h-4" />
                         Make Payment
                     </Button>
-                    
-                    <Button 
+
+                    <Button
                         variant="outline"
                         as="a"
                         :href="`/invoices/${debt.invoice_id}`"
@@ -143,8 +143,8 @@
             </div>
 
             <DialogFooter>
-                <Button 
-                    variant="outline" 
+                <Button
+                    variant="outline"
                     @click="closeDialog"
                     class="cursor-pointer"
                 >

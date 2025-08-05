@@ -50,33 +50,33 @@
                         </Label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
-                            <Input 
-                                id="payment_amount" 
-                                type="number" 
-                                v-model.number="form.amount" 
-                                step="0.01" 
-                                min="0" 
+                            <Input
+                                id="payment_amount"
+                                type="number"
+                                v-model.number="form.amount"
+                                step="0.01"
+                                min="0"
                                 :max="debt.remaining_amount"
-                                required 
-                                placeholder="0.00" 
+                                required
+                                placeholder="0.00"
                                 class="h-10 pl-8"
-                                :class="{ 'border-destructive focus:border-destructive': errors.amount }" 
+                                :class="{ 'border-destructive focus:border-destructive': errors.amount }"
                             />
                         </div>
                         <InputError field="amount" :message="errors.amount" />
                         <div class="flex gap-2 mt-2">
-                            <Button 
-                                type="button" 
-                                variant="outline" 
+                            <Button
+                                type="button"
+                                variant="outline"
                                 size="sm"
                                 @click="setPartialPayment"
                                 class="text-xs cursor-pointer"
                             >
                                 50%
                             </Button>
-                            <Button 
-                                type="button" 
-                                variant="outline" 
+                            <Button
+                                type="button"
+                                variant="outline"
                                 size="sm"
                                 @click="setFullPayment"
                                 class="text-xs cursor-pointer"
@@ -128,12 +128,12 @@
 
                     <div class="space-y-2">
                         <Label for="notes" class="text-sm font-medium">Payment Notes</Label>
-                        <Textarea 
-                            id="notes" 
+                        <Textarea
+                            id="notes"
                             v-model="form.notes"
                             placeholder="Add payment details or reference..."
                             class="min-h-[80px] resize-none"
-                            :class="{ 'border-destructive focus:border-destructive': errors.notes }" 
+                            :class="{ 'border-destructive focus:border-destructive': errors.notes }"
                         />
                         <InputError field="notes" :message="errors.notes" />
                     </div>
@@ -163,17 +163,17 @@
                     </div>
 
                     <DialogFooter class="flex flex-col sm:flex-row gap-2">
-                        <Button 
-                            type="button" 
-                            variant="outline" 
+                        <Button
+                            type="button"
+                            variant="outline"
                             @click="closeDialog"
                             :disabled="form.processing"
                             class="cursor-pointer"
                         >
                             Cancel
                         </Button>
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             :disabled="form.processing || !form.amount || form.amount <= 0 || form.amount > debt.remaining_amount"
                             class="cursor-pointer"
                         >
@@ -293,7 +293,7 @@ const processPayment = async () => {
     if (!props.debt) return
 
     try {
-        await form.post(`/customer-debts/${props.debt.id}/pay`, {
+        await form.post(`/customer-debts/${props.debt.id}/add-payment`, {
             onSuccess: () => {
                 toast.success('Payment processed successfully')
                 emit('payment-processed')

@@ -30,11 +30,11 @@ class CustomerDebtController extends Controller
         $this->authorize('customer_debts:view');
 
         $filters = $request->only([
-            'per_page', 'search', 'sort_by', 'sort_dir', 'status', 
-            'customer_id', 'date_from', 'date_to', 'due_date_from', 
+            'per_page', 'search', 'sort_by', 'sort_dir', 'status',
+            'customer_id', 'date_from', 'date_to', 'due_date_from',
             'due_date_to', 'overdue'
         ]);
-        
+
         $debts = $this->service->filterAndPaginate($filters);
 
         return Inertia::render('CustomerDebts/Index', [
@@ -247,10 +247,10 @@ class CustomerDebtController extends Controller
         if (!$debt->due_date || $debt->status === 'paid') {
             return 0;
         }
-        
+
         $today = now();
         $dueDate = is_string($debt->due_date) ? now()->parse($debt->due_date) : $debt->due_date;
-        
+
         return $today->gt($dueDate) ? $today->diffInDays($dueDate) : 0;
     }
 }

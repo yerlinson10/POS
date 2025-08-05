@@ -255,7 +255,7 @@
                                 </div>
                                 <div class="p-4">
                                     <div class="space-y-3">
-                                        <div v-for="payment in invoice.payments" :key="payment.id" 
+                                        <div v-for="payment in invoice.payments" :key="payment.id"
                                              class="flex justify-between items-center py-2 border-b last:border-b-0">
                                             <div>
                                                 <div class="text-sm font-medium">${{ payment.amount }}</div>

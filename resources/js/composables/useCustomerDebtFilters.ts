@@ -57,7 +57,7 @@ export function useCustomerDebtFilters(props: CustomerDebtFiltersProps) {
 
     const search = () => {
         const params = new URLSearchParams()
-        
+
         if (filters.search) params.append('search', filters.search)
         if (filters.sort_by) params.append('sort_by', filters.sort_by)
         if (filters.sort_dir) params.append('sort_dir', filters.sort_dir)
@@ -66,7 +66,7 @@ export function useCustomerDebtFilters(props: CustomerDebtFiltersProps) {
         if (filters.per_page !== 15) params.append('per_page', filters.per_page.toString())
 
         const url = `/customer-debts${params.toString() ? '?' + params.toString() : ''}`
-        
+
         router.get(url, {}, {
             preserveState: true,
             preserveScroll: true,

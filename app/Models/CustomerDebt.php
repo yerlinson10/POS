@@ -41,7 +41,7 @@ class CustomerDebt extends Model
         if (!$this->due_date || $this->isPaid()) {
             return 0;
         }
-        
+
         // Simplemente retornamos 0 por ahora para evitar errores
         // Se calculará en el controlador
         return 0;
@@ -146,7 +146,7 @@ class CustomerDebt extends Model
 
         // Actualizar el monto pagado en la factura
         $this->invoice->increment('paid_amount', $amount);
-        
+
         // Actualizar estado de pago de la factura
         if ($this->invoice->paid_amount >= $this->invoice->total_amount) {
             $this->invoice->update(['payment_status' => 'paid']);
