@@ -8,16 +8,25 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Exception;
+use \App\Helpers\StockHelper;
+use \App\DTOs\InvoiceEditDTO;
 
+
+/**
+ * Servicio para la gestión de facturas.
+ *
+ * Centraliza la lógica de negocio relacionada con facturas, incluyendo filtrado, edición,
+ * validación de stock, transiciones de estado y actualización de cotizaciones.
+ */
 class InvoiceService
 {
     /**
-     * Filtrar y paginar facturas.
+     * Filtra y pagina facturas según los filtros proporcionados.
      *
-     * @param array $filters
-     * @return LengthAwarePaginator
+     * @param array $filters Filtros de búsqueda y paginación.
+     * @return LengthAwarePaginator Paginador de facturas.
      */
-    public function filterAndPaginate(array $filters)
+    public function filterAndPaginate(array $filters): LengthAwarePaginator
     {
         $perPage = (int) ($filters['per_page'] ?? 10);
 
@@ -50,26 +59,40 @@ class InvoiceService
             ->appends($filters);
     }
 
+
+    /**
+     * Busca una factura por ID con relaciones cargadas.
+     *
+     * @param int $id ID de la factura.
+     * @return Invoice|null Factura encontrada o null.
+     */
     public function find(int $id): ?Invoice
     {
         return Invoice::with(['customer', 'items.product', 'user', 'debt', 'payments'])->find($id);
     }
 
+
+    /**
+     * Actualiza el estado de una factura, validando reglas de negocio y stock.
+     *
+     * @param int $id ID de la factura.
+     * @param string $status Nuevo estado ('quotation', 'paid', 'canceled').
+     * @return Invoice Factura actualizada.
+     * @throws Exception Si la transición de estado no es válida o hay stock insuficiente.
+     */
     public function updateStatus(int $id, string $status): Invoice
     {
         $invoice = Invoice::with(['customer', 'items.product'])->findOrFail($id);
         $oldStatus = $invoice->status;
 
-        // Validate status transitions based on business rules
+        // Validar transición de estado
         $this->validateStatusTransition($oldStatus, $status);
 
-        // Check stock availability before making any changes
+        // Validar stock antes de cambiar a pagada
         if ($oldStatus === 'quotation' && $status === 'paid') {
-
-            $stockValidation = $this->validateStockAvailability($invoice);
+            $stockValidation = StockHelper::validateStockAvailability($invoice);
 
             if (!$stockValidation['success']) {
-
                 $customerName = 'Customer without name';
                 if ($invoice->customer) {
                     $firstName = $invoice->customer->first_name ?? '';
@@ -97,9 +120,8 @@ class InvoiceService
         try {
             $invoice->update(['status' => $status]);
 
-            // Handle stock changes based on status changes
+            // Descontar stock si pasa a pagada
             if ($oldStatus === 'quotation' && $status === 'paid') {
-                // Reduce stock when marking as paid (stock already validated)
                 foreach ($invoice->items as $item) {
                     $product = Product::find($item->product_id);
                     if ($product) {
@@ -117,16 +139,20 @@ class InvoiceService
         }
     }
 
+
     /**
-     * Validate status transitions based on business rules
+     * Valida las transiciones de estado de la factura según reglas de negocio.
+     *
+     * @param string $currentStatus Estado actual.
+     * @param string $newStatus Nuevo estado.
+     * @throws Exception Si la transición no es válida.
      */
     private function validateStatusTransition(string $currentStatus, string $newStatus): void
     {
-        // Define allowed transitions
         $allowedTransitions = [
             'quotation' => ['paid', 'canceled'],
             'canceled' => ['quotation'],
-            'paid' => [], // No transitions allowed from paid status
+            'paid' => [],
         ];
 
         if (!isset($allowedTransitions[$currentStatus])) {
@@ -138,48 +164,16 @@ class InvoiceService
         }
     }
 
-    /**
-     * Validate stock availability for all items in an invoice
-     */
-    private function validateStockAvailability(Invoice $invoice): array
-    {
-        $unavailableProducts = [];
-        $allStockAvailable = true;
 
-        foreach ($invoice->items as $item) {
-            $product = $item->product; // Use the loaded relationship instead of querying again
-            if (!$product) {
-                $unavailableProducts[] = [
-                    'product_id' => $item->product_id,
-                    'product_name' => 'Product not found',
-                    'product_sku' => null,
-                    'required_quantity' => (int) $item->quantity,
-                    'available_stock' => 0,
-                    'missing_stock' => (int) $item->quantity
-                ];
-                $allStockAvailable = false;
-            } elseif ($product->stock < $item->quantity) {
-                $unavailableProducts[] = [
-                    'product_id' => $product->id,
-                    'product_name' => $product->name ?? 'Product without name',
-                    'product_sku' => $product->sku ?? null,
-                    'required_quantity' => (int) $item->quantity,
-                    'available_stock' => (int) $product->stock,
-                    'missing_stock' => (int) ($item->quantity - $product->stock)
-                ];
-                $allStockAvailable = false;
-            }
-        }
-        return [
-            'success' => $allStockAvailable,
-            'unavailable_products' => $unavailableProducts
-        ];
-    }
-
+    // La validación de stock ahora se realiza mediante StockHelper::validateStockAvailability
     /**
-     * Get quotation for editing
+     * Obtiene los datos necesarios para editar una cotización y los encapsula en un DTO.
+     *
+     * @param int $id ID de la factura.
+     * @return InvoiceEditDTO DTO con datos de factura, clientes y productos.
+     * @throws Exception Si la factura no existe o no es una cotización.
      */
-    public function getQuotationForEdit(int $id): array
+    public function getQuotationForEdit(int $id): InvoiceEditDTO
     {
         $invoice = $this->find($id);
 
@@ -187,12 +181,10 @@ class InvoiceService
             throw new Exception('Invoice not found');
         }
 
-        // Only allow editing quotations
         if ($invoice->status !== 'quotation') {
             throw new Exception('Only quotations can be edited.');
         }
 
-        // Get customers and products for the edit form
         $customers = \App\Models\Customer::select('id', 'first_name', 'last_name', 'email', 'phone', 'address')
             ->orderBy('first_name')
             ->get()
@@ -202,7 +194,7 @@ class InvoiceService
                 'email' => $c->email,
                 'phone' => $c->phone,
                 'address' => $c->address,
-            ]);
+            ])->toArray();
 
         $products = \App\Models\Product::with(['category', 'unitMeasure'])
             ->where('stock', '>', 0)
@@ -217,54 +209,57 @@ class InvoiceService
                 'stock' => (int) $p->stock,
                 'category' => $p->category->name,
                 'unit_measure' => $p->unitMeasure->code,
-            ]);
+            ])->toArray();
 
-        return [
-            'invoice' => [
-                'id' => $invoice->id,
-                'date' => $invoice->date->format('Y-m-d'),
-                'customer_id' => $invoice->customer_id,
-                'customer' => $invoice->customer ? [
-                    'id' => $invoice->customer->id,
-                    'full_name' => $invoice->customer->first_name . ' ' . $invoice->customer->last_name,
-                    'email' => $invoice->customer->email,
-                    'phone' => $invoice->customer->phone,
-                    'address' => $invoice->customer->address,
-                ] : null,
-                'subtotal' => $invoice->subtotal,
-                'discount_type' => $invoice->discount_type,
-                'discount_value' => $invoice->discount_value,
-                'total_amount' => $invoice->total_amount,
-                'status' => $invoice->status,
-                'payment_method' => $invoice->payment_method,
-                'items' => $invoice->items->map(fn($item) => [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'product' => [
-                        'id' => $item->product->id,
-                        'name' => $item->product->name,
-                        'sku' => $item->product->sku,
-                        'price' => (float) $item->product->price,
-                        'stock' => (int) $item->product->stock,
-                    ],
-                    'quantity' => $item->quantity,
-                    'unit_price' => $item->unit_price,
-                    'line_total' => $item->line_total,
-                ]),
-                'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
-            ],
-            'customers' => $customers,
-            'products' => $products,
+        $invoiceArr = [
+            'id' => $invoice->id,
+            'date' => $invoice->date->format('Y-m-d'),
+            'customer_id' => $invoice->customer_id,
+            'customer' => $invoice->customer ? [
+                'id' => $invoice->customer->id,
+                'full_name' => $invoice->customer->first_name . ' ' . $invoice->customer->last_name,
+                'email' => $invoice->customer->email,
+                'phone' => $invoice->customer->phone,
+                'address' => $invoice->customer->address,
+            ] : null,
+            'subtotal' => $invoice->subtotal,
+            'discount_type' => $invoice->discount_type,
+            'discount_value' => $invoice->discount_value,
+            'total_amount' => $invoice->total_amount,
+            'status' => $invoice->status,
+            'payment_method' => $invoice->payment_method,
+            'items' => $invoice->items->map(fn($item) => [
+                'id' => $item->id,
+                'product_id' => $item->product_id,
+                'product' => [
+                    'id' => $item->product->id,
+                    'name' => $item->product->name,
+                    'sku' => $item->product->sku,
+                    'price' => (float) $item->product->price,
+                    'stock' => (int) $item->product->stock,
+                ],
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'line_total' => $item->line_total,
+            ])->toArray(),
+            'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
         ];
+
+        return new InvoiceEditDTO($invoiceArr, $customers, $products);
     }
 
+
     /**
-     * Update quotation
+     * Actualiza una cotización existente con los datos proporcionados.
+     *
+     * @param int $id ID de la factura.
+     * @param array $data Datos validados para la actualización.
+     * @return Invoice Factura actualizada.
+     * @throws Exception Si la factura no es una cotización o ocurre un error en la transacción.
      */
     public function updateQuotation(int $id, array $data): Invoice
     {
         $invoice = Invoice::findOrFail($id);
-        // Only allow editing quotations
         if ($invoice->status !== 'quotation') {
             throw new Exception('Only quotations can be edited.');
         }
@@ -272,7 +267,6 @@ class InvoiceService
         DB::beginTransaction();
 
         try {
-            // Update invoice basic info
             $invoice->update([
                 'date' => $data['date'],
                 'subtotal' => $data['subtotal'],
@@ -281,10 +275,8 @@ class InvoiceService
                 'total_amount' => $data['total_amount'],
             ]);
 
-            // Delete existing items
             $invoice->items()->delete();
 
-            // Create new items
             foreach ($data['items'] as $itemData) {
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,

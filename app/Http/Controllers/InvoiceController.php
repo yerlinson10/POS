@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\InvoiceResource;
 use Inertia\Inertia;
 use App\Models\Invoice;
-use App\Models\Product;
-use App\Models\Customer;
-use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Services\InvoiceService;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\Invoice\UpdateInvoiceRequest;
 
@@ -26,8 +23,12 @@ class InvoiceController extends Controller
 
     /**
      * Display a listing of the resource.
+     *
+     * @param Request $request
+     *
+     * @return \Inertia\Response
      */
-    public function index(Request $request)
+    public function index(Request $request): \Inertia\Response
     {
         $this->authorize('viewAny', Invoice::class);
 
@@ -56,8 +57,12 @@ class InvoiceController extends Controller
 
     /**
      * Display the specified resource.
+     *
+     * @param string|int $id
+     *
+     * @return \Inertia\Response
      */
-    public function show(string $id)
+    public function show(string|int $id): \Inertia\Response
     {
         $invoice = $this->service->find($id);
 
@@ -67,70 +72,33 @@ class InvoiceController extends Controller
 
         $this->authorize('view', $invoice);
 
+        InvoiceResource::withoutWrapping();
         return Inertia::render('Invoices/Show', [
-            'invoice' => [
-                'id' => $invoice->id,
-                'date' => $invoice->date->format('Y-m-d'),
-                'customer_id' => $invoice->customer_id,
-                'customer' => $invoice->customer ? [
-                    'id' => $invoice->customer->id,
-                    'name' => $invoice->customer->first_name . ' ' . $invoice->customer->last_name,
-                    'email' => $invoice->customer->email,
-                    'phone' => $invoice->customer->phone,
-                    'address' => $invoice->customer->address,
-                ] : null,
-                'subtotal_amount' => $invoice->subtotal,
-                'discount_type' => $invoice->discount_type,
-                'discount_value' => $invoice->discount_value,
-                'discount_amount' => $invoice->discount_amount,
-                'tax_amount' => $invoice->tax_amount,
-                'total_amount' => $invoice->total_amount,
-                'paid_amount' => $invoice->paid_amount,
-                'debt_amount' => $invoice->debt_amount,
-                'status' => $invoice->status,
-                'payment_status' => $invoice->payment_status,
-                'payment_method' => $invoice->payment_method,
-                'due_date' => $invoice->due_date ? $invoice->due_date->format('Y-m-d') : null,
-                'items' => $invoice->items->map(fn($item) => [
-                    'id' => $item->id,
-                    'product_id' => $item->product_id,
-                    'product' => [
-                        'id' => $item->product->id,
-                        'name' => $item->product->name,
-                        'sku' => $item->product->sku,
-                    ],
-                    'quantity' => $item->quantity,
-                    'unit_price' => $item->unit_price,
-                    'total_amount' => $item->line_total,
-                ]),
-                'debt' => $invoice->debt ? [
-                    'id' => $invoice->debt->id,
-                    'original_amount' => $invoice->debt->original_amount,
-                    'remaining_amount' => $invoice->debt->remaining_amount,
-                    'paid_amount' => $invoice->debt->paid_amount,
-                    'status' => $invoice->debt->status,
-                    'debt_date' => $invoice->debt->debt_date,
-                    'due_date' => $invoice->debt->due_date,
-                ] : null,
-                'payments' => $invoice->payments->map(fn($payment) => [
-                    'id' => $payment->id,
-                    'amount' => $payment->amount,
-                    'payment_method' => $payment->payment_method,
-                    'payment_date' => $payment->payment_date,
-                    'description' => $payment->description,
-                ]),
-                'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
-            ],
-            // Pass any flash data that might contain stock errors
+            'invoice' => InvoiceResource::make($invoice),
             'stock_error' => session('stock_error'),
             'message' => session('message'),
         ]);
     }
 
     /**
-     * Update invoice status.
+     * Actualiza el estado de una factura.
+     *
+     * Este método maneja la transición de estados de la factura (cotización, pagada, cancelada).
+     * Incluye validación de stock insuficiente y retorna mensajes estructurados para la UI.
+     *
+     * @param Request $request
+     * @param string $id
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException Si la validación de estado falla.
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException Si la factura no existe.
+     *
+     * @details
+     * - Si ocurre un error de stock insuficiente, retorna un mensaje formateado y detalles del error.
+     * - Si ocurre otro error, retorna mensaje de error genérico.
      */
-    public function updateStatus(Request $request, string $id)
+    public function updateStatus(Request $request, string $id): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'status' => 'required|in:quotation,paid,canceled'
@@ -142,8 +110,6 @@ class InvoiceController extends Controller
             $this->authorize('update', $invoice);
 
             // Additional validation for status transitions
-            $this->validateStatusTransition($invoice->status, $request->status);
-
             $this->service->updateStatus($id, $request->status);
 
             // Return JSON response for AJAX requests
@@ -205,9 +171,13 @@ class InvoiceController extends Controller
                     'text' => 'Error: ' . $errorMessage
                 ]);
         }
-    }    /**
-         * Format stock error message for display
-         */
+    }
+    /**
+     * Formatea el mensaje de error de stock insuficiente para mostrarlo en la UI.
+     *
+     * @param array $errorData Datos estructurados del error de stock.
+     * @return string Mensaje legible para el usuario.
+     */
     private function formatStockErrorMessage(array $errorData): string
     {
         $message = "Cannot change invoice #{$errorData['invoice_id']} status for customer {$errorData['customer']} due to insufficient stock:\n\n";
@@ -222,31 +192,17 @@ class InvoiceController extends Controller
         return $message;
     }
 
-    /**
-     * Validate status transitions based on business rules
-     */
-    private function validateStatusTransition(string $currentStatus, string $newStatus): void
-    {
-        // Define allowed transitions
-        $allowedTransitions = [
-            'quotation' => ['paid', 'canceled'],
-            'canceled' => ['quotation'],
-            'paid' => [], // No transitions allowed from paid status
-        ];
-
-        if (!isset($allowedTransitions[$currentStatus])) {
-            throw new \Exception("Invalid current status: {$currentStatus}");
-        }
-
-        if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
-            throw new \Exception("Cannot change status from '{$currentStatus}' to '{$newStatus}'. Invalid transition.");
-        }
-    }
 
     /**
-     * Show the form for editing a quotation.
+     * Muestra el formulario para editar una cotización.
+     *
+     * Si la factura no existe, redirige con mensaje de error.
+     * Si ocurre una excepción, redirige a la vista de la factura con el mensaje de error.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse|\Inertia\Response
      */
-    public function edit(string $id)
+    public function edit(string $id): \Illuminate\Http\RedirectResponse|\Inertia\Response
     {
         try {
             $invoice = $this->service->find($id);
@@ -272,9 +228,16 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Update the specified quotation.
+     * Actualiza la cotización especificada.
+     *
+     * Si la factura no existe, retorna 404.
+     * Si ocurre una excepción, retorna mensaje de error y código 422.
+     *
+     * @param UpdateInvoiceRequest $request
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(UpdateInvoiceRequest $request, string $id)
+    public function update(UpdateInvoiceRequest $request, string $id): \Illuminate\Http\JsonResponse
     {
         $invoice = $this->service->find($id);
         if (!$invoice) {
