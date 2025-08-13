@@ -9,8 +9,7 @@ class InvoiceEditDTO
 {
     /** @var array Datos de la factura */
     public array $invoice;
-    /** @var array Lista de clientes */
-    public array $customers;
+
     /** @var array Lista de productos */
     public array $products;
 
@@ -21,10 +20,9 @@ class InvoiceEditDTO
      * @param array $customers
      * @param array $products
      */
-    public function __construct(array $invoice, array $customers, array $products)
+    public function __construct(array $invoice, array $products)
     {
         $this->invoice = $invoice;
-        $this->customers = $customers;
         $this->products = $products;
     }
 
@@ -37,7 +35,6 @@ class InvoiceEditDTO
     {
         return [
             'invoice' => $this->invoice,
-            'customers' => $this->customers,
             'products' => $this->products,
         ];
     }

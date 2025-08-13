@@ -185,17 +185,6 @@ class InvoiceService
             throw new Exception('Only quotations can be edited.');
         }
 
-        $customers = \App\Models\Customer::select('id', 'first_name', 'last_name', 'email', 'phone', 'address')
-            ->orderBy('first_name')
-            ->get()
-            ->map(fn($c) => [
-                'id' => $c->id,
-                'full_name' => $c->first_name . ' ' . $c->last_name,
-                'email' => $c->email,
-                'phone' => $c->phone,
-                'address' => $c->address,
-            ])->toArray();
-
         $products = \App\Models\Product::with(['category', 'unitMeasure'])
             ->where('stock', '>', 0)
             ->select('id', 'name', 'sku', 'price', 'stock', 'category_id', 'unit_measure_id')
@@ -245,7 +234,7 @@ class InvoiceService
             'created_at' => $invoice->created_at->format('Y-m-d H:i:s'),
         ];
 
-        return new InvoiceEditDTO($invoiceArr, $customers, $products);
+        return new InvoiceEditDTO($invoiceArr,$products);
     }
 
 
