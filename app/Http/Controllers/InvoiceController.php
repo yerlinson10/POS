@@ -216,7 +216,7 @@ class InvoiceController extends Controller
 
             $this->authorize('update', $invoice);
 
-            $data = $this->service->getQuotationForEdit((int) $id);
+            $data = (array)$this->service->getQuotationForEdit((int) $id);
             return Inertia::render('Invoices/Edit', $data);
         } catch (\Exception $e) {
             return redirect()->route('invoices.show', $id)
