@@ -9,6 +9,7 @@ use App\Services\CustomerService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
+use App\Http\Resources\CustomerResource;
 
 class CustomerController extends Controller
 {
@@ -21,94 +22,81 @@ class CustomerController extends Controller
         $this->service = $service;
     }
     /**
-     * Display a listing of the resource.
+     * Muestra la lista de clientes con filtros y paginación.
+     *
+     * @param Request $request
+     * @return \Inertia\Response
      */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Customer::class);
-
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
         $customers = $this->service->filterAndPaginate($filters);
-
         return Inertia::render('Customers/Index', [
-            'customers' => $customers->through(fn($p) => [
-                'id' => $p->id,
-                'first_name' => $p->first_name,
-                'last_name' => $p->last_name,
-                'email' => $p->email,
-                'phone' => $p->phone,
-                'address' => $p->address
-            ]),
+            'customers' => CustomerResource::collection($customers),
             'filters' => $filters,
         ]);
     }
 
     /**
-     * Display the specified resource.
+     * Muestra un cliente específico.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(string $id)
     {
-        $customer = $this->service->find($id);
-        if (!$customer) {
-            return response()->json(['message' => 'No encontrado'], 404);
+        try {
+            $customer = $this->service->find($id);
+            $this->authorize('view', $customer);
+            return response()->json(new CustomerResource($customer));
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
         }
-
-        $this->authorize('view', $customer);
-
-        return response()->json($customer);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para crear un nuevo cliente.
+     *
+     * @return \Inertia\Response
      */
     public function create()
     {
         $this->authorize('create', Customer::class);
-
         return Inertia::render('Customers/Form', [
             'customer' => null,
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo cliente en la base de datos.
+     *
+     * @param StoreCustomerRequest $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
     public function store(StoreCustomerRequest $request)
     {
         $this->authorize('create', Customer::class);
         try {
             $customer = $this->service->create($request->validated());
-
-            // If request expects JSON (for modal), return the customer data
             if ($request->expectsJson()) {
-                return response()->json([
-                    'customer' => [
-                        'id' => $customer->id,
-                        'name' => $customer->first_name . ' ' . $customer->last_name,
-                        'email' => $customer->email,
-                        'phone' => $customer->phone,
-                        'address' => $customer->address,
-                    ]
-                ], 201);
+                return response()->json(new CustomerResource($customer), 201);
             }
-
             return redirect()->route('customers.index')
                 ->with('message', [
                     'type' => 'success',
                     'text' => 'Customer created.'
                 ]);
-        } catch (\Throwable $th) {
+        } catch (\DomainException $e) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Error creating customer',
-                    'error' => $th->getMessage()
+                    'message' => $e->getMessage()
                 ], 500);
             }
-
             return redirect()->back()
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Error creating customer: ' . $th->getMessage()
+                    'text' => $e->getMessage()
                 ])
                 ->withInput();
         }
@@ -116,98 +104,79 @@ class CustomerController extends Controller
 
 
     /**
-     * Show the form for editing the specified resource.
+     * Muestra el formulario para editar un cliente existente.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse|\Inertia\Response
      */
     public function edit(string $id)
     {
-        $p = $this->service->find($id);
-        if (!$p) {
+        try {
+            $customer = $this->service->find($id);
+            $this->authorize('update', $customer);
+            return Inertia::render('Customers/Form', [
+                'customer' => new CustomerResource($customer)
+            ]);
+        } catch (\DomainException $e) {
             return redirect()->route('customers.index')
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Customer not found.'
+                    'text' => $e->getMessage()
                 ]);
         }
-
-        $this->authorize('update', $p);
-
-        return Inertia::render('Customers/Form', [
-            'customer' => [
-                'id' => $p->id,
-                'first_name' => $p->first_name,
-                'last_name' => $p->last_name,
-                'email' => $p->email,
-                'phone' => $p->phone,
-                'address' => $p->address
-            ],
-        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza un cliente existente en la base de datos.
+     *
+     * @param UpdateCustomerRequest $request
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateCustomerRequest $request, string $id)
     {
-        $customer = $this->service->find($id);
-        if (!$customer) {
-            return redirect()->route('customers.index')
-                ->with('message', [
-                    'type' => 'error',
-                    'text' => 'Customer not found.'
-                ]);
-        }
-
-        $this->authorize('update', $customer);
-
         try {
+            $customer = $this->service->find($id);
+            $this->authorize('update', $customer);
             $this->service->update($id, $request->validated());
-
             return redirect()->route('customers.index')
                 ->with('message', [
                     'type' => 'success',
                     'text' => 'Customer updated.'
                 ]);
-        } catch (\Throwable $th) {
+        } catch (\DomainException $e) {
             return redirect()->back()
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Error updating customer: ' . $th->getMessage()
+                    'text' => $e->getMessage()
                 ])
                 ->withInput();
         }
-
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un cliente de la base de datos.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(string $id)
     {
-        $customer = $this->service->find($id);
-        if (!$customer) {
-            return redirect()->route('customers.index')
-                ->with('message', [
-                    'type' => 'error',
-                    'text' => 'Customer not found.'
-                ]);
-        }
-
-        $this->authorize('delete', $customer);
-
         try {
+            $customer = $this->service->find($id);
+            $this->authorize('delete', $customer);
             $this->service->delete($id);
             return redirect()->route('customers.index')
                 ->with('message', [
                     'type' => 'success',
                     'text' => 'Customer deleted.'
                 ]);
-        } catch (\Throwable $th) {
-            return redirect()->back()
+        } catch (\DomainException $e) {
+            return redirect()->route('customers.index')
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Error deleting customer: ' . $th->getMessage()
+                    'text' => $e->getMessage()
                 ]);
         }
-
     }
 }

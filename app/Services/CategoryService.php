@@ -21,10 +21,10 @@ class CategoryService
 
         try {
             $categoriesQuery = Category::when($filters['search'] ?? null, function ($query, $search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->where('categories.name', 'like', "%{$search}%");
-                    });
-                })
+                $query->where(function ($q) use ($search) {
+                    $q->where('categories.name', 'like', "%{$search}%");
+                });
+            })
                 // Preparado para relaciones futuras
                 // ->with(['relacion'])
                 ->withAdvancedFilters($filters, [
@@ -49,9 +49,7 @@ class CategoryService
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         return Category::orderBy('created_at', 'desc')
-                    // Preparado para relaciones futuras
-                    // ->with(['relacion'])
-                    ->paginate($perPage);
+            ->paginate($perPage);
     }
 
     /**
@@ -62,9 +60,9 @@ class CategoryService
     public function all(): Collection
     {
         return Category::orderBy('created_at', 'desc')
-                    // Preparado para relaciones futuras
-                    // ->with(['relacion'])
-                    ->get();
+            // Preparado para relaciones futuras
+            // ->with(['relacion'])
+            ->get();
     }
 
     /**

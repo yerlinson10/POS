@@ -8,47 +8,56 @@ use App\Models\Customer;
 
 class CustomerService
 {
-    public function filterAndPaginate($filters)
+    /**
+     * Filtrar y paginar clientes.
+     *
+     * @param array $filters
+     * @return LengthAwarePaginator
+     * @throws \DomainException
+     */
+    public function filterAndPaginate($filters): LengthAwarePaginator
     {
         $perPage = (int) ($filters['per_page'] ?? 10);
-
-        $customersQuery = Customer::when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('customers.first_name', 'like', "%{$search}%")
-                        ->orWhere('customers.last_name', 'like', "%{$search}%")
-                        ->orWhere('customers.email', 'like', "%{$search}%")
-                        ->orWhere('customers.phone', 'like', "%{$search}%");
-                });
-            })
-            ->withAdvancedFilters($filters, [
-                'id',
-                'first_name',
-                'last_name',
-                'email',
-                'phone',
-                'address',
-                'created_at'
-            ]);
-
-        return $customersQuery
-                ->paginate($perPage)
-                ->appends($filters);
+        try {
+            $customersQuery = Customer::when($filters['search'] ?? null, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('customers.first_name', 'like', "%{$search}%")
+                            ->orWhere('customers.last_name', 'like', "%{$search}%")
+                            ->orWhere('customers.email', 'like', "%{$search}%")
+                            ->orWhere('customers.phone', 'like', "%{$search}%");
+                    });
+                })
+                ->withAdvancedFilters($filters, [
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'phone',
+                    'address',
+                    'created_at'
+                ]);
+            return $customersQuery
+                    ->orderBy('created_at', 'desc')
+                    ->paginate($perPage)
+                    ->appends($filters);
+        } catch (\Throwable $e) {
+            throw new \DomainException('Error al filtrar clientes: ' . $e->getMessage());
+        }
     }
+
     /**
-     * Listar productos con paginación.
+     * Listar clientes con paginación.
      *
      * @param int $perPage
      * @return LengthAwarePaginator
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
-        return Customer::all()
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        return Customer::orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     /**
-     * Obtener todos los productos (sin paginar).
+     * Obtener todos los clientes (sin paginar).
      *
      * @return Collection
      */
@@ -58,51 +67,69 @@ class CustomerService
     }
 
     /**
-     * Buscar un producto por ID.
+     * Buscar un cliente por ID.
      *
      * @param  int  $id
-     * @return Customer|null
+     * @return Customer
+     * @throws \DomainException
      */
-    public function find(int $id): ?Customer
+    public function find(int $id): Customer
     {
-        return Customer::find($id);
+        $customer = Customer::find($id);
+        if (!$customer) {
+            throw new \DomainException('Cliente no encontrado.');
+        }
+        return $customer;
     }
 
     /**
-     * Crear un nuevo producto.
+     * Crear un nuevo cliente.
      *
      * @param  array  $data
      * @return Customer
-     *
+     * @throws \DomainException
      */
     public function create(array $data): Customer
     {
-        return Customer::create($data);
+        try {
+            return Customer::create($data);
+        } catch (\Throwable $e) {
+            throw new \DomainException('Error al crear cliente: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Actualizar un producto existente.
+     * Actualizar un cliente existente.
      *
      * @param  int    $id
      * @param  array  $data
      * @return Customer
-     *
+     * @throws \DomainException
      */
     public function update(int $id, array $data): Customer
     {
-        $product = Customer::findOrFail($id);
-        $product->update($data);
-        return $product;
+        try {
+            $customer = Customer::findOrFail($id);
+            $customer->update($data);
+            return $customer;
+        } catch (\Throwable $e) {
+            throw new \DomainException('Error al actualizar cliente: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Eliminar un producto.
+     * Eliminar un cliente.
      *
      * @param  int  $id
      * @return void
+     * @throws \DomainException
      */
     public function delete(int $id): void
     {
-        Customer::findOrFail($id)->delete();
+        try {
+            Customer::findOrFail($id)->delete();
+        } catch (\Throwable $e) {
+            throw new \DomainException('Error al eliminar cliente: ' . $e->getMessage());
+        }
     }
 }
