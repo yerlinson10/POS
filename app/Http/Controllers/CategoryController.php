@@ -7,9 +7,10 @@ use App\Models\Category;
 use App\Models\UnitMeasure;
 use Illuminate\Http\Request;
 use App\Services\CategoryService;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Http\Resources\CategoryResource;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CategoryController extends Controller
 {
@@ -22,168 +23,151 @@ class CategoryController extends Controller
         $this->service = $service;
     }
     /**
-     * Display a listing of the resource.
+     * Muestra la lista de categorías con filtros y paginación.
+     *
+     * @param Request $request
+     * @return \Inertia\Response
      */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Category::class);
-
         $filters = $request->only(['per_page', 'search', 'sort_by', 'sort_dir']);
         $categories = $this->service->filterAndPaginate($filters);
-
         return Inertia::render('Categories/Index', [
-            'categories' => $categories->through(fn($p) => [
-                'id' => $p->id,
-                'name' => $p->name,
-            ]),
+            'categories' => CategoryResource::collection($categories),
             'filters' => $filters,
         ]);
     }
 
     /**
-     * Display the specified resource.
+     * Muestra una categoría específica.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(string $id)
     {
-        $category = $this->service->find($id);
-        if (!$category) {
-            return response()->json(['message' => 'No encontrado'], 404);
+        try {
+            $category = $this->service->find($id);
+            $this->authorize('view', $category);
+            return response()->json(new CategoryResource($category));
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
         }
-
-        $this->authorize('view', $category);
-
-        return response()->json($category);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para crear una nueva categoría.
+     *
+     * @return \Inertia\Response
      */
     public function create()
     {
         $this->authorize('create', Category::class);
-
-        return Inertia::render('Categories/Form', [
-            'category' => null,
-        ]);
+        return Inertia::render('Categories/Form');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena una nueva categoría en la base de datos.
+     *
+     * @param StoreCategoryRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreCategoryRequest $request)
     {
         $this->authorize('create', Category::class);
-
         try {
             $this->service->create($request->validated());
-
             return redirect()->route('categories.index')
                 ->with('message', [
                     'type' => 'success',
                     'text' => 'Category created.'
                 ]);
-        } catch (\Throwable $th) {
+        } catch (\DomainException $e) {
             return redirect()->back()
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Error creating category: ' . $th->getMessage()
+                    'text' => $e->getMessage()
                 ])
                 ->withInput();
         }
-
     }
 
 
     /**
-     * Show the form for editing the specified resource.
+     * Muestra el formulario para editar una categoría existente.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse|\Inertia\Response
      */
     public function edit(string $id)
     {
-        $p = $this->service->find($id);
-        if (!$p) {
+        try {
+            $category = $this->service->find($id);
+            $this->authorize('update', $category);
+            return Inertia::render('Categories/Form', [
+                'category' => new CategoryResource($category)
+            ]);
+        } catch (\DomainException $e) {
             return redirect()->route('categories.index')
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Category not found.'
+                    'text' => $e->getMessage()
                 ]);
         }
-
-        $this->authorize('update', $p);
-
-        return Inertia::render('Categories/Form', [
-            'category' => [
-                'id' => $p->id,
-                'name' => $p->name,
-                'description' => $p->description,
-            ]
-        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza una categoría existente en la base de datos.
+     *
+     * @param UpdateCategoryRequest $request
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateCategoryRequest $request, string $id)
     {
-        $category = $this->service->find($id);
-        if (!$category) {
-            return redirect()->route('categories.index')
-                ->with('message', [
-                    'type' => 'error',
-                    'text' => 'Category not found.'
-                ]);
-        }
-
-        $this->authorize('update', $category);
-
         try {
+            $category = $this->service->find($id);
+            $this->authorize('update', $category);
             $this->service->update($id, $request->validated());
-
             return redirect()->route('categories.index')
                 ->with('message', [
                     'type' => 'success',
                     'text' => 'Category updated.'
                 ]);
-        } catch (\Throwable $th) {
+        } catch (\DomainException $e) {
             return redirect()->back()
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Error updating category: ' . $th->getMessage()
+                    'text' => $e->getMessage()
                 ])
                 ->withInput();
         }
-
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina una categoría de la base de datos.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(string $id)
     {
-        $category = $this->service->find($id);
-        if (!$category) {
-            return redirect()->route('categories.index')
-                ->with('message', [
-                    'type' => 'error',
-                    'text' => 'Category not found.'
-                ]);
-        }
-
-        $this->authorize('delete', $category);
-
         try {
+            $category = $this->service->find($id);
+            $this->authorize('delete', $category);
             $this->service->delete($id);
             return redirect()->route('categories.index')
                 ->with('message', [
                     'type' => 'success',
                     'text' => 'Category deleted.'
                 ]);
-        } catch (\Throwable $th) {
-            return redirect()->back()
+        } catch (\DomainException $e) {
+            return redirect()->route('categories.index')
                 ->with('message', [
                     'type' => 'error',
-                    'text' => 'Error deleting category: ' . $th->getMessage()
+                    'text' => $e->getMessage()
                 ]);
         }
-
     }
 }
